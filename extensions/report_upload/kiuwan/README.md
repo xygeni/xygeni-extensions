@@ -19,6 +19,7 @@ To export the findings to a local file for uploading into third-party tools like
 The rule JAR and rule descriptors are already provided in the [dist](dist) directory for your convenience. Anyway, the jar with the compile rule could be generated using Maven:
 
 ```console
+$ cd extensions/report_upload/kiuwan
 $ mvn package
 ```
 

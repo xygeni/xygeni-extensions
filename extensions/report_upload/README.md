@@ -7,7 +7,7 @@
 - [The Report Upload framework](#the-report-upload-framework)
 - [Adding support for a new format](#adding-support-for-a-new-report-format)
 - [Formats](#formats)
-  - [Kiuwan SAST](#kiuwan-sast)
+  - [Kiuwan SAST](kiuwan/README.md)
 </details>
 
 ## About
