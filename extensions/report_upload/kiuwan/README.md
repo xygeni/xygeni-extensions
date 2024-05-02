@@ -2,11 +2,15 @@
 
 ## About
 
-Kiuwan is a powerful, end-to-end application security platform. Kiuwan Static Application Security Testing (SAST) product.  
+Kiuwan is a powerful, end-to-end application security platform. Kiuwan Static Application Security Testing (SAST) product is the tool that detects security vulnerabilities in source code using static analysis.
+
+The problem is that Xygeni does not provide a mechanism in the agent (Kiuwan Local Analyzer) for writing to a local file the findings from the tool.
 
 ## How report extraction works
 
-The Kiuwan scanner (Kiuwan Local Analyzer) by default uploads its findings to the Kiuwan platform. To export the findings to a local file for uploading into third-party tools like Xygeni, the approach is to register the custom rule [ExportRule](src/main/java/ext/kiuwan/ExportRule.java) provided that registers a task to export the 
+The Kiuwan scanner (Kiuwan Local Analyzer) by default uploads its findings to the Kiuwan platform. 
+
+To export the findings to a local file for uploading into third-party tools like Xygeni, the approach used was to register the custom rule [ExportRule](src/main/java/ext/kiuwan/ExportRule.java) provided that registers a task to export the findings at the end of the analysis, using the standard-provided report formatter for the `xml_issues` report, the same format that the agent uses to send the findings to the Kiuwan on-cloud service.
 
 ## Steps
 
