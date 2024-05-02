@@ -1,0 +1,1464 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<Report version='1.0' xmlns='xmlns://www.optimyth.com/schema/issues' xmlns:xsi='http://www.w3.org/2001/XMLSchema-instance' xsi:schemaLocation='xmlns://www.optimyth.com/schema/issues violations.xml.xsd'>
+  <Analysis id='1595c637-281a-4948-9720-82d6c3b3e660'>
+    <Application>WebGoat</Application>
+    <Directory>/home/user/work/kiuwan/WebGoat</Directory>
+    <Technologies>java</Technologies>
+    <Model id='qaking_JAVA'>
+      <ChecksPath>modelpath</ChecksPath>
+      <Description></Description>
+    </Model>
+    <Mode>default</Mode>
+    <Timestamp date='2024-05-01' time='11:36:02' timezone='CEST' utc='1714556162014'/>
+    <ElapsedTime milliseconds='3636'>3 seconds</ElapsedTime>
+    <DumpCode>true</DumpCode>
+    <HashVersion>1</HashVersion>
+    <GlobalConfidence value='89.189'>
+      <Confidence id='OPT.CRITERIUM_VALUE.CQM.EFFICIENCY' category='Efficiency' parent='JAVA' technology='java' isLeaf='true' value='100.0'/>
+      <Confidence id='OPT.CRITERIUM_VALUE.CQM.MAINTAINABILITY' category='Maintainability' parent='JAVA' technology='java' isLeaf='true' value='100.0'/>
+      <Confidence id='OPT.CRITERIUM_VALUE.CQM.RELIABILITY' category='Reliability' parent='JAVA' technology='java' isLeaf='true' value='100.0'/>
+      <Confidence id='OPT.CRITERIUM_VALUE.CQM.SECURITY' category='Security' parent='JAVA' technology='java' isLeaf='true' value='0.0'/>
+      <Confidence id='OPT.CRITERIUM_VALUE.CQM.PORTABILITY' category='Portability' parent='JAVA' technology='java' isLeaf='true' value='100.0'/>
+    </GlobalConfidence>
+    <Statistics>
+      <Checks>146</Checks>
+      <Files>7</Files>
+      <Issues>26</Issues>
+      <MutedIssues>0</MutedIssues>
+      <IssuesPerFile>3.7142857142857144</IssuesPerFile>
+      <IssuesBySeverity>
+        <Severity severity='critical' count='14'/>
+        <Severity severity='high' count='6'/>
+        <Severity severity='medium' count='6'/>
+        <Severity severity='low' count='0'/>
+        <Severity severity='info' count='0'/>
+      </IssuesBySeverity>
+      <IssuesByCategory>
+        <Category category='OPT.CRITERIUM_VALUE.CQM.SECURITY' parent='JAVA' technology='JAVA' count='26'>
+          <Check id='OPT.JAVA.SEC_JAVA.CrossSiteRequestForgeryRule' severity='high' count='4'/>
+          <Check id='OPT.JAVA.SEC_JAVA.CrossSiteScriptingRule' severity='critical' count='8'/>
+          <Check id='OPT.JAVA.SEC_JAVA.HttpParameterPollutionRule' severity='high' count='2'/>
+          <Check id='OPT.JAVA.SEC_JAVA.InputPathNotCanonicalizedRule' severity='medium' count='2'/>
+          <Check id='OPT.JAVA.SEC_JAVA.PathTraversalRule' severity='critical' count='4'/>
+          <Check id='OPT.JAVA.SEC_JAVA.ServerSideRequestForgeryRule' severity='critical' count='2'/>
+          <Check id='OPT.JAVA.SEC_JAVA.UnnormalizedInputString' severity='medium' count='4'/>
+        </Category>
+      </IssuesByCategory>
+      <UnparsedFiles>0</UnparsedFiles>
+      <Metric name='loc'>434</Metric>
+      <Metric name='totalLoc'>434</Metric>
+      <Metric name='bytes'>19320</Metric>
+    </Statistics>
+  </Analysis>
+  <Files>
+    <File id='1' path='ProfileUpload.java' bytes='1725' loc='47' issues='2' checksum='e320b57f84d62668db4bbf3d9b8a3b84'>/home/user/work/kiuwan/WebGoat/ProfileUpload.java</File>
+    <File id='2' path='ProfileUploadBase.java' bytes='4259' loc='122' issues='5' checksum='dfe8b5cf0b4dda627adf235b1509a375'>/home/user/work/kiuwan/WebGoat/ProfileUploadBase.java</File>
+    <File id='3' path='ProfileUploadFix.java' bytes='1800' loc='47' issues='2' checksum='d3674bd5f3b32d83cd5630a6d5c60a78'>/home/user/work/kiuwan/WebGoat/ProfileUploadFix.java</File>
+    <File id='4' path='ProfileUploadRemoveUserInput.java' bytes='1522' loc='38' issues='2' checksum='ed8a0bef12ba794be2c7c2f42a720a83'>/home/user/work/kiuwan/WebGoat/ProfileUploadRemoveUserInput.java</File>
+    <File id='5' path='ProfileUploadRetrieval.java' bytes='4758' loc='116' issues='10' checksum='35e7d24703387dcdbd4bc0ec0ad21afd'>/home/user/work/kiuwan/WebGoat/ProfileUploadRetrieval.java</File>
+    <File id='6' path='ProfileZipSlip.java' bytes='3776' loc='102' issues='5' checksum='3ceb0953136a0a9b3b78050c53e25ea4'>/home/user/work/kiuwan/WebGoat/ProfileZipSlip.java</File>
+  </Files>
+  <Issues>
+    <Issue id='1' check='OPT.JAVA.SEC_JAVA.CrossSiteRequestForgeryRule' severity='high' security='true'>
+      <Location fileId='1' path='ProfileUpload.java' line='36'/>
+      <Hash>0161eff0542b9049798edce4fc29c4ec</Hash>
+      <Code>AttackResult uploadFileHandler(
+      @RequestParam(&quot;uploadedFile&quot;) MultipartFile file,
+      @RequestParam(value = &quot;fullName&quot;, required = false) String fullName) {
+    return super.execute(file, fullName);
+  }</Code>
+      <Explanation>state-change call: super.execute(file, fullName), in uploadFileHandler(org.springframework.web.multipart.MultipartFile,java.lang.String), line 39</Explanation>
+      <CWE>352</CWE>
+    </Issue>
+    <Issue id='2' check='OPT.JAVA.SEC_JAVA.CrossSiteScriptingRule' severity='critical' security='true'>
+      <Location fileId='1' path='ProfileUpload.java' line='39'/>
+      <Hash>5f48efed8c41eae673a0cf94df942a8c</Hash>
+      <Code>return super.execute(file, fullName);</Code>
+      <Explanation>Stored XSS: file_input</Explanation>
+      <CWE>79</CWE>
+      <Frames>
+        <Frame id='1' kind='source' category='file_input' resource='filesystem'>
+          <Location fileId='2' path='ProfileUploadBase.java' line='42'/>
+          <Code>      var uploadedFile = new File(uploadDirectory, fullName);</Code>
+          <Container>org.owasp.webgoat.container.assignments.AttackResult execute(org.springframework.web.multipart.MultipartFile file, java.lang.String fullName)</Container>
+        </Frame>
+        <Frame id='2' kind='propagation' category='file_input' resource='filesystem'>
+          <Location fileId='1' path='ProfileUpload.java' line='39'/>
+          <Code>return super.execute(file, fullName);</Code>
+        </Frame>
+        <Frame id='3' kind='sink' category='xss' resource='web'>
+          <Location fileId='1' path='ProfileUpload.java' line='39'/>
+          <Code>return super.execute(file, fullName);</Code>
+          <Container>org.owasp.webgoat.container.assignments.AttackResult uploadFileHandler(org.springframework.web.multipart.MultipartFile file, java.lang.String fullName)</Container>
+        </Frame>
+      </Frames>
+    </Issue>
+    <Issue id='3' check='OPT.JAVA.SEC_JAVA.InputPathNotCanonicalizedRule' severity='medium' security='true'>
+      <Location fileId='2' path='ProfileUploadBase.java' line='42'/>
+      <Hash>766670d08f63a5f2f079e5c3125940c5</Hash>
+      <Code>      var uploadedFile = new File(uploadDirectory, fullName);</Code>
+      <CWE>180</CWE>
+      <Frames>
+        <Frame id='1' kind='source' category='user_input' resource='web'>
+          <Location fileId='4' path='ProfileUploadRemoveUserInput.java' line='35'/>
+          <Code>@RequestParam(&quot;uploadedFileRemoveUserInput&quot;) MultipartFile file</Code>
+          <Container>org.owasp.webgoat.container.assignments.AttackResult uploadFileHandler(org.springframework.web.multipart.MultipartFile file)</Container>
+        </Frame>
+        <Frame id='2' kind='propagation' category='canonicalization' resource='filesystem'>
+          <Location fileId='4' path='ProfileUploadRemoveUserInput.java' line='36'/>
+          <Code>return super.execute(file, file.getOriginalFilename());</Code>
+        </Frame>
+        <Frame id='3' kind='sink' category='canonicalization' resource='filesystem'>
+          <Location fileId='2' path='ProfileUploadBase.java' line='42'/>
+          <Code>      var uploadedFile = new File(uploadDirectory, fullName);</Code>
+          <Container>org.owasp.webgoat.container.assignments.AttackResult execute(org.springframework.web.multipart.MultipartFile file, java.lang.String fullName)</Container>
+          <InjectionPoint>fullName</InjectionPoint>
+          <VarDecl> String fullName</VarDecl>
+        </Frame>
+        <DataPath2>
+          <DataPathFrame varname='file' kind='source'>
+            <Location fileId='4' path='ProfileUploadRemoveUserInput.java' line='35'/>
+            <Code>@RequestParam(&quot;uploadedFileRemoveUserInput&quot;) MultipartFile file</Code>
+          </DataPathFrame>
+          <DataPathFrame varname='file' kind='call'>
+            <Location fileId='4' path='ProfileUploadRemoveUserInput.java' line='36'/>
+            <Code>return super.execute(file, file.getOriginalFilename());</Code>
+          </DataPathFrame>
+          <IndirectDataPath kind='call' varname='fullName'>
+            <Location fileId='2' path='ProfileUploadBase.java' line='31'/>
+            <Container>org.owasp.webgoat.container.assignments.AttackResult execute(org.springframework.web.multipart.MultipartFile file, java.lang.String fullName)</Container>
+            <DataPathFrame varname='fullName' kind='sink'>
+              <Location fileId='2' path='ProfileUploadBase.java' line='42'/>
+              <Code>uploadedFile = new File(uploadDirectory, fullName)</Code>
+            </DataPathFrame>
+          </IndirectDataPath>
+        </DataPath2>
+      </Frames>
+    </Issue>
+    <Issue id='4' check='OPT.JAVA.SEC_JAVA.PathTraversalRule' severity='critical' security='true'>
+      <Location fileId='2' path='ProfileUploadBase.java' line='42'/>
+      <Hash>128060967089a7353a8550167c63e8b4</Hash>
+      <Code>      var uploadedFile = new File(uploadDirectory, fullName);</Code>
+      <CWE>22</CWE>
+      <Frames>
+        <Frame id='1' kind='source' category='user_input' resource='web'>
+          <Location fileId='4' path='ProfileUploadRemoveUserInput.java' line='35'/>
+          <Code>@RequestParam(&quot;uploadedFileRemoveUserInput&quot;) MultipartFile file</Code>
+          <Container>org.owasp.webgoat.container.assignments.AttackResult uploadFileHandler(org.springframework.web.multipart.MultipartFile file)</Container>
+        </Frame>
+        <Frame id='2' kind='propagation' category='path_traversal' resource='filesystem'>
+          <Location fileId='4' path='ProfileUploadRemoveUserInput.java' line='36'/>
+          <Code>return super.execute(file, file.getOriginalFilename());</Code>
+        </Frame>
+        <Frame id='3' kind='sink' category='path_traversal' resource='filesystem'>
+          <Location fileId='2' path='ProfileUploadBase.java' line='42'/>
+          <Code>      var uploadedFile = new File(uploadDirectory, fullName);</Code>
+          <Container>org.owasp.webgoat.container.assignments.AttackResult execute(org.springframework.web.multipart.MultipartFile file, java.lang.String fullName)</Container>
+          <InjectionPoint>fullName</InjectionPoint>
+          <VarDecl> String fullName</VarDecl>
+        </Frame>
+        <DataPath2>
+          <DataPathFrame varname='file' kind='source'>
+            <Location fileId='4' path='ProfileUploadRemoveUserInput.java' line='35'/>
+            <Code>@RequestParam(&quot;uploadedFileRemoveUserInput&quot;) MultipartFile file</Code>
+          </DataPathFrame>
+          <DataPathFrame varname='file' kind='call'>
+            <Location fileId='4' path='ProfileUploadRemoveUserInput.java' line='36'/>
+            <Code>return super.execute(file, file.getOriginalFilename());</Code>
+          </DataPathFrame>
+          <IndirectDataPath kind='call' varname='fullName'>
+            <Location fileId='2' path='ProfileUploadBase.java' line='31'/>
+            <Container>org.owasp.webgoat.container.assignments.AttackResult execute(org.springframework.web.multipart.MultipartFile file, java.lang.String fullName)</Container>
+            <DataPathFrame varname='fullName' kind='sink'>
+              <Location fileId='2' path='ProfileUploadBase.java' line='42'/>
+              <Code>uploadedFile = new File(uploadDirectory, fullName)</Code>
+            </DataPathFrame>
+          </IndirectDataPath>
+        </DataPath2>
+      </Frames>
+    </Issue>
+    <Issue id='5' check='OPT.JAVA.SEC_JAVA.UnnormalizedInputString' severity='medium' security='true'>
+      <Location fileId='2' path='ProfileUploadBase.java' line='42'/>
+      <Hash>c158d5633c6d406cb2e3a19fd1fe06aa</Hash>
+      <Code>      var uploadedFile = new File(uploadDirectory, fullName);</Code>
+      <CWE>180</CWE>
+      <Frames>
+        <Frame id='1' kind='source' category='user_input' resource='web'>
+          <Location fileId='3' path='ProfileUploadFix.java' line='38'/>
+          <Code>@RequestParam(value = &quot;fullNameFix&quot;, required = false) String fullName</Code>
+          <Container>org.owasp.webgoat.container.assignments.AttackResult uploadFileHandler(org.springframework.web.multipart.MultipartFile file, java.lang.String fullName)</Container>
+        </Frame>
+        <Frame id='2' kind='propagation' category='path_traversal' resource='filesystem'>
+          <Location fileId='3' path='ProfileUploadFix.java' line='39'/>
+          <Code>return super.execute(file, fullName != null ? fullName.replace(&quot;../&quot;, &quot;&quot;) : &quot;&quot;);</Code>
+        </Frame>
+        <Frame id='3' kind='sink' category='path_traversal' resource='filesystem'>
+          <Location fileId='2' path='ProfileUploadBase.java' line='42'/>
+          <Code>      var uploadedFile = new File(uploadDirectory, fullName);</Code>
+          <Container>org.owasp.webgoat.container.assignments.AttackResult execute(org.springframework.web.multipart.MultipartFile file, java.lang.String fullName)</Container>
+          <InjectionPoint>fullName</InjectionPoint>
+          <VarDecl> String fullName</VarDecl>
+        </Frame>
+        <DataPath2>
+          <DataPathFrame varname='fullName' kind='source'>
+            <Location fileId='3' path='ProfileUploadFix.java' line='38'/>
+            <Code>@RequestParam(value = &quot;fullNameFix&quot;, required = false) String fullName</Code>
+          </DataPathFrame>
+          <DataPathFrame varname='fullName' kind='call'>
+            <Location fileId='3' path='ProfileUploadFix.java' line='39'/>
+            <Code>return super.execute(file, fullName != null ? fullName.replace(&quot;../&quot;, &quot;&quot;) : &quot;&quot;);</Code>
+          </DataPathFrame>
+          <IndirectDataPath kind='call' varname='fullName'>
+            <Location fileId='2' path='ProfileUploadBase.java' line='31'/>
+            <Container>org.owasp.webgoat.container.assignments.AttackResult execute(org.springframework.web.multipart.MultipartFile file, java.lang.String fullName)</Container>
+            <DataPathFrame varname='fullName' kind='sink'>
+              <Location fileId='2' path='ProfileUploadBase.java' line='42'/>
+              <Code>uploadedFile = new File(uploadDirectory, fullName)</Code>
+            </DataPathFrame>
+          </IndirectDataPath>
+        </DataPath2>
+      </Frames>
+    </Issue>
+    <Issue id='6' check='OPT.JAVA.SEC_JAVA.UnnormalizedInputString' severity='medium' security='true'>
+      <Location fileId='2' path='ProfileUploadBase.java' line='42'/>
+      <Hash>b07d6c2af60562f07c0766957b18fd6f</Hash>
+      <Code>      var uploadedFile = new File(uploadDirectory, fullName);</Code>
+      <CWE>180</CWE>
+      <Frames>
+        <Frame id='1' kind='source' category='user_input' resource='web'>
+          <Location fileId='4' path='ProfileUploadRemoveUserInput.java' line='35'/>
+          <Code>@RequestParam(&quot;uploadedFileRemoveUserInput&quot;) MultipartFile file</Code>
+          <Container>org.owasp.webgoat.container.assignments.AttackResult uploadFileHandler(org.springframework.web.multipart.MultipartFile file)</Container>
+        </Frame>
+        <Frame id='2' kind='propagation' category='path_traversal' resource='filesystem'>
+          <Location fileId='4' path='ProfileUploadRemoveUserInput.java' line='36'/>
+          <Code>return super.execute(file, file.getOriginalFilename());</Code>
+        </Frame>
+        <Frame id='3' kind='sink' category='path_traversal' resource='filesystem'>
+          <Location fileId='2' path='ProfileUploadBase.java' line='42'/>
+          <Code>      var uploadedFile = new File(uploadDirectory, fullName);</Code>
+          <Container>org.owasp.webgoat.container.assignments.AttackResult execute(org.springframework.web.multipart.MultipartFile file, java.lang.String fullName)</Container>
+          <InjectionPoint>fullName</InjectionPoint>
+          <VarDecl> String fullName</VarDecl>
+        </Frame>
+        <DataPath2>
+          <DataPathFrame varname='file' kind='source'>
+            <Location fileId='4' path='ProfileUploadRemoveUserInput.java' line='35'/>
+            <Code>@RequestParam(&quot;uploadedFileRemoveUserInput&quot;) MultipartFile file</Code>
+          </DataPathFrame>
+          <DataPathFrame varname='file' kind='call'>
+            <Location fileId='4' path='ProfileUploadRemoveUserInput.java' line='36'/>
+            <Code>return super.execute(file, file.getOriginalFilename());</Code>
+          </DataPathFrame>
+          <IndirectDataPath kind='call' varname='fullName'>
+            <Location fileId='2' path='ProfileUploadBase.java' line='31'/>
+            <Container>org.owasp.webgoat.container.assignments.AttackResult execute(org.springframework.web.multipart.MultipartFile file, java.lang.String fullName)</Container>
+            <DataPathFrame varname='fullName' kind='sink'>
+              <Location fileId='2' path='ProfileUploadBase.java' line='42'/>
+              <Code>uploadedFile = new File(uploadDirectory, fullName)</Code>
+            </DataPathFrame>
+          </IndirectDataPath>
+        </DataPath2>
+      </Frames>
+    </Issue>
+    <Issue id='7' check='OPT.JAVA.SEC_JAVA.CrossSiteScriptingRule' severity='critical' security='true'>
+      <Location fileId='2' path='ProfileUploadBase.java' line='91'/>
+      <Hash>ac968dafe78c70fa1fbf036e0253b7c7</Hash>
+      <Code>return ResponseEntity.ok()
+        .contentType(MediaType.parseMediaType(MediaType.IMAGE_JPEG_VALUE))
+        .body(getProfilePictureAsBase64());</Code>
+      <Explanation>Stored XSS: file_input</Explanation>
+      <CWE>79</CWE>
+      <Frames>
+        <Frame id='1' kind='source' category='file_input' resource='filesystem'>
+          <Location fileId='2' path='ProfileUploadBase.java' line='96'/>
+          <Code>        new File(this.webGoatHomeDirectory, &quot;/PathTraversal/&quot; + webSession.getUserName());</Code>
+          <Container>byte[] getProfilePictureAsBase64()</Container>
+        </Frame>
+        <Frame id='2' kind='propagation' category='file_input' resource='filesystem'>
+          <Location fileId='2' path='ProfileUploadBase.java' line='91'/>
+          <Code>return ResponseEntity.ok()
+        .contentType(MediaType.parseMediaType(MediaType.IMAGE_JPEG_VALUE))
+        .body(getProfilePictureAsBase64());</Code>
+        </Frame>
+        <Frame id='3' kind='sink' category='xss' resource='web'>
+          <Location fileId='2' path='ProfileUploadBase.java' line='91'/>
+          <Code>return ResponseEntity.ok()
+        .contentType(MediaType.parseMediaType(MediaType.IMAGE_JPEG_VALUE))
+        .body(getProfilePictureAsBase64());</Code>
+          <Container>org.springframework.http.ResponseEntity getProfilePicture()</Container>
+        </Frame>
+      </Frames>
+    </Issue>
+    <Issue id='8' check='OPT.JAVA.SEC_JAVA.CrossSiteRequestForgeryRule' severity='high' security='true'>
+      <Location fileId='3' path='ProfileUploadFix.java' line='36'/>
+      <Hash>aba6095c20bf9aacc0907426ffb5bed3</Hash>
+      <Code>AttackResult uploadFileHandler(
+      @RequestParam(&quot;uploadedFileFix&quot;) MultipartFile file,
+      @RequestParam(value = &quot;fullNameFix&quot;, required = false) String fullName) {
+    return super.execute(file, fullName != null ? fullName.replace(&quot;../&quot;, &quot;&quot;) : &quot;&quot;);
+  }</Code>
+      <Explanation>state-change call: super.execute(file, fullName != null ? fullName.replace(&quot;../&quot;, &quot;&quot;) : &quot;&quot;), in uploadFileHandler(org.springframework.web.multipart.MultipartFile,java.lang.String), line 39</Explanation>
+      <CWE>352</CWE>
+    </Issue>
+    <Issue id='9' check='OPT.JAVA.SEC_JAVA.CrossSiteScriptingRule' severity='critical' security='true'>
+      <Location fileId='3' path='ProfileUploadFix.java' line='39'/>
+      <Hash>eca19b301d39dd946f16abf5c2ba3bea</Hash>
+      <Code>return super.execute(file, fullName != null ? fullName.replace(&quot;../&quot;, &quot;&quot;) : &quot;&quot;);</Code>
+      <Explanation>Stored XSS: file_input</Explanation>
+      <CWE>79</CWE>
+      <Frames>
+        <Frame id='1' kind='source' category='file_input' resource='filesystem'>
+          <Location fileId='2' path='ProfileUploadBase.java' line='42'/>
+          <Code>      var uploadedFile = new File(uploadDirectory, fullName);</Code>
+          <Container>org.owasp.webgoat.container.assignments.AttackResult execute(org.springframework.web.multipart.MultipartFile file, java.lang.String fullName)</Container>
+        </Frame>
+        <Frame id='2' kind='propagation' category='file_input' resource='filesystem'>
+          <Location fileId='3' path='ProfileUploadFix.java' line='39'/>
+          <Code>return super.execute(file, fullName != null ? fullName.replace(&quot;../&quot;, &quot;&quot;) : &quot;&quot;);</Code>
+        </Frame>
+        <Frame id='3' kind='sink' category='xss' resource='web'>
+          <Location fileId='3' path='ProfileUploadFix.java' line='39'/>
+          <Code>return super.execute(file, fullName != null ? fullName.replace(&quot;../&quot;, &quot;&quot;) : &quot;&quot;);</Code>
+          <Container>org.owasp.webgoat.container.assignments.AttackResult uploadFileHandler(org.springframework.web.multipart.MultipartFile file, java.lang.String fullName)</Container>
+        </Frame>
+      </Frames>
+    </Issue>
+    <Issue id='10' check='OPT.JAVA.SEC_JAVA.CrossSiteRequestForgeryRule' severity='high' security='true'>
+      <Location fileId='4' path='ProfileUploadRemoveUserInput.java' line='34'/>
+      <Hash>f9496b4a90c38648f1739d8a6ed31e19</Hash>
+      <Code>AttackResult uploadFileHandler(
+      @RequestParam(&quot;uploadedFileRemoveUserInput&quot;) MultipartFile file) {
+    return super.execute(file, file.getOriginalFilename());
+  }</Code>
+      <Explanation>state-change call: super.execute(file, file.getOriginalFilename()), in uploadFileHandler(org.springframework.web.multipart.MultipartFile), line 36</Explanation>
+      <CWE>352</CWE>
+    </Issue>
+    <Issue id='11' check='OPT.JAVA.SEC_JAVA.CrossSiteScriptingRule' severity='critical' security='true'>
+      <Location fileId='4' path='ProfileUploadRemoveUserInput.java' line='36'/>
+      <Hash>9acd8c8ec2e30c9c8f7c63250a2778c6</Hash>
+      <Code>return super.execute(file, file.getOriginalFilename());</Code>
+      <Explanation>Stored XSS: file_input</Explanation>
+      <CWE>79</CWE>
+      <Frames>
+        <Frame id='1' kind='source' category='file_input' resource='filesystem'>
+          <Location fileId='2' path='ProfileUploadBase.java' line='42'/>
+          <Code>      var uploadedFile = new File(uploadDirectory, fullName);</Code>
+          <Container>org.owasp.webgoat.container.assignments.AttackResult execute(org.springframework.web.multipart.MultipartFile file, java.lang.String fullName)</Container>
+        </Frame>
+        <Frame id='2' kind='propagation' category='file_input' resource='filesystem'>
+          <Location fileId='4' path='ProfileUploadRemoveUserInput.java' line='36'/>
+          <Code>return super.execute(file, file.getOriginalFilename());</Code>
+        </Frame>
+        <Frame id='3' kind='sink' category='xss' resource='web'>
+          <Location fileId='4' path='ProfileUploadRemoveUserInput.java' line='36'/>
+          <Code>return super.execute(file, file.getOriginalFilename());</Code>
+          <Container>org.owasp.webgoat.container.assignments.AttackResult uploadFileHandler(org.springframework.web.multipart.MultipartFile file)</Container>
+        </Frame>
+      </Frames>
+    </Issue>
+    <Issue id='12' check='OPT.JAVA.SEC_JAVA.InputPathNotCanonicalizedRule' severity='medium' security='true'>
+      <Location fileId='5' path='ProfileUploadRetrieval.java' line='92'/>
+      <Hash>48c218b238e9aa6cd234d4c6b6e25f24</Hash>
+      <Code>catPicture =
+          new File(catPicturesDirectory, (id == null ? RandomUtils.nextInt(1, 11) : id) + &quot;.jpg&quot;)</Code>
+      <CWE>180</CWE>
+      <Frames>
+        <Frame id='1' kind='source' category='user_input' resource='web'>
+          <Location fileId='5' path='ProfileUploadRetrieval.java' line='83'/>
+          <Code>HttpServletRequest request</Code>
+          <Container>org.springframework.http.ResponseEntity getProfilePicture(jakarta.servlet.http.HttpServletRequest request)</Container>
+        </Frame>
+        <Frame id='2' kind='sink' category='canonicalization' resource='filesystem'>
+          <Location fileId='5' path='ProfileUploadRetrieval.java' line='92'/>
+          <Code>catPicture =
+          new File(catPicturesDirectory, (id == null ? RandomUtils.nextInt(1, 11) : id) + &quot;.jpg&quot;)</Code>
+          <Container>org.springframework.http.ResponseEntity getProfilePicture(jakarta.servlet.http.HttpServletRequest request)</Container>
+        </Frame>
+        <DataPath2>
+          <DataPathFrame varname='request' kind='source'>
+            <Location fileId='5' path='ProfileUploadRetrieval.java' line='83'/>
+            <Code>HttpServletRequest request</Code>
+          </DataPathFrame>
+          <DataPathFrame varname='request' kind='assign'>
+            <Location fileId='5' path='ProfileUploadRetrieval.java' line='90'/>
+            <Code>id = request.getParameter(&quot;id&quot;)</Code>
+          </DataPathFrame>
+          <DataPathFrame varname='id' kind='sink'>
+            <Location fileId='5' path='ProfileUploadRetrieval.java' line='92'/>
+            <Code>catPicture =
+          new File(catPicturesDirectory, (id == null ? RandomUtils.nextInt(1, 11) : id) + &quot;.jpg&quot;)</Code>
+          </DataPathFrame>
+        </DataPath2>
+      </Frames>
+    </Issue>
+    <Issue id='13' check='OPT.JAVA.SEC_JAVA.PathTraversalRule' severity='critical' security='true'>
+      <Location fileId='5' path='ProfileUploadRetrieval.java' line='92'/>
+      <Hash>3900cc64c8467126d070bac5f923ec8a</Hash>
+      <Code>catPicture =
+          new File(catPicturesDirectory, (id == null ? RandomUtils.nextInt(1, 11) : id) + &quot;.jpg&quot;)</Code>
+      <CWE>22</CWE>
+      <Frames>
+        <Frame id='1' kind='source' category='user_input' resource='web'>
+          <Location fileId='5' path='ProfileUploadRetrieval.java' line='83'/>
+          <Code>HttpServletRequest request</Code>
+          <Container>org.springframework.http.ResponseEntity getProfilePicture(jakarta.servlet.http.HttpServletRequest request)</Container>
+        </Frame>
+        <Frame id='2' kind='sink' category='path_traversal' resource='filesystem'>
+          <Location fileId='5' path='ProfileUploadRetrieval.java' line='92'/>
+          <Code>catPicture =
+          new File(catPicturesDirectory, (id == null ? RandomUtils.nextInt(1, 11) : id) + &quot;.jpg&quot;)</Code>
+          <Container>org.springframework.http.ResponseEntity getProfilePicture(jakarta.servlet.http.HttpServletRequest request)</Container>
+        </Frame>
+        <DataPath2>
+          <DataPathFrame varname='request' kind='source'>
+            <Location fileId='5' path='ProfileUploadRetrieval.java' line='83'/>
+            <Code>HttpServletRequest request</Code>
+          </DataPathFrame>
+          <DataPathFrame varname='request' kind='assign'>
+            <Location fileId='5' path='ProfileUploadRetrieval.java' line='90'/>
+            <Code>id = request.getParameter(&quot;id&quot;)</Code>
+          </DataPathFrame>
+          <DataPathFrame varname='id' kind='sink'>
+            <Location fileId='5' path='ProfileUploadRetrieval.java' line='92'/>
+            <Code>catPicture =
+          new File(catPicturesDirectory, (id == null ? RandomUtils.nextInt(1, 11) : id) + &quot;.jpg&quot;)</Code>
+          </DataPathFrame>
+        </DataPath2>
+      </Frames>
+    </Issue>
+    <Issue id='14' check='OPT.JAVA.SEC_JAVA.UnnormalizedInputString' severity='medium' security='true'>
+      <Location fileId='5' path='ProfileUploadRetrieval.java' line='92'/>
+      <Hash>1571c8fb472b5cdb0bcc825fef24e396</Hash>
+      <Code>catPicture =
+          new File(catPicturesDirectory, (id == null ? RandomUtils.nextInt(1, 11) : id) + &quot;.jpg&quot;)</Code>
+      <CWE>180</CWE>
+      <Frames>
+        <Frame id='1' kind='source' category='user_input' resource='web'>
+          <Location fileId='5' path='ProfileUploadRetrieval.java' line='83'/>
+          <Code>HttpServletRequest request</Code>
+          <Container>org.springframework.http.ResponseEntity getProfilePicture(jakarta.servlet.http.HttpServletRequest request)</Container>
+        </Frame>
+        <Frame id='2' kind='sink' category='path_traversal' resource='filesystem'>
+          <Location fileId='5' path='ProfileUploadRetrieval.java' line='92'/>
+          <Code>catPicture =
+          new File(catPicturesDirectory, (id == null ? RandomUtils.nextInt(1, 11) : id) + &quot;.jpg&quot;)</Code>
+          <Container>org.springframework.http.ResponseEntity getProfilePicture(jakarta.servlet.http.HttpServletRequest request)</Container>
+        </Frame>
+        <DataPath2>
+          <DataPathFrame varname='request' kind='source'>
+            <Location fileId='5' path='ProfileUploadRetrieval.java' line='83'/>
+            <Code>HttpServletRequest request</Code>
+          </DataPathFrame>
+          <DataPathFrame varname='request' kind='assign'>
+            <Location fileId='5' path='ProfileUploadRetrieval.java' line='90'/>
+            <Code>id = request.getParameter(&quot;id&quot;)</Code>
+          </DataPathFrame>
+          <DataPathFrame varname='id' kind='sink'>
+            <Location fileId='5' path='ProfileUploadRetrieval.java' line='92'/>
+            <Code>catPicture =
+          new File(catPicturesDirectory, (id == null ? RandomUtils.nextInt(1, 11) : id) + &quot;.jpg&quot;)</Code>
+          </DataPathFrame>
+        </DataPath2>
+      </Frames>
+    </Issue>
+    <Issue id='15' check='OPT.JAVA.SEC_JAVA.CrossSiteScriptingRule' severity='critical' security='true'>
+      <Location fileId='5' path='ProfileUploadRetrieval.java' line='97'/>
+      <Hash>7275e499cb2905d8a66e84e187ca7c52</Hash>
+      <Code>return ResponseEntity.ok()
+            .contentType(MediaType.parseMediaType(MediaType.IMAGE_JPEG_VALUE))
+            .body(FileCopyUtils.copyToByteArray(catPicture));</Code>
+      <Explanation>Stored XSS: file_input</Explanation>
+      <CWE>79</CWE>
+      <Frames>
+        <Frame id='1' kind='source' category='file_input' resource='filesystem'>
+          <Location fileId='5' path='ProfileUploadRetrieval.java' line='92'/>
+          <Code>catPicture =
+          new File(catPicturesDirectory, (id == null ? RandomUtils.nextInt(1, 11) : id) + &quot;.jpg&quot;)</Code>
+          <Container>org.springframework.http.ResponseEntity getProfilePicture(jakarta.servlet.http.HttpServletRequest request)</Container>
+        </Frame>
+        <Frame id='2' kind='sink' category='xss' resource='web'>
+          <Location fileId='5' path='ProfileUploadRetrieval.java' line='97'/>
+          <Code>return ResponseEntity.ok()
+            .contentType(MediaType.parseMediaType(MediaType.IMAGE_JPEG_VALUE))
+            .body(FileCopyUtils.copyToByteArray(catPicture));</Code>
+          <Container>org.springframework.http.ResponseEntity getProfilePicture(jakarta.servlet.http.HttpServletRequest request)</Container>
+        </Frame>
+        <DataPath2>
+          <DataPathFrame varname='catPicture' kind='source'>
+            <Location fileId='5' path='ProfileUploadRetrieval.java' line='91'/>
+            <Code>catPicture =
+          new File(catPicturesDirectory, (id == null ? RandomUtils.nextInt(1, 11) : id) + &quot;.jpg&quot;)</Code>
+          </DataPathFrame>
+          <DataPathFrame varname='catPicture' kind='sink'>
+            <Location fileId='5' path='ProfileUploadRetrieval.java' line='97'/>
+            <Code>return ResponseEntity.ok()
+            .contentType(MediaType.parseMediaType(MediaType.IMAGE_JPEG_VALUE))
+            .body(FileCopyUtils.copyToByteArray(catPicture));</Code>
+          </DataPathFrame>
+        </DataPath2>
+      </Frames>
+    </Issue>
+    <Issue id='16' check='OPT.JAVA.SEC_JAVA.HttpParameterPollutionRule' severity='high' security='true'>
+      <Location fileId='5' path='ProfileUploadRetrieval.java' line='102'/>
+      <Hash>3d34d2edc90b9b285410a1b362ecc879</Hash>
+      <Code>return ResponseEntity.ok()
+            .contentType(MediaType.parseMediaType(MediaType.IMAGE_JPEG_VALUE))
+            .location(new URI(&quot;/PathTraversal/random-picture?id=&quot; + catPicture.getName()))
+            .body(Base64.getEncoder().encode(FileCopyUtils.copyToByteArray(catPicture)));</Code>
+      <CWE>235</CWE>
+      <Frames>
+        <Frame id='1' kind='source' category='user_input' resource='web'>
+          <Location fileId='5' path='ProfileUploadRetrieval.java' line='83'/>
+          <Code>HttpServletRequest request</Code>
+          <Container>org.springframework.http.ResponseEntity getProfilePicture(jakarta.servlet.http.HttpServletRequest request)</Container>
+        </Frame>
+        <Frame id='2' kind='sink' category='http_parameter_pollution'>
+          <Location fileId='5' path='ProfileUploadRetrieval.java' line='102'/>
+          <Code>return ResponseEntity.ok()
+            .contentType(MediaType.parseMediaType(MediaType.IMAGE_JPEG_VALUE))
+            .location(new URI(&quot;/PathTraversal/random-picture?id=&quot; + catPicture.getName()))
+            .body(Base64.getEncoder().encode(FileCopyUtils.copyToByteArray(catPicture)));</Code>
+          <Container>org.springframework.http.ResponseEntity getProfilePicture(jakarta.servlet.http.HttpServletRequest request)</Container>
+        </Frame>
+        <DataPath2>
+          <DataPathFrame varname='request' kind='source'>
+            <Location fileId='5' path='ProfileUploadRetrieval.java' line='83'/>
+            <Code>HttpServletRequest request</Code>
+          </DataPathFrame>
+          <DataPathFrame varname='request' kind='assign'>
+            <Location fileId='5' path='ProfileUploadRetrieval.java' line='90'/>
+            <Code>id = request.getParameter(&quot;id&quot;)</Code>
+          </DataPathFrame>
+          <DataPathFrame varname='id' kind='assign'>
+            <Location fileId='5' path='ProfileUploadRetrieval.java' line='92'/>
+            <Code>catPicture =
+          new File(catPicturesDirectory, (id == null ? RandomUtils.nextInt(1, 11) : id) + &quot;.jpg&quot;)</Code>
+          </DataPathFrame>
+          <DataPathFrame varname='catPicture' kind='sink'>
+            <Location fileId='5' path='ProfileUploadRetrieval.java' line='102'/>
+            <Code>return ResponseEntity.ok()
+            .contentType(MediaType.parseMediaType(MediaType.IMAGE_JPEG_VALUE))
+            .location(new URI(&quot;/PathTraversal/random-picture?id=&quot; + catPicture.getName()))
+            .body(Base64.getEncoder().encode(FileCopyUtils.copyToByteArray(catPicture)));</Code>
+          </DataPathFrame>
+        </DataPath2>
+      </Frames>
+    </Issue>
+    <Issue id='17' check='OPT.JAVA.SEC_JAVA.ServerSideRequestForgeryRule' severity='critical' security='true'>
+      <Location fileId='5' path='ProfileUploadRetrieval.java' line='102'/>
+      <Hash>b0edc70eda2c63d49e305957676c21a8</Hash>
+      <Code>return ResponseEntity.ok()
+            .contentType(MediaType.parseMediaType(MediaType.IMAGE_JPEG_VALUE))
+            .location(new URI(&quot;/PathTraversal/random-picture?id=&quot; + catPicture.getName()))
+            .body(Base64.getEncoder().encode(FileCopyUtils.copyToByteArray(catPicture)));</Code>
+      <CWE>918</CWE>
+      <Frames>
+        <Frame id='1' kind='source' category='user_input' resource='web'>
+          <Location fileId='5' path='ProfileUploadRetrieval.java' line='83'/>
+          <Code>HttpServletRequest request</Code>
+          <Container>org.springframework.http.ResponseEntity getProfilePicture(jakarta.servlet.http.HttpServletRequest request)</Container>
+        </Frame>
+        <Frame id='2' kind='sink' category='ssrf'>
+          <Location fileId='5' path='ProfileUploadRetrieval.java' line='102'/>
+          <Code>return ResponseEntity.ok()
+            .contentType(MediaType.parseMediaType(MediaType.IMAGE_JPEG_VALUE))
+            .location(new URI(&quot;/PathTraversal/random-picture?id=&quot; + catPicture.getName()))
+            .body(Base64.getEncoder().encode(FileCopyUtils.copyToByteArray(catPicture)));</Code>
+          <Container>org.springframework.http.ResponseEntity getProfilePicture(jakarta.servlet.http.HttpServletRequest request)</Container>
+        </Frame>
+        <DataPath2>
+          <DataPathFrame varname='request' kind='source'>
+            <Location fileId='5' path='ProfileUploadRetrieval.java' line='83'/>
+            <Code>HttpServletRequest request</Code>
+          </DataPathFrame>
+          <DataPathFrame varname='request' kind='assign'>
+            <Location fileId='5' path='ProfileUploadRetrieval.java' line='90'/>
+            <Code>id = request.getParameter(&quot;id&quot;)</Code>
+          </DataPathFrame>
+          <DataPathFrame varname='id' kind='assign'>
+            <Location fileId='5' path='ProfileUploadRetrieval.java' line='92'/>
+            <Code>catPicture =
+          new File(catPicturesDirectory, (id == null ? RandomUtils.nextInt(1, 11) : id) + &quot;.jpg&quot;)</Code>
+          </DataPathFrame>
+          <DataPathFrame varname='catPicture' kind='sink'>
+            <Location fileId='5' path='ProfileUploadRetrieval.java' line='102'/>
+            <Code>return ResponseEntity.ok()
+            .contentType(MediaType.parseMediaType(MediaType.IMAGE_JPEG_VALUE))
+            .location(new URI(&quot;/PathTraversal/random-picture?id=&quot; + catPicture.getName()))
+            .body(Base64.getEncoder().encode(FileCopyUtils.copyToByteArray(catPicture)));</Code>
+          </DataPathFrame>
+        </DataPath2>
+      </Frames>
+    </Issue>
+    <Issue id='18' check='OPT.JAVA.SEC_JAVA.CrossSiteScriptingRule' severity='critical' security='true'>
+      <Location fileId='5' path='ProfileUploadRetrieval.java' line='103'/>
+      <Hash>7275e499cb2905d8a66e84e187ca7c52</Hash>
+      <Code>return ResponseEntity.ok()
+            .contentType(MediaType.parseMediaType(MediaType.IMAGE_JPEG_VALUE))
+            .location(new URI(&quot;/PathTraversal/random-picture?id=&quot; + catPicture.getName()))
+            .body(Base64.getEncoder().encode(FileCopyUtils.copyToByteArray(catPicture)));</Code>
+      <Explanation>Stored XSS: file_input</Explanation>
+      <CWE>79</CWE>
+      <Frames>
+        <Frame id='1' kind='source' category='file_input' resource='filesystem'>
+          <Location fileId='5' path='ProfileUploadRetrieval.java' line='92'/>
+          <Code>catPicture =
+          new File(catPicturesDirectory, (id == null ? RandomUtils.nextInt(1, 11) : id) + &quot;.jpg&quot;)</Code>
+          <Container>org.springframework.http.ResponseEntity getProfilePicture(jakarta.servlet.http.HttpServletRequest request)</Container>
+        </Frame>
+        <Frame id='2' kind='sink' category='xss' resource='web'>
+          <Location fileId='5' path='ProfileUploadRetrieval.java' line='103'/>
+          <Code>return ResponseEntity.ok()
+            .contentType(MediaType.parseMediaType(MediaType.IMAGE_JPEG_VALUE))
+            .location(new URI(&quot;/PathTraversal/random-picture?id=&quot; + catPicture.getName()))
+            .body(Base64.getEncoder().encode(FileCopyUtils.copyToByteArray(catPicture)));</Code>
+          <Container>org.springframework.http.ResponseEntity getProfilePicture(jakarta.servlet.http.HttpServletRequest request)</Container>
+        </Frame>
+        <DataPath2>
+          <DataPathFrame varname='catPicture' kind='source'>
+            <Location fileId='5' path='ProfileUploadRetrieval.java' line='91'/>
+            <Code>catPicture =
+          new File(catPicturesDirectory, (id == null ? RandomUtils.nextInt(1, 11) : id) + &quot;.jpg&quot;)</Code>
+          </DataPathFrame>
+          <DataPathFrame varname='catPicture' kind='sink'>
+            <Location fileId='5' path='ProfileUploadRetrieval.java' line='103'/>
+            <Code>return ResponseEntity.ok()
+            .contentType(MediaType.parseMediaType(MediaType.IMAGE_JPEG_VALUE))
+            .location(new URI(&quot;/PathTraversal/random-picture?id=&quot; + catPicture.getName()))
+            .body(Base64.getEncoder().encode(FileCopyUtils.copyToByteArray(catPicture)));</Code>
+          </DataPathFrame>
+        </DataPath2>
+      </Frames>
+    </Issue>
+    <Issue id='19' check='OPT.JAVA.SEC_JAVA.HttpParameterPollutionRule' severity='high' security='true'>
+      <Location fileId='5' path='ProfileUploadRetrieval.java' line='106'/>
+      <Hash>3d34d2edc90b9b285410a1b362ecc879</Hash>
+      <Code>return ResponseEntity.status(HttpStatus.NOT_FOUND)
+          .location(new URI(&quot;/PathTraversal/random-picture?id=&quot; + catPicture.getName()))
+          .body(
+              StringUtils.arrayToCommaDelimitedString(catPicture.getParentFile().listFiles())
+                  .getBytes());</Code>
+      <CWE>235</CWE>
+      <Frames>
+        <Frame id='1' kind='source' category='user_input' resource='web'>
+          <Location fileId='5' path='ProfileUploadRetrieval.java' line='83'/>
+          <Code>HttpServletRequest request</Code>
+          <Container>org.springframework.http.ResponseEntity getProfilePicture(jakarta.servlet.http.HttpServletRequest request)</Container>
+        </Frame>
+        <Frame id='2' kind='sink' category='http_parameter_pollution'>
+          <Location fileId='5' path='ProfileUploadRetrieval.java' line='106'/>
+          <Code>return ResponseEntity.status(HttpStatus.NOT_FOUND)
+          .location(new URI(&quot;/PathTraversal/random-picture?id=&quot; + catPicture.getName()))
+          .body(
+              StringUtils.arrayToCommaDelimitedString(catPicture.getParentFile().listFiles())
+                  .getBytes());</Code>
+          <Container>org.springframework.http.ResponseEntity getProfilePicture(jakarta.servlet.http.HttpServletRequest request)</Container>
+        </Frame>
+        <DataPath2>
+          <DataPathFrame varname='request' kind='source'>
+            <Location fileId='5' path='ProfileUploadRetrieval.java' line='83'/>
+            <Code>HttpServletRequest request</Code>
+          </DataPathFrame>
+          <DataPathFrame varname='request' kind='assign'>
+            <Location fileId='5' path='ProfileUploadRetrieval.java' line='90'/>
+            <Code>id = request.getParameter(&quot;id&quot;)</Code>
+          </DataPathFrame>
+          <DataPathFrame varname='id' kind='assign'>
+            <Location fileId='5' path='ProfileUploadRetrieval.java' line='92'/>
+            <Code>catPicture =
+          new File(catPicturesDirectory, (id == null ? RandomUtils.nextInt(1, 11) : id) + &quot;.jpg&quot;)</Code>
+          </DataPathFrame>
+          <DataPathFrame varname='catPicture' kind='sink'>
+            <Location fileId='5' path='ProfileUploadRetrieval.java' line='106'/>
+            <Code>return ResponseEntity.status(HttpStatus.NOT_FOUND)
+          .location(new URI(&quot;/PathTraversal/random-picture?id=&quot; + catPicture.getName()))
+          .body(
+              StringUtils.arrayToCommaDelimitedString(catPicture.getParentFile().listFiles())
+                  .getBytes());</Code>
+          </DataPathFrame>
+        </DataPath2>
+      </Frames>
+    </Issue>
+    <Issue id='20' check='OPT.JAVA.SEC_JAVA.ServerSideRequestForgeryRule' severity='critical' security='true'>
+      <Location fileId='5' path='ProfileUploadRetrieval.java' line='106'/>
+      <Hash>b0edc70eda2c63d49e305957676c21a8</Hash>
+      <Code>return ResponseEntity.status(HttpStatus.NOT_FOUND)
+          .location(new URI(&quot;/PathTraversal/random-picture?id=&quot; + catPicture.getName()))
+          .body(
+              StringUtils.arrayToCommaDelimitedString(catPicture.getParentFile().listFiles())
+                  .getBytes());</Code>
+      <CWE>918</CWE>
+      <Frames>
+        <Frame id='1' kind='source' category='user_input' resource='web'>
+          <Location fileId='5' path='ProfileUploadRetrieval.java' line='83'/>
+          <Code>HttpServletRequest request</Code>
+          <Container>org.springframework.http.ResponseEntity getProfilePicture(jakarta.servlet.http.HttpServletRequest request)</Container>
+        </Frame>
+        <Frame id='2' kind='sink' category='ssrf'>
+          <Location fileId='5' path='ProfileUploadRetrieval.java' line='106'/>
+          <Code>return ResponseEntity.status(HttpStatus.NOT_FOUND)
+          .location(new URI(&quot;/PathTraversal/random-picture?id=&quot; + catPicture.getName()))
+          .body(
+              StringUtils.arrayToCommaDelimitedString(catPicture.getParentFile().listFiles())
+                  .getBytes());</Code>
+          <Container>org.springframework.http.ResponseEntity getProfilePicture(jakarta.servlet.http.HttpServletRequest request)</Container>
+        </Frame>
+        <DataPath2>
+          <DataPathFrame varname='request' kind='source'>
+            <Location fileId='5' path='ProfileUploadRetrieval.java' line='83'/>
+            <Code>HttpServletRequest request</Code>
+          </DataPathFrame>
+          <DataPathFrame varname='request' kind='assign'>
+            <Location fileId='5' path='ProfileUploadRetrieval.java' line='90'/>
+            <Code>id = request.getParameter(&quot;id&quot;)</Code>
+          </DataPathFrame>
+          <DataPathFrame varname='id' kind='assign'>
+            <Location fileId='5' path='ProfileUploadRetrieval.java' line='92'/>
+            <Code>catPicture =
+          new File(catPicturesDirectory, (id == null ? RandomUtils.nextInt(1, 11) : id) + &quot;.jpg&quot;)</Code>
+          </DataPathFrame>
+          <DataPathFrame varname='catPicture' kind='sink'>
+            <Location fileId='5' path='ProfileUploadRetrieval.java' line='106'/>
+            <Code>return ResponseEntity.status(HttpStatus.NOT_FOUND)
+          .location(new URI(&quot;/PathTraversal/random-picture?id=&quot; + catPicture.getName()))
+          .body(
+              StringUtils.arrayToCommaDelimitedString(catPicture.getParentFile().listFiles())
+                  .getBytes());</Code>
+          </DataPathFrame>
+        </DataPath2>
+      </Frames>
+    </Issue>
+    <Issue id='21' check='OPT.JAVA.SEC_JAVA.CrossSiteScriptingRule' severity='critical' security='true'>
+      <Location fileId='5' path='ProfileUploadRetrieval.java' line='107'/>
+      <Hash>7275e499cb2905d8a66e84e187ca7c52</Hash>
+      <Code>return ResponseEntity.status(HttpStatus.NOT_FOUND)
+          .location(new URI(&quot;/PathTraversal/random-picture?id=&quot; + catPicture.getName()))
+          .body(
+              StringUtils.arrayToCommaDelimitedString(catPicture.getParentFile().listFiles())
+                  .getBytes());</Code>
+      <Explanation>Stored XSS: file_input</Explanation>
+      <CWE>79</CWE>
+      <Frames>
+        <Frame id='1' kind='source' category='file_input' resource='filesystem'>
+          <Location fileId='5' path='ProfileUploadRetrieval.java' line='92'/>
+          <Code>catPicture =
+          new File(catPicturesDirectory, (id == null ? RandomUtils.nextInt(1, 11) : id) + &quot;.jpg&quot;)</Code>
+          <Container>org.springframework.http.ResponseEntity getProfilePicture(jakarta.servlet.http.HttpServletRequest request)</Container>
+        </Frame>
+        <Frame id='2' kind='sink' category='xss' resource='web'>
+          <Location fileId='5' path='ProfileUploadRetrieval.java' line='107'/>
+          <Code>return ResponseEntity.status(HttpStatus.NOT_FOUND)
+          .location(new URI(&quot;/PathTraversal/random-picture?id=&quot; + catPicture.getName()))
+          .body(
+              StringUtils.arrayToCommaDelimitedString(catPicture.getParentFile().listFiles())
+                  .getBytes());</Code>
+          <Container>org.springframework.http.ResponseEntity getProfilePicture(jakarta.servlet.http.HttpServletRequest request)</Container>
+        </Frame>
+        <DataPath2>
+          <DataPathFrame varname='catPicture' kind='source'>
+            <Location fileId='5' path='ProfileUploadRetrieval.java' line='91'/>
+            <Code>catPicture =
+          new File(catPicturesDirectory, (id == null ? RandomUtils.nextInt(1, 11) : id) + &quot;.jpg&quot;)</Code>
+          </DataPathFrame>
+          <DataPathFrame varname='catPicture' kind='sink'>
+            <Location fileId='5' path='ProfileUploadRetrieval.java' line='108'/>
+            <Code>return ResponseEntity.status(HttpStatus.NOT_FOUND)
+          .location(new URI(&quot;/PathTraversal/random-picture?id=&quot; + catPicture.getName()))
+          .body(
+              StringUtils.arrayToCommaDelimitedString(catPicture.getParentFile().listFiles())
+                  .getBytes());</Code>
+          </DataPathFrame>
+        </DataPath2>
+      </Frames>
+    </Issue>
+    <Issue id='22' check='OPT.JAVA.SEC_JAVA.CrossSiteRequestForgeryRule' severity='high' security='true'>
+      <Location fileId='6' path='ProfileZipSlip.java' line='51'/>
+      <Hash>fd2f1b62bbcb83a9a75a08d1f6e5daa6</Hash>
+      <Code>AttackResult uploadFileHandler(@RequestParam(&quot;uploadedFileZipSlip&quot;) MultipartFile file) {
+    if (!file.getOriginalFilename().toLowerCase().endsWith(&quot;.zip&quot;)) {
+      return failed(this).feedback(&quot;path-traversal-zip-slip.no-zip&quot;).build();
+    } else {
+      return processZipUpload(file);
+(...)</Code>
+      <Explanation>state-change call: processZipUpload(file), in uploadFileHandler(org.springframework.web.multipart.MultipartFile), line 55</Explanation>
+      <CWE>352</CWE>
+    </Issue>
+    <Issue id='23' check='OPT.JAVA.SEC_JAVA.CrossSiteScriptingRule' severity='critical' security='true'>
+      <Location fileId='6' path='ProfileZipSlip.java' line='55'/>
+      <Hash>563da5720d8414696dd533fc17b1c1d9</Hash>
+      <Code>return processZipUpload(file);</Code>
+      <Explanation>Stored XSS: file_input</Explanation>
+      <CWE>79</CWE>
+      <Frames>
+        <Frame id='1' kind='source' category='file_input' resource='filesystem'>
+          <Location fileId='2' path='ProfileUploadBase.java' line='96'/>
+          <Code>        new File(this.webGoatHomeDirectory, &quot;/PathTraversal/&quot; + webSession.getUserName());</Code>
+          <Container>byte[] getProfilePictureAsBase64()</Container>
+        </Frame>
+        <Frame id='2' kind='propagation' category='file_input' resource='filesystem'>
+          <Location fileId='6' path='ProfileZipSlip.java' line='63'/>
+          <Code>    var currentImage = getProfilePictureAsBase64();</Code>
+          <Container>org.owasp.webgoat.container.assignments.AttackResult processZipUpload(org.springframework.web.multipart.MultipartFile file)</Container>
+        </Frame>
+        <Frame id='3' kind='propagation' category='file_input' resource='filesystem'>
+          <Location fileId='6' path='ProfileZipSlip.java' line='55'/>
+          <Code>return processZipUpload(file);</Code>
+        </Frame>
+        <Frame id='4' kind='sink' category='xss' resource='web'>
+          <Location fileId='6' path='ProfileZipSlip.java' line='55'/>
+          <Code>return processZipUpload(file);</Code>
+          <Container>org.owasp.webgoat.container.assignments.AttackResult uploadFileHandler(org.springframework.web.multipart.MultipartFile file)</Container>
+        </Frame>
+      </Frames>
+    </Issue>
+    <Issue id='24' check='OPT.JAVA.SEC_JAVA.PathTraversalRule' severity='critical' security='true'>
+      <Location fileId='6' path='ProfileZipSlip.java' line='69'/>
+      <Hash>5b19752577320ae914867d559d2fa2f0</Hash>
+      <Code>      ZipFile zip = new ZipFile(uploadedZipFile.toFile());</Code>
+      <CWE>22</CWE>
+      <Frames>
+        <Frame id='1' kind='source' category='user_input' resource='web'>
+          <Location fileId='6' path='ProfileZipSlip.java' line='51'/>
+          <Code>@RequestParam(&quot;uploadedFileZipSlip&quot;) MultipartFile file</Code>
+          <Container>org.owasp.webgoat.container.assignments.AttackResult uploadFileHandler(org.springframework.web.multipart.MultipartFile file)</Container>
+        </Frame>
+        <Frame id='2' kind='propagation' category='path_traversal' resource='filesystem'>
+          <Location fileId='6' path='ProfileZipSlip.java' line='55'/>
+          <Code>return processZipUpload(file);</Code>
+        </Frame>
+        <Frame id='3' kind='sink' category='path_traversal' resource='filesystem'>
+          <Location fileId='6' path='ProfileZipSlip.java' line='69'/>
+          <Code>      ZipFile zip = new ZipFile(uploadedZipFile.toFile());</Code>
+          <Container>org.owasp.webgoat.container.assignments.AttackResult processZipUpload(org.springframework.web.multipart.MultipartFile file)</Container>
+          <InjectionPoint>file</InjectionPoint>
+          <VarDecl>MultipartFile file</VarDecl>
+        </Frame>
+        <DataPath2>
+          <DataPathFrame varname='file' kind='source'>
+            <Location fileId='6' path='ProfileZipSlip.java' line='51'/>
+            <Code>@RequestParam(&quot;uploadedFileZipSlip&quot;) MultipartFile file</Code>
+          </DataPathFrame>
+          <DataPathFrame varname='file' kind='call'>
+            <Location fileId='6' path='ProfileZipSlip.java' line='55'/>
+            <Code>return processZipUpload(file);</Code>
+          </DataPathFrame>
+          <IndirectDataPath kind='call' varname='file'>
+            <Location fileId='6' path='ProfileZipSlip.java' line='60'/>
+            <Container>org.owasp.webgoat.container.assignments.AttackResult processZipUpload(org.springframework.web.multipart.MultipartFile file)</Container>
+            <DataPathFrame varname='file' kind='assign'>
+              <Location fileId='6' path='ProfileZipSlip.java' line='67'/>
+              <Code>FileCopyUtils.copy(file.getBytes(), uploadedZipFile.toFile());</Code>
+            </DataPathFrame>
+            <DataPathFrame varname='uploadedZipFile' kind='sink'>
+              <Location fileId='6' path='ProfileZipSlip.java' line='69'/>
+              <Code>zip = new ZipFile(uploadedZipFile.toFile())</Code>
+            </DataPathFrame>
+          </IndirectDataPath>
+        </DataPath2>
+      </Frames>
+    </Issue>
+    <Issue id='25' check='OPT.JAVA.SEC_JAVA.UnnormalizedInputString' severity='medium' security='true'>
+      <Location fileId='6' path='ProfileZipSlip.java' line='69'/>
+      <Hash>59fb8781ef3240c81e617be59df01fe6</Hash>
+      <Code>      ZipFile zip = new ZipFile(uploadedZipFile.toFile());</Code>
+      <CWE>180</CWE>
+      <Frames>
+        <Frame id='1' kind='source' category='user_input' resource='web'>
+          <Location fileId='6' path='ProfileZipSlip.java' line='51'/>
+          <Code>@RequestParam(&quot;uploadedFileZipSlip&quot;) MultipartFile file</Code>
+          <Container>org.owasp.webgoat.container.assignments.AttackResult uploadFileHandler(org.springframework.web.multipart.MultipartFile file)</Container>
+        </Frame>
+        <Frame id='2' kind='propagation' category='path_traversal' resource='filesystem'>
+          <Location fileId='6' path='ProfileZipSlip.java' line='55'/>
+          <Code>return processZipUpload(file);</Code>
+        </Frame>
+        <Frame id='3' kind='sink' category='path_traversal' resource='filesystem'>
+          <Location fileId='6' path='ProfileZipSlip.java' line='69'/>
+          <Code>      ZipFile zip = new ZipFile(uploadedZipFile.toFile());</Code>
+          <Container>org.owasp.webgoat.container.assignments.AttackResult processZipUpload(org.springframework.web.multipart.MultipartFile file)</Container>
+          <InjectionPoint>file</InjectionPoint>
+          <VarDecl>MultipartFile file</VarDecl>
+        </Frame>
+        <DataPath2>
+          <DataPathFrame varname='file' kind='source'>
+            <Location fileId='6' path='ProfileZipSlip.java' line='51'/>
+            <Code>@RequestParam(&quot;uploadedFileZipSlip&quot;) MultipartFile file</Code>
+          </DataPathFrame>
+          <DataPathFrame varname='file' kind='call'>
+            <Location fileId='6' path='ProfileZipSlip.java' line='55'/>
+            <Code>return processZipUpload(file);</Code>
+          </DataPathFrame>
+          <IndirectDataPath kind='call' varname='file'>
+            <Location fileId='6' path='ProfileZipSlip.java' line='60'/>
+            <Container>org.owasp.webgoat.container.assignments.AttackResult processZipUpload(org.springframework.web.multipart.MultipartFile file)</Container>
+            <DataPathFrame varname='file' kind='assign'>
+              <Location fileId='6' path='ProfileZipSlip.java' line='67'/>
+              <Code>FileCopyUtils.copy(file.getBytes(), uploadedZipFile.toFile());</Code>
+            </DataPathFrame>
+            <DataPathFrame varname='uploadedZipFile' kind='sink'>
+              <Location fileId='6' path='ProfileZipSlip.java' line='69'/>
+              <Code>zip = new ZipFile(uploadedZipFile.toFile())</Code>
+            </DataPathFrame>
+          </IndirectDataPath>
+        </DataPath2>
+      </Frames>
+    </Issue>
+    <Issue id='26' check='OPT.JAVA.SEC_JAVA.PathTraversalRule' severity='critical' security='true'>
+      <Location fileId='6' path='ProfileZipSlip.java' line='73'/>
+      <Hash>431fdf7a37ab3616d478acc75a9836b5</Hash>
+      <Code>        File f = new File(tmpZipDirectory.toFile(), e.getName());</Code>
+      <CWE>22</CWE>
+      <Frames>
+        <Frame id='1' kind='source' category='user_input' resource='web'>
+          <Location fileId='6' path='ProfileZipSlip.java' line='51'/>
+          <Code>@RequestParam(&quot;uploadedFileZipSlip&quot;) MultipartFile file</Code>
+          <Container>org.owasp.webgoat.container.assignments.AttackResult uploadFileHandler(org.springframework.web.multipart.MultipartFile file)</Container>
+        </Frame>
+        <Frame id='2' kind='propagation' category='path_traversal' resource='filesystem'>
+          <Location fileId='6' path='ProfileZipSlip.java' line='55'/>
+          <Code>return processZipUpload(file);</Code>
+        </Frame>
+        <Frame id='3' kind='sink' category='path_traversal' resource='filesystem'>
+          <Location fileId='6' path='ProfileZipSlip.java' line='73'/>
+          <Code>        File f = new File(tmpZipDirectory.toFile(), e.getName());</Code>
+          <Container>org.owasp.webgoat.container.assignments.AttackResult processZipUpload(org.springframework.web.multipart.MultipartFile file)</Container>
+          <InjectionPoint>file</InjectionPoint>
+          <VarDecl>MultipartFile file</VarDecl>
+        </Frame>
+        <DataPath2>
+          <DataPathFrame varname='file' kind='source'>
+            <Location fileId='6' path='ProfileZipSlip.java' line='51'/>
+            <Code>@RequestParam(&quot;uploadedFileZipSlip&quot;) MultipartFile file</Code>
+          </DataPathFrame>
+          <DataPathFrame varname='file' kind='call'>
+            <Location fileId='6' path='ProfileZipSlip.java' line='55'/>
+            <Code>return processZipUpload(file);</Code>
+          </DataPathFrame>
+          <IndirectDataPath kind='call' varname='file'>
+            <Location fileId='6' path='ProfileZipSlip.java' line='60'/>
+            <Container>org.owasp.webgoat.container.assignments.AttackResult processZipUpload(org.springframework.web.multipart.MultipartFile file)</Container>
+            <DataPathFrame varname='file' kind='assign'>
+              <Location fileId='6' path='ProfileZipSlip.java' line='67'/>
+              <Code>FileCopyUtils.copy(file.getBytes(), uploadedZipFile.toFile());</Code>
+            </DataPathFrame>
+            <DataPathFrame varname='uploadedZipFile' kind='assign'>
+              <Location fileId='6' path='ProfileZipSlip.java' line='69'/>
+              <Code>zip = new ZipFile(uploadedZipFile.toFile())</Code>
+            </DataPathFrame>
+            <DataPathFrame varname='zip' kind='assign'>
+              <Location fileId='6' path='ProfileZipSlip.java' line='70'/>
+              <Code>entries = zip.entries()</Code>
+            </DataPathFrame>
+            <DataPathFrame varname='entries' kind='assign'>
+              <Location fileId='6' path='ProfileZipSlip.java' line='72'/>
+              <Code>e = entries.nextElement()</Code>
+            </DataPathFrame>
+            <DataPathFrame varname='e' kind='sink'>
+              <Location fileId='6' path='ProfileZipSlip.java' line='73'/>
+              <Code>f = new File(tmpZipDirectory.toFile(), e.getName())</Code>
+            </DataPathFrame>
+          </IndirectDataPath>
+        </DataPath2>
+      </Frames>
+    </Issue>
+  </Issues>
+  <Checks>
+    <Check id='OPT.JAVA.SEC_JAVA.CrossSiteRequestForgeryRule' issues='4' technology='java' severity='high' effort='3' message='CrossSiteRequestForgeryRule: Cross-site request forgery (CSRF)'>
+      <Category>OPT.CRITERIUM_VALUE.CQM.SECURITY</Category>
+      <Tags>csrf,CWEScope:Availability,CWEScope:Non-Repudiation,CWEScope:Confidentiality,CWEScope:Access-Control,CWEScope:Integrity</Tags>
+      <Description>A sensitive operation associated with an web URL (servlet, JSP, WebUI, Struts Action ...) may be invoked from
+a request coming from a legitimate, authenticated user (with identity typically encoded in a session ID cookie)
+but where an attacker was able to force the user agent to submit the request.
+
+For an CSRF attack to succeed, various elements must occur together:
+1. Trusted user is logged in the vulnerable webapp
+2. Trusted user agent is tricked by the attacker (e.g. in a web app he controls) to send an HTTP request to the
+   vulnerable URL
+3. The server-side logic under that URL accepts the request as if it was really initiated by the legitimate user,
+   without explicit verification that the user really intended to perform the operation, simply because the
+   session ID cookie for the logged-in user appears in the HTTP request.
+
+The result is that the vulnerable application accepts the operation (controlled by attacker) as if it was submitted
+by the trusted, logged-in, user. This is an abuse of the trust the web application puts on HTTP requests coming from
+logged-in users.
+
+A CSRF vulnerability is a design flaw, where certain web operations (sensitive, as an attacker may gain benefit
+from the legitimate user) are not protected by a control that avoids this kind of attack to succeed. Essentially,
+a CSRF flaw occurs when a web resource performing sensitive operations do not check that the request came from
+from same webapp + same user (the application, at server side, needs to explicitely check the request provenance somehow).
+
+NOTE: Other attacks, like Cross-site WebSocket hijacking (https://www.christian-schneider.net/CrossSiteWebSocketHijacking.html)
+follow the same path and are prevented along the very same techniques.
+        </Description>
+      <Remediation>The anti-CSRF control needs to be explicit at the web controller or configured at the infrastructure level
+(e.g. an HTTP filter on each sensitive URL, like OWASP CSRFGuard) that, for example, leverages same-origin policy (SOP)
+in browsers to ensure that a unique and unpredictable CSRF token generated by the web application (at request or session scope)
+as a parameter (in URL or in message body) or request header is the same as a cookie (generated by the web application and sent
+by the user agent, typically a web browser).
+
+As an attacker cannot read the CSRF token cookie in victim&apos;s browser (and note that any cross-site scripting or CR/LF
+header splitting flaws breaks this assumption), he cannot setup an HTTP message with the CSRF token in
+both a parameter and cookie header, and the receiving web controller will detect a mismatch between CSRF token in
+the cookie and the parameter, rejecting the operation as a CSRF attack attempt. This is called &quot;synchronizer token pattern&quot;,
+used in libraries like OWASP ESAPI.
+
+Other prevention mechanisms create the token in client-side (JavaScript) and send it as a cookie value and message
+parameter or header. The server-side is &quot;stateless&quot; as it does not need to remember the CSRF token for each logged
+user. It only need to check that the token in cookie and header/parameter are present and equal. This works also
+when no XSS / HTTP splitting vulnerabilities exists, because the attacker cannot read responses or fetch cookies
+emitted in the legitimate user agent to the target web application, due to the same-origin policy.
+
+Of course, relying on the Referer or Origin HTTP header is not reliable, as such headers may be changed by browser
+or intermediate proxies/firewalls due to privacy concerns. And do not assume that GET requests should not be used
+for sensitive operations while POST are safe against CSRF attacks: an attacker may easily craft a POST form and make it
+submitted automatically with some JavaScript, from the victim&apos;s browser.</Remediation>
+      <Configuration>
+For limiting the positives rate, you may set checkStateChange=true for reporing as vulnerable actions
+only those performing state-modification operations, like file/databse writes, or changes in session.
+
+If the source files implementing sensitive transactions to be protected against CSRF attacks could be delimited by patterns,
+the &apos;patterns&apos; property could be set, with a comma-separated list of Ant-like patterns, so the rule will check only
+the files matching the given patterns (possibly representing web request processing for sensitive operations).
+For example: &apos;**/admin/controllers/*.java&apos;.
+
+You may reduce the kind of protection mechanisms to be checked using the &apos;checkers&apos; property. If left empty,
+all known CSRF protection mechanisms for common web frameworks (CSRFGuard, ESAPI, JSF, HDIV, Struts1, Struts2 or SpringSecurity)
+will be checked for. Specify a comma-separated list of the subset of protection checks that you want to be checked.</Configuration>
+      <Benefits>Avoid CSRF attacks.</Benefits>
+      <Reference>http://cwe.mitre.org/data/definitions/352.html</Reference>
+      <Reference>https://en.wikipedia.org/wiki/Cross-site_request_forgery</Reference>
+      <Reference>https://www.owasp.org/index.php/CSRF_Prevention_Cheat_Sheet</Reference>
+      <Example>// No &quot;bad code&quot; for CSRF. The lack of anti-CSRF protection
+// in web actions performing sensitive operations is the flaw.</Example>
+      <ExampleRepair>Add a particular anti-CSRF control (sometimes in each action class,
+sometimes in webapp configuration.
+
+For example, for OWASP CSRFGuard, In web.xml file:
+
+	Activate the CsrfGuardFilter:
+	&lt;filter&gt;
+		&lt;filter-name&gt;CSRFGuard&lt;/filter-name&gt;
+		&lt;filter-class&gt;org.owasp.csrfguard.CsrfGuardFilter&lt;/filter-class&gt;
+	&lt;/filter&gt;
+
+	Configure anti-CSRF filter:
+  &lt;listener&gt;
+    &lt;listener-class&gt;org.owasp.csrfguard.CsrfGuardServletContextListener&lt;/listener-class&gt;
+  &lt;/listener&gt;
+  &lt;listener&gt;
+    &lt;listener-class&gt;org.owasp.csrfguard.CsrfGuardHttpSessionListener&lt;/listener-class&gt;
+  &lt;/listener&gt;
+  &lt;context-param&gt;
+    &lt;param-name&gt;Owasp.CsrfGuard.Config&lt;/param-name&gt;
+    &lt;param-value&gt;WEB-INF/Owasp.CsrfGuard.properties&lt;/param-value&gt;
+  &lt;/context-param&gt;
+
+	Map the filter to URL patterns for sensitive actions to be protected:
+	&lt;filter-mapping&gt;
+		&lt;filter-name&gt;CSRFGuard&lt;/filter-name&gt;
+		&lt;url-pattern&gt;/*&lt;/url-pattern&gt;
+	&lt;/filter-mapping&gt;</ExampleRepair>
+      <Properties>
+        <Property name='checkStateChange'>true</Property>
+        <Property name='checkers'></Property>
+        <Property name='patterns'></Property>
+      </Properties>
+      <CWE>352</CWE>
+    </Check>
+    <Check id='OPT.JAVA.SEC_JAVA.CrossSiteScriptingRule' issues='8' technology='java' severity='critical' effort='3' message='CrossSiteScriptingRule: Improper Neutralization of Input During Web Page Generation (&apos;Cross-site Scripting&apos;)'>
+      <Category>OPT.CRITERIUM_VALUE.CQM.SECURITY</Category>
+      <Tags>essential,CWEScope:Availability,CWEScope:Confidentiality,CWEScope:Access-Control,CWEScope:Integrity</Tags>
+      <Description>
+Software places user-controlled input in page content. An attacker could inject browser script code that is executed
+in the client browser. The end-user is the attacked subject, and the software is the vehicle for the attack.
+There are two main kinds of XSS:
+
+* Reflected XSS: Attacker causes victim to supply malicious content to a vulnerable web application, which
+  renders HTML content embedding a malicious script executed in victim&apos;s browser. A variation of this is named
+  DOM-based XSS, where the vulnerable software does not generate content depending on user input but include
+  script code that use user-controlled input.
+
+* Persisted XSS: Attacker provides malicious content to vulnerable application. When other user access to
+  vulnerable pages that embed without proper neutralization the attacker content, script code is executed in the
+  victim&apos;s browser.
+
+The script executed in the victim&apos;s browser could perform malicious activities.
+
+Many browsers could limit the damage via security restrictions (e.g. &apos;same origin policy&apos;), but user browsers
+generally allow scripting languages (e.g. JavaScript) in their browsers (disabling JavaScript severely limits
+a web site).
+        </Description>
+      <Remediation>
+For remediation, it is recommended to use a proper library for encoding output (like OWASP ESAPI Encoding module,
+OWASP Java HTML Sanitizer, OWASP AntiSamy, or Apache Shiro), as well as using proper input validation, preferably of the white-list kind
+(&quot;accept only known, neutral input&quot;).
+
+It&apos;s very important to ensure that the version used from these libraries don&apos;t contain any vulnerability.
+
+Remember that the attacker may encode special HTML/JavaScript characters in rather imaginative ways to escape
+&quot;reject bad characters&quot; validation strategy.
+        </Remediation>
+      <Reference>https://www.owasp.org/index.php/XSS_(Cross_Site_Scripting)_Prevention_Cheat_Sheet</Reference>
+      <Reference>https://www.google.es/about/appsecurity/learning/xss/</Reference>
+      <Reference>https://www.securecoding.cert.org/confluence/display/java/IDS51-J.+Properly+encode+or+escape+output</Reference>
+      <Reference>http://cwe.mitre.org/data/definitions/79.html</Reference>
+      <Example>
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import java.io.IOException;
+import java.io.PrintWriter;
+
+public class CrossSiteScriptingCode {
+  public void directXSS(HttpServletRequest req, HttpServletResponse res) throws IOException {
+    PrintWriter w = res.getWriter();
+    w.println( req.getParameter(&quot;input&quot;) ); // VIOLATION
+  }
+}
+        </Example>
+      <ExampleRepair>
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import java.io.IOException;
+import java.io.PrintWriter;
+import org.owasp.html.*;
+
+public class CrossSiteScriptingCode {
+  public void directXSS(HttpServletRequest req, HttpServletResponse res) throws IOException {
+    PrintWriter w = res.getWriter();
+    // OWASP Java HTML Sanitizer (upgrade to r88 or later)
+    // Use your own security library if needed
+    PolicyFactory policy = Sanitizers.FORMATTING.and(Sanitizers.LINKS);
+    String safeHTML = policy.sanitize( req.getParameter(&quot;input&quot;) );
+    w.println(safeHTML); // OK
+  }
+}
+        </ExampleRepair>
+      <Properties>
+        <Property name='checkXssProtectionHeaderDisabled'>true</Property>
+        <Property name='inputs'>user_input, database_input, file_input</Property>
+      </Properties>
+      <CWE>79</CWE>
+    </Check>
+    <Check id='OPT.JAVA.SEC_JAVA.HttpParameterPollutionRule' issues='2' technology='java' severity='high' effort='2' message='HttpParameterPollutionRule: HTTP parameter pollution (HPP)'>
+      <Category>OPT.CRITERIUM_VALUE.CQM.SECURITY</Category>
+      <Tags>http-parameter-pollution,CWEScope:Integrity</Tags>
+      <Description>Concatenating untrusted input into path, query string, or parameters for HTTP message (in the URL or in the request body)
+may allow an attacker to override/add unexpected request parameters. Attacker may change the intended
+HTTP request semantics, and may give him/her access to unauthorized data or bypass web application
+firewall validations.
+
+Note: Do not confuse HPP with Server-Side Request Forgery (SSRF), where the attacker has control over the
+full request URL, including host and port. For HPP attack, attacker has control over other parts like the query string
+part of the URL. Remember the format of an HTTP URL: scheme://user:password@host:port/path?query#fragment
+where query is typically param=value&amp;param2=value. HPP is about attackers controlling path, query or fragment,
+while SSRF means controlling scheme, user, password, host or port.
+
+Like other injection issues, with HPP attackers play with &quot;&amp;&quot; to inject additional parameter (similar to the quote
+in SQL injection), &quot;../&quot; to change the path, &quot;;&quot; (to add matrix parameters to URL at different path segments), or &quot;#&quot;
+to remove ending URL characers (like &quot;--&quot; comment delimiter in SQL injection).
+
+Controlling the path typically changes the semantics of the action represented by the HTTP resource.
+Some REST services use request parameter like _method for selecting the HTTP method, which may be subverted by an HPP attack
+(an HTTP header manipulation flaw could also be leveraged with X-HTTP-Method-Override or similar headers in certain frameworks).
+
+For example, imagine a web application that calls to a remote home-banking REST API. The webapp emits
+a (GET) url https://mybank.com/show-balance/account/X/monetaryUnit?date=now to show the balance for the user account X,
+where X is taken from a trusted source, but where monetaryUnit is taken from a cookie, and concatenated without
+any validation or encoding into the URL. An attacker could pass a Cookie request header set to &quot;../../../transfer/X/to/Y?_method=POST#&quot;,
+so the vulnerable web application will create https://mybank.com/show-balance/account/X/../../../transfer/X/to/Y?_method=POST#?date=now
+which is equivalent to a POST https://mybank.com/transfer/X/to/Y.</Description>
+      <Remediation>Use strict input validation checks and right output filtering (URL encoding, to make sure that
+encoded untrusted input added to query string cannot result as unexpected &quot;param=value&quot; entries).
+
+Libraries like Apache Commons HttpComponents provide methods for creating HTTP request with automatic
+proper encoding of request parameters and safe utilities like URIBuilder (when used properly!), a &quot;prepared URL&quot;
+similar to PreparedStatement for SQL injection.</Remediation>
+      <Benefits>Avoid unexpected behaviour for HTTP parameter pollution attacks.</Benefits>
+      <Reference>http://cwe.mitre.org/data/definitions/235.html</Reference>
+      <Reference>RESTing On Your Laurels will Get YOu Pwned</Reference>
+      <Example>String lang = req.getParameter(&quot;lang&quot;); // untrusted input
+
+// Using Apache Commons HttpClient API:
+GetMethod get = new GetMethod(&quot;http://www.host.com&quot;);
+get.setQueryString(&quot;lang=&quot; + lang + &quot;&amp;poll_id=&quot; + poll_id); /* VIOLATION */
+get.execute();
+
+// Using java.net.URLConnection API:
+String queryString = &quot;?lang=&quot; + lang + &quot;&amp;poll_id=&quot; + poll_id;
+URL url = new URL(&quot;http://www.host.com&quot; + queryString); /* VIOLATION */
+URLConnection urlConn = url.openConnection();
+...
+InputStream response = url.getInputStream();</Example>
+      <ExampleRepair>String lang = req.getParameter(&quot;lang&quot;); // untrusted input
+validate(lang); // custom validation
+// url-encode so special query string chars (&amp;,;?%) in lang are safe
+lang = URLEncoder.encode(lang);
+... same as before ...</ExampleRepair>
+      <CWE>235</CWE>
+    </Check>
+    <Check id='OPT.JAVA.SEC_JAVA.InputPathNotCanonicalizedRule' issues='2' technology='java' severity='medium' effort='3' message='InputPathNotCanonicalizedRule: Incorrect Behavior Order: Validate Before Canonicalize'>
+      <Category>OPT.CRITERIUM_VALUE.CQM.SECURITY</Category>
+      <Tags>CWEScope:Access-Control</Tags>
+      <Description>A system can accept inputs that contain file path names. That path names
+could be contains alias file links such as symbolic (soft) links, hard links, shortcuts, shadows, aliases, and junctions.
+Path names should be resolved to a canonical format before to perform any operation with them.
+In the lines below we can see some examples about path names:
+
+- C:\temp\file.txt - This is a path, an absolute path, and a canonical path.
+- .\file.txt - This is a path. It&apos;s neither an absolute path nor a canonical path.
+- C:\temp\myapp\bin\..\\..\file.txt - This is a path and an absolute path. It&apos;s not a canonical path.
+
+Canonicalization doesn&apos;t contribute to security assurance by itself, but it&apos;s necessary before perform any validation over a path name.
+Doing validations over relative or absolute paths involves a risk.
+
+This rule reports violation when a file path name is used without doing a canonicalization before a validation.
+
+This rule reports violation when an system input is not normalized and then validated. </Description>
+      <Remediation>Java API provides the getCanonicalPath method in class File to transform a file path name to canonical format.</Remediation>
+      <Benefits>Avoiding malicious file path names improves security.</Benefits>
+      <Reference>https://www.securecoding.cert.org/confluence/display/java/FIO16-J.+Canonicalize+path+names+before+validating+them</Reference>
+      <Reference>http://cwe.mitre.org/data/definitions/171.html</Reference>
+      <Example>
+package com.demos;
+
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.IOException;
+import javax.servlet.http.HttpServletRequest;
+
+public class CanonicalizeDemo {
+
+  public static void main(String[] args) throws IOException {
+
+    File file = new File(&quot;/img/&quot; + args[0]);
+
+	// &apos;equals&apos; method is not a proper neutralization for file object
+	// because it doesn&apos;t have a previous canonicalization
+    if (!file.getPath().equals(&quot;/img/java/file1.txt&quot;) &amp;&amp;
+        !file.getPath().equals(&quot;/img/java/file2.txt&quot;)) {
+       return;
+    }
+
+    FileInputStream fis2 = new FileInputStream(file); /* VIOLATION */
+
+	// Canonicalization without validation
+	File file2 = new File(&quot;/img/&quot; + args[1]);
+	String canonicalPath2 = file2.getCanonicalPath();
+	FileInputStream fis3 = new FileInputStream(canonicalPath2); /* VIOLATION */
+
+  }
+}
+        </Example>
+      <ExampleRepair>
+package com.demos;
+
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.IOException;
+import javax.servlet.http.HttpServletRequest;
+
+public class CanonicalizeDemo {
+
+  public static void main(String[] args) throws IOException {
+
+    File file = new File(&quot;/img/&quot; + args[0]);
+    if (!isInSecureDir(file)) {
+      throw new IllegalArgumentException();
+    }
+    String canonicalPath = file.getCanonicalPath();
+    if (!canonicalPath.equals(&quot;/img/java/file1.txt&quot;) &amp;&amp;
+        !canonicalPath.equals(&quot;/img/java/file2.txt&quot;)) {
+        return;
+    }
+
+	  // Canonicalized and Neutralized
+    FileInputStream fis = new FileInputStream(canonicalPath); /* OK */
+  }
+}
+        </ExampleRepair>
+      <CWE>180</CWE>
+    </Check>
+    <Check id='OPT.JAVA.SEC_JAVA.PathTraversalRule' issues='4' technology='java' severity='critical' effort='3' message='PathTraversalRule: Avoid non-neutralized user-controlled input composed in a pathname to a resource'>
+      <Category>OPT.CRITERIUM_VALUE.CQM.SECURITY</Category>
+      <Tags>CWEScope:Availability,CWEScope:Confidentiality,CWEScope:Integrity</Tags>
+      <Description>
+Software uses external input to construct a pathname that is intended to identify a file or directory
+that is located underneath a restricted parent directory, but the software does not properly neutralize
+special elements within the pathname that can cause the pathname to resolve to a location outside the
+restricted directory.
+
+Under an application server, if the application server configuration does not restrict access to files outside
+certain restricted directories, the attacker may fetch sensitive files, and if the file is written with contents
+controlled by user input, the attacker may change configuration files (like web.xml among others), web contents
+(&apos;web defacement&apos;), or libraries (for more insidious code injection attacks). Access to system files
+(the customary /etc/password in Unix/Linux systems) could also allowed with the app server account permissions.
+
+It is recommended, besides ensuring that files depending on user-controlled input do not exit the intended directories,
+that the OS account does have the minimal permissions, to reduce the impact of a successful path traversal attack.
+        </Description>
+      <Reference>http://cwe.mitre.org/data/definitions/22.html</Reference>
+      <Reference>http://cwe.mitre.org/data/definitions/73.html</Reference>
+      <Example>import javax.servlet.ServletException;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import java.io.*;
+
+public class PathTraversalCode {
+
+  public InputStream indirectPathTraversal(HttpServletRequest req) throws IOException {
+    String inputFile = req.getParameter(&quot;file&quot;);
+    inputFile = inputFile + &quot;.tmp&quot;;
+    return new FileInputStream(SAFE_DIR.getAbsoluteFile() + inputFile);   // VIOLATION
+  }
+
+}</Example>
+      <ExampleRepair>import javax.servlet.ServletException;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import java.io.*;
+
+public class PathTraversalCode {
+
+  public InputStream indirectPathTraversal(HttpServletRequest req) throws IOException {
+    String inputFile = req.getParameter(&quot;file&quot;);
+    inputFile = inputFile + &quot;.tmp&quot;;
+    String filename = new File(inputFile).getName();
+    return new FileInputStream(new File(SAFE_DIR, filename));   // OK
+  }
+
+}</ExampleRepair>
+      <Properties>
+        <Property name='inputs'>user_input</Property>
+      </Properties>
+      <CWE>22</CWE>
+    </Check>
+    <Check id='OPT.JAVA.SEC_JAVA.ServerSideRequestForgeryRule' issues='2' technology='java' severity='critical' effort='2' message='ServerSideRequestForgeryRule: Server-Side Request Forgery (SSRF)'>
+      <Category>OPT.CRITERIUM_VALUE.CQM.SECURITY</Category>
+      <Tags>http-parameter-pollution,CWEScope:Confidentiality,CWEScope:Integrity</Tags>
+      <Description>The software builds an URL using untrusted input, and retrieves the contents of this URL (e.g. a webservice),
+without ensuring that the target (scheme, host, port ...) is the intended one.
+
+This is an instance of the &apos;confused deputy&apos; weakness, where the vulnerable application acts as a proxy
+or relay for connections totally or partially controlled by an attacker.
+
+As the connection originates from the host of the vulnerable application, that may hide the attacker origin,
+and bypass network controls.
+
+Attackers may leverage this flaw to use the application as a network proxy to:
+* conduct port scanning in internal networks,
+* access to local sensitive files using file:// scheme,
+* use unintended protocols like tftp to gain unintended connections to internal or external hosts,
+* bypass firewalls (the application host may be allowed to perform connections controlled by the attacker),
+* attack web applications using injection attacks
+and other malicious activity.</Description>
+      <Remediation>Do not let untrusted input to form part of the target URL that will be used for connecting to remote hosts.
+
+If not possible, make sure that at least the scheme, host and port are not taken directly from untrusted input,
+and take the &quot;dynamic&quot; parts of the URL that depends on untrusted input are properly validated and escaped
+(for example, using URL encoding for parameters in query string, see HttpParameterPollution check).
+Use a &quot;whitelist&quot; approach for getting the parts of the URL that could depend on external input.
+
+Follow a similar approach when the application creates browser links or similar content that could be affected
+by untrusted input.</Remediation>
+      <Reference>http://cwe.mitre.org/data/definitions/918.html</Reference>
+      <Reference>SSRF bible. Cheat-sheet ONSec Labs</Reference>
+      <Example>String url = request.getParameter(&quot;hidden_url&quot;); // not so hidden...
+
+// Using java.net.URLConnection
+URL url = new URL(url); // VIOLATION
+InputStream is = url.openConnection().getContent();
+
+// Using Apache Commons HttpComponents
+CloseableHttpClient httpclient = HttpClients.createDefault();
+HttpGet httpget = new HttpGet(url); // VIOLATION
+CloseableHttpResponse response = httpclient.execute(httpget);
+...</Example>
+      <ExampleRepair>String _url = request.getParameter(&quot;hidden_url&quot;); // not so hidden...
+
+// perform a white-list validation ensuring, for example,
+// that the all URL parts are in expected sets
+String url = validateUrl(_url);
+
+... same as before ...</ExampleRepair>
+      <CWE>918</CWE>
+    </Check>
+    <Check id='OPT.JAVA.SEC_JAVA.UnnormalizedInputString' issues='4' technology='java' severity='medium' effort='3' message='UnnormalizedInputString: Always normalize system inputs'>
+      <Category>OPT.CRITERIUM_VALUE.CQM.SECURITY</Category>
+      <Tags>CWEScope:Access-Control</Tags>
+      <Description>When a system accepts external inputs usually uses a filtering or validation technique
+to check if the input is safe or a malicious input.
+
+When filtering techniques like blacklisting are used, certain characters whose use can be malicious can skip this
+filtering if they are encoded in other different format than the expected.
+
+Therefore, it would be easy for a malicious attacker to bypass, for example, filterings against XSS sending label
+&lt;script&gt; as &quot;\ uFE64&quot; + &quot;script&quot; + &quot;\ uFE65&quot;.
+
+Therefore, it is necessary normalizing inputs previously to validation, ensuring this way that validation is
+performed on strings with the expected format.
+
+This rule reports violation when an system input is not normalized and then validated.</Description>
+      <Remediation>Java API provides the Normalizer class along with its normalize method to transform a
+string into a proper format.</Remediation>
+      <Benefits>Avoiding maliciously formatted chains improves security.</Benefits>
+      <Reference>http://cwe.mitre.org/data/definitions/180.html</Reference>
+      <Reference>https://www.securecoding.cert.org/confluence/display/java/IDS01-J.+Normalize+strings+before+validating+them</Reference>
+      <Example>import javax.servlet.http.HttpServletRequest;
+import java.io.IOException;
+import java.util.regex.Pattern;
+import java.util.regex.Matcher;
+import java.text.Normalizer;
+import java.io.FileInputStream;
+
+public class Sample {
+
+  public void method_KO (HttpServletRequest req) throws IOException {
+    String btype = req.getParameter(&quot;backuptype&quot;);
+    String s = &quot;\uFE64&quot; + btype + &quot;\uFE65&quot;;
+
+    // Validate
+    if (s.matches(&quot;&quot;)) {
+      // Found blacklisted tag
+      throw new IllegalStateException();
+    } else {
+      // ...
+    }
+
+    // Normalize
+    s = Normalizer.normalize(s, Form.NFKC);
+
+    FileInputStream in = new FileInputStream(s);    // VIOLATION
+  }
+}</Example>
+      <ExampleRepair>import javax.servlet.http.HttpServletRequest;
+import java.io.IOException;
+import java.util.regex.Pattern;
+import java.util.regex.Matcher;
+import java.text.Normalizer;
+import java.io.FileInputStream;
+
+public class Sample {
+
+  public void method_KO (HttpServletRequest req) throws IOException {
+    String btype = req.getParameter(&quot;backuptype&quot;);
+    String s = &quot;\uFE64&quot; + btype + &quot;\uFE65&quot;;
+
+    // Normalize
+    s = Normalizer.normalize(s, Form.NFKC);
+
+    // Validate
+    if (s.matches(&quot;&quot;)) {
+      // Found blacklisted tag
+      throw new IllegalStateException();
+    } else {
+      // ...
+    }
+
+    FileInputStream in = new FileInputStream(s);    // OK
+  }
+}</ExampleRepair>
+      <CWE>180</CWE>
+    </Check>
+  </Checks>
+</Report>
