@@ -30,7 +30,7 @@ This project aims at extending the Xygeni platform for End to End Software Suppl
 
 This repository help partners and end-users to share their own extensions and to request for new ones, that could be added to the platform or even provided here for the community.
 
-The repositoru contains documentation and examples for Xygeni extensions, including:
+The repository contains documentation and examples for Xygeni extensions, including:
 
 - custom detectors,
 - activity sensors,
@@ -69,7 +69,7 @@ The kind of security tools supported are:
 
 The `report-upload` framework is available with the scanner so new converters for unsupported formats could be added. This framework is the one which Xygeni uses for the provided converters.
 
-<div style="align:center"><img src="img/report_upload_framework.png" width="70%" alt="report upload framework"></div>
+<img src="img/report_upload_framework.png" width="70%" alt="report upload framework" style="display:block;margin-left:auto;margin-right:auto" />
 
 To know the list of external scanners and formats supported, please go to the [external scanners supported](https://docs.xygeni.io/xydocs/integrations/external_scanners/external_scanners.html). 
 
