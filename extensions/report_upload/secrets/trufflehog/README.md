@@ -111,6 +111,7 @@ Secrets types found by Trufflehog detectors should be mapped to Xygeni Secret ty
 To compile and package the converter its required some libraries that can be copied from the Xygeni scanner lib folder. 
 The file `lib/copy-here.txt` contains the list of required libraries, and  `compile-and-package-converter.sh` script can be used to compile and package the converter. 
 
-Finally copy the `trufflehog-converter.jar` generated to the xygeni scanner `/conf` folder and execute the following command to upload a result of Trufflehog secrets analysis to Xygeni.
+Finally copy the `trufflehog-converter.jar` generated to the xygeni scanner `/conf` folder and execute the following command to upload a result of Trufflehog secrets analysis to Xygeni. 
 
-    ./xygeni -v report-upload -r TRUFFLEHOG_SECRETS.json -f secrets-trufflehog
+    # upload webgoat repository report of Trufflehog analysis example to xygeni
+    ./xygeni -v report-upload -r test/webgoat_trufflehog_report.json-like -f secrets-trufflehog
