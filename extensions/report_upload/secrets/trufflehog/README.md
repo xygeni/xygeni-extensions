@@ -8,22 +8,6 @@ Through this document, we will show how to create a custom report converter for 
 
 ## Steps to generate a Custom Report Converter 
 
-### Add new Trufflehog report upload definition
-
-By adding a new Trufflehog report definition to `xygeni.custom.report-upload.yml` you will be able to use it in the `report-upload` command.
-
-    secrets-trufflehog:
-      enabled:     true
-      description: Secrets detected by TruffleHog, in JSON format
-      types:       application/json
-      loader:      my_org.xygeni.report-load.trufflehog.TruffleHogLoader
-      converter:   my_org.xygeni.report-load.trufflehog.TruffleHogConverter
-
-The new secrets-trufflehog will be listed as a new available format,
-so you may upload findings from trufflehog with:
-
-    $>xygeni report-upload -r TRUFFLE_SECRETS.json -f secrets-trufflehog
-
 Three classes should be implemented to load and convert the Trufflehog report:
 
 * `my_org.xygeni.report_load.trufflehog.TruffleHogLoader` 
@@ -100,18 +84,40 @@ Secrets types found by Trufflehog detectors should be mapped to Xygeni Secret ty
 
 ### Setup the environment
 
+The converter has a maven structure that should be setup in the `pom.xml` file.
+
     Converter folder structure:
 
-    /bin - contains the converter compile and package script
-    /lib - contains the converter code
     /src/main/java - contains the converter source code
-    /src/main/resources - contains the converter resources
-    /classes - generated folder where compiled classes will be copied to
+    /src/main/resources/Trufflehog.properties - contains the list of Trufflehog detectors and their corresponding Xygeni Secret types
+    /src/test/java - contains a test of the converter
+    /src/test/resources - contains a trufflehog report in json format
+    /pom.xml - contains the maven project structure
 
-To compile and package the converter its required some libraries that can be copied from the Xygeni scanner lib folder. 
-The file `lib/copy-here.txt` contains the list of required libraries, and  `compile-and-package-converter.sh` script can be used to compile and package the converter. 
+To compile and package the converter its required some libraries that can be referenced by setting the path to the Xygeni Scanner libraries at the property `xygeni.libs` in the `pom.xml` file.
 
-Finally copy the `trufflehog-converter.jar` generated to the xygeni scanner `/conf` folder and execute the following command to upload a result of Trufflehog secrets analysis to Xygeni. 
+To generate the jar file run:
+
+    mvn package
+
+Copy the `dist/trufflehog-importer-1.0.jar` generated jar to the xygeni scanner `/conf` folder
+
+### Add new Trufflehog report upload definition
+
+By adding a new Trufflehog report definition to `xygeni.custom.report-upload.yml` file available at Xygeni Scanner conf folder, you will be able to use it in the `report-upload` command.
+
+    secrets-trufflehog:
+      enabled:     true
+      description: Secrets detected by TruffleHog, in JSON format
+      types:       application/json
+      loader:      my_org.xygeni.report_load.trufflehog.TruffleHogLoader
+      converter:   my_org.xygeni.report_load.trufflehog.TruffleHogConverter
+
+The new secrets-trufflehog will be listed as a new available format,
+so you may upload findings from trufflehog with:
+
+Finally, execute the following command to upload a result of Trufflehog secrets analysis to Xygeni. 
 
     # upload webgoat repository report of Trufflehog analysis example to xygeni
     ./xygeni -v report-upload -r test/webgoat_trufflehog_report.json-like -f secrets-trufflehog
+
