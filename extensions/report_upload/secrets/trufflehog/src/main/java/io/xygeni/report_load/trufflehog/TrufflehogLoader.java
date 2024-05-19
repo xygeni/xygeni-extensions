@@ -1,11 +1,11 @@
-package xygeni.report_load.trufflehog;
+package io.xygeni.report_load.trufflehog;
 
 
 import com.depsdoctor.commons.io.IO;
 import com.depsdoctor.commons.json.JsonDeserializer;
 import io.xygeni.report.load.JsonLoader;
 import io.xygeni.report.load.ReportLoadException;
-import xygeni.report_load.trufflehog.model.TrufflehogSecret;
+import io.xygeni.report_load.trufflehog.model.TrufflehogSecret;
 import lombok.NonNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

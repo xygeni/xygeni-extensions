@@ -1,4 +1,4 @@
-package xygeni.report_load.trufflehog;
+package io.xygeni.report_load.trufflehog;
 
 import com.depsdoctor.core.model.common.Confidence;
 import com.depsdoctor.core.model.common.ReportProperties;
@@ -7,9 +7,10 @@ import com.depsdoctor.core.model.files.FileType;
 import com.depsdoctor.core.model.secrets.PotentialSecret;
 import com.depsdoctor.core.model.secrets.SecretType;
 import com.depsdoctor.core.model.secrets.SecretsReport;
+import com.depsdoctor.commons.security.Obfuscator;
 import io.xygeni.report.load.BaseReportConverter;
 import io.xygeni.report.load.ReportConverterException;
-import xygeni.report_load.trufflehog.model.TrufflehogSecret;
+import io.xygeni.report_load.trufflehog.model.TrufflehogSecret;
 import org.apache.commons.lang3.EnumUtils;
 import org.slf4j.LoggerFactory;
 
@@ -19,10 +20,12 @@ import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
 import java.util.TreeSet;
+import java.time.Instant;
 
 import static com.depsdoctor.commons.Strings.hasText;
 import static com.depsdoctor.core.model.files.FileType.fileType;
 import static org.apache.commons.io.FilenameUtils.getExtension;
+import static com.depsdoctor.commons.time.TimestampHelper.isValidInstant;
 
 /**
  * This converter will convert the Trufflehog report into a SecretsReport by mapping each Trufflehog detector to xygeni SecretType.
@@ -99,7 +102,9 @@ public class TrufflehogConverter extends BaseReportConverter<TrufflehogSecret[],
 
     String check = trufflehogSecret.getDetectorName() == null ? "trufflehog" : trufflehogSecret.getDetectorName();
     SecretType type = getSecretType(trufflehogSecret);
-    String ofuscated = trufflehogSecret.getRedacted() != null ? trufflehogSecret.getRedacted() : "-";
+    String ofuscated = trufflehogSecret.getRedacted();
+    if(!hasText(ofuscated)) ofuscated = Obfuscator.truncateMiddle(trufflehogSecret.getRaw());
+
     String key = trufflehogSecret.getRaw() != null && trufflehogSecret.getRawV2() != null && trufflehogSecret.getRawV2().length() > trufflehogSecret.getRaw().length() ?
       trufflehogSecret.getRawV2().substring(trufflehogSecret.getRaw().length()) : "-"; // rawV2 is raw + keyID
 
@@ -115,7 +120,9 @@ public class TrufflehogConverter extends BaseReportConverter<TrufflehogSecret[],
 
     String email = sourceData.getEmail();
     String user = hasText(email) ? email : "-";
-    Long timestamp = sourceData.getTimestamp() != null ? sourceData.getTimestamp() : null;
+    String ts = sourceData.getTimestamp() != null ? sourceData.getTimestamp() : null;
+    long timestamp = isValidInstant(ts) ? Instant.parse(ts).toEpochMilli() : System.currentTimeMillis();
+
     String commitSha = sourceData.getCommit() != null ? sourceData.getCommit() : null;
 
     if(commitSha != null) secretBuilder.scm(commitSha, timestamp, user, user);

@@ -1,4 +1,4 @@
-package xygeni.report_load.trufflehog.model;
+package io.xygeni.report_load.trufflehog.model;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
@@ -17,7 +17,7 @@ public class SourceMetadataType {
   @JsonProperty("line") private int line;
   @JsonProperty("repository") private String repository;
   @JsonProperty("commit") private String commit;
-  @JsonProperty("timestamp") private Long timestamp;
+  @JsonProperty("timestamp") private String timestamp;
 
   @Override
   public String toString() {

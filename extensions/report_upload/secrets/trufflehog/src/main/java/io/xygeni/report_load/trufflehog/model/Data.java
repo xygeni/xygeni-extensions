@@ -1,4 +1,4 @@
-package xygeni.report_load.trufflehog.model;
+package io.xygeni.report_load.trufflehog.model;
 
 import com.fasterxml.jackson.annotation.JsonAlias;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
