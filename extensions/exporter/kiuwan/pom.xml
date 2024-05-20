@@ -16,7 +16,8 @@
         <maven.compiler.source>8</maven.compiler.source>
         <maven.compiler.target>8</maven.compiler.target>
 
-        <kiuwan.home>/home/lrodriguez/projects/kiuwan/qakingAgent/dist/engine/</kiuwan.home>
+        <!-- set KIUWAN_HOME or pass Kiuwan Local Agent directory with mvn ... -Dkiuwan.home=PATH_TO_KLA -->
+        <kiuwan.home>${env.KIUWAN_HOME}</kiuwan.home>
         <kiuwan.libs>${kiuwan.home}/lib.engine</kiuwan.libs>
     </properties>
 
