@@ -11,6 +11,7 @@ import java.io.File;
 import static org.assertj.core.api.Assertions.assertThat;
 
 /**
+ * Tests for {@link TrufflehogConverter}
  *
  * @author vdlr
  * @version 08-May-2024 (vdlr)
@@ -28,7 +29,6 @@ public class TrufflehogConverterTest {
     SecretsReport xygeniSecrets = converter.convert("secrets-trufflehog", truffehogJsonFile.getParentFile(), trufflehogSecrets);
 
     assertThat(xygeniSecrets).isNotNull();
-    System.out.println(xygeniSecrets);
     assertReport(xygeniSecrets, "secrets-trufflehog",truffehogJsonFile);
 
   }
@@ -39,7 +39,6 @@ public class TrufflehogConverterTest {
     assertThat(xygeni.getSecrets()).hasSize(xygeni.getStatistics().getSecrets());
     assertThat(xygeni.getStatistics().getFiles()).isPositive();
     var secret = xygeni.getSecrets().getSecrets().iterator().next();
-    System.out.println("serectexxx " + secret);
     assertThat(secret.getSecret()).isNotBlank();
   }
 
