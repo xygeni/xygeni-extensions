@@ -7,6 +7,11 @@
 - [The Report Upload framework](#the-report-upload-framework)
 - [Adding support for a new format](#adding-support-for-a-new-report-format)
 - [Formats](#formats)
+  - [Secrets](#secrets)
+  - [SAST](#sast)
+  - [SCA](#sca)
+  - [IaC](#iac)
+- [Exporting reports](#exporting-reports)
   - [Kiuwan SAST](kiuwan/README.md)
 </details>
 
@@ -49,6 +54,26 @@ See [Defining Custom Report Converters](https://docs.xygeni.io/xydocs/developers
 ## Formats
 
 This repository has additional examples and formats to the list of pre-defined supported formats in the Xygeni `report-upload` tool.
+
+### Secrets
+
+Get implementation details of a secret report format upload following the [Trufflehog converter](extensions/report_upload/secrets/trufflehog/README.md) example.
+
+### SAST
+
+TBD
+
+### SCA
+
+TBD
+
+### IaC
+
+TBD
+
+## Exporting reports
+
+As a complement to Kiuwan SAST converter available in the Xygeni `report-upload` tool, here is an example of how to export the findings from Kiuwan.
 
 ### Kiuwan SAST
 
