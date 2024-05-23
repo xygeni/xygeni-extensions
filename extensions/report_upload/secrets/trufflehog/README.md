@@ -71,10 +71,10 @@ Here is a sample implementation, take a look of the final implementation at [Tru
         return false;
       }
 
-      // A json like export from trufflehog can be obtained by using "--json" option and redirecting output to file. 
+      // A json-like export from trufflehog can be obtained by using the "--json" option and redirecting output to file. 
 
       // The exported file will contain several lines in json format, 
-      // but the export is not a json complaining so it require to implement the load method in this case. It can be 
+      // but the export is not a json complaining so it requires implementing the load method in this case. It can be 
 
     }
 
@@ -94,7 +94,7 @@ The converter has a maven structure that should be setup in the `pom.xml` file.
     /src/test/resources - contains a trufflehog report in json format
     /pom.xml - contains the maven project structure
 
-To compile and package the converter its required some libraries that can be referenced by setting the path to the Xygeni Scanner libraries at the property `xygeni.libs` in the `pom.xml` file.
+To compile and package the converter it requires some libraries that can be referenced by setting the path to the Xygeni Scanner libraries at the property `xygeni.libs` in the `pom.xml` file.
 
 To generate the jar file run:
 
@@ -120,4 +120,5 @@ Finally, execute the following command to upload a result of Trufflehog secrets 
 
     # upload webgoat repository report of Trufflehog analysis example to xygeni
     ./xygeni -v report-upload -r test/webgoat_trufflehog_report.json-like -f secrets-trufflehog
+
 
