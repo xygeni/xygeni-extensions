@@ -1,6 +1,6 @@
 # Report Upload
 
-<details>
+<details open="open">
 <summary>Table of Contents</summary>
 
 - [About](#about)
@@ -11,8 +11,6 @@
   - [SAST](#sast)
   - [SCA](#sca)
   - [IaC](#iac)
-- [Exporting reports](#exporting-reports)
-  - [Kiuwan SAST](kiuwan/README.md)
 </details>
 
 ## About
@@ -71,16 +69,3 @@ TBD
 
 TBD
 
-## Exporting reports
-
-As a complement to Kiuwan SAST converter available in the Xygeni `report-upload` tool, here is an example of how to export the findings from Kiuwan.
-
-### Kiuwan SAST
-
-Kiuwan is a powerful, end-to-end application security platform. Kiuwan Static Application Security Testing (SAST) product is the tool that detects security vulnerabilities in source code using static analysis.
-
-The problem is that Xygeni does not provide a mechanism in the agent (Kiuwan Local Analyzer) for writing to a local file the findings from the tool.
-
-To export the findings to a local file for uploading into third-party tools like Xygeni, the approach used was to register the custom rule [ExportRule](src/main/java/ext/kiuwan/ExportRule.java) provided that registers a task to export the findings at the end of the analysis.
-
-See [Kiuwan Exporter](kiuwan/README.md) for full details on how to register the exporter in your Kiuwan account, and to upload exported reports from Kiuwan into Xygeni using the `report-upload` command.
