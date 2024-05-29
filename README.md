@@ -20,6 +20,7 @@
   - [Create a guardrail or workflow action](#create-a-guardrail-or-workflow-action)
   - [Create a report loader for a third-party tool](#create-a-report-loader-for-a-third-party-tool)
   - [Create an activity sensor for a software system](#create-an-activity-sensor-for-a-software-system)
+  - [Run an exporter for a third-party tool](#exporting-reports)
 - [Contributing](#contributing)
 
 </details>
@@ -60,6 +61,29 @@ The `report-upload` framework is available with the scanner so new converters fo
 ## Create an activity sensor for a software system
 
 TBD
+
+
+## Exporting reports
+
+Xygeni exporters are shared to allow third-party tools to provide data in a format that Xygeni can ingest. 
+
+### Kiuwan SAST Exporter
+
+As a complement to Kiuwan SAST converter available in the Xygeni `report-upload` tool, here is an example of how to export the findings from Kiuwan.
+
+Kiuwan is a powerful, end-to-end application security platform. Kiuwan Static Application Security Testing (SAST) product is the tool that detects security vulnerabilities in source code using static analysis.
+
+The problem is that Xygeni does not provide a mechanism in the agent (Kiuwan Local Analyzer) for writing to a local file the findings from the tool.
+
+To export the findings to a local file for uploading into third-party tools like Xygeni, the approach used was to register the custom rule [ExportRule](src/main/java/ext/kiuwan/ExportRule.java) provided that registers a task to export the findings at the end of the analysis.
+
+See [Kiuwan Exporter](kiuwan/README.md) for full details on how to register the exporter in your Kiuwan account, and to upload exported reports from Kiuwan into Xygeni using the `report-upload` command.
+
+### Sonaraube SAST Exporter
+
+As a complement to Sonarqube SAST converter available in the Xygeni `report-upload` tool, here is an example of how to export the findings from Sonarqube (Server and Cloud) by using the Sonarqube Web API.
+
+See [Sonarqube Exporter](extensions/exporter/sonarqube/README.md) for details.
 
 # Contributing
 
