@@ -12,7 +12,7 @@ Following can find out how to export findings from SonarQube using Web API to a 
 ## Python exporter
 
 Use the `generate_report.py` python script to export findings from SonarQube to a json file.
-It allow to set the SonarQube server URL and the SonarQube API token in case of private SonarQube installation. And it also allow to set the SonarCloud url and the SonarCloud API token in case of SonarCloud SaaS service.
+It allows setting the SonarQube server URL and the SonarQube API token in case of private SonarQube installation. And it also allows setting the SonarCloud url and the SonarCloud API token in case of SonarCloud SaaS service.
 
 
 ```console
@@ -44,3 +44,4 @@ or
 xygeni report-upload --report=/path/to/my/sonarcloud.report.json --format sast-sonarcloud
 
 ```
+
