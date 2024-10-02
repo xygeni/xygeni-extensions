@@ -44,9 +44,13 @@ The following sections document how to add a custom component to the Xygeni plat
 
 ## Create a custom detector
 
-A detector is a piece of logic that detects an issue in the scanned system like source code, a source code repository or a container image, a CI/CD system or another software tool. A detector has an implementation class and a YAML file configuring the detector and providing documentation for the issues created by the detector.
+A Xygeni **detector** is a piece of logic that detects a security issue in a scanned target system such as source code, a source code repository or a container image, a CI/CD system or another software tool. A detector has YAML (.yml) file that configures the detector, possibly an implementation class (.java), and optionally an AsciiDoc (.adoc) file to document the issues raised by the detector.
 
-Read [Developing Custom Detectors](https://docs.xygeni.io/xydocs/developers/custom_detectors.html) for full documentation.
+Read [Developing Custom Detectors](extensions/custom_detectors/README.md) for full documentation.
+
+## Create a custom remediation
+
+TBD
 
 ## Create a guardrail or workflow action
 
