@@ -1,0 +1,77 @@
+= Unreviewed Branch
+
+[cols="1,3" width="60%" frame="none" grid="rows" stripes="odd" .toc]
+|===
+|ID
+| custom_unreviewed_branch
+|Severity
+| [red]#*critical*#
+|Family
+| SCM
+|===
+
+== Description
+
+Does the project use branch protection?
+
+This detector checks if the default and release branches have a protection rule enforcing code reviews.
+
+TIP: A few branches should be protected, like the main / default and release branches (often used to deploy into production). Feature or bug fixing branches do not need to be protected, but when merging them into a protected branch, the established rules will be enforced.
+
+Code reviews constitute a best practice to make software safer and more robust, to share knowledge, to detect early security vulnerabilities, potential malicious behaviour, and to check compliance with legal and regulatory requirements.
+
+== Security
+
+Branch protection allows maintainers to define rules that enforce certain workflows for branches, such as requiring review or passing certain status checks before acceptance into a main branch, or preventing rewriting of public history.
+
+At least one reviewer could be required, which greatly reduces the risk that a compromised contributor can inject malicious code. Review also increases the likelihood that an unintentional vulnerability in a contribution will be detected and fixed before the change is accepted.
+
+== Mitigation / Fix
+
+The worst case is when no branch protection is set for the default or any release branch.
+
+Even when branch protection is set for a branch, not following the recommended configuration could be even worse, as it may give a false sense of security.
+
+The configuration specifies the minimal protection rules that on the configured branches that will raise issues when not enabled are:
+
+- Prevent force push
+- Prevent branch deletion
+//- For administrators, include administrator for review
+- Status checks defined
+- Have one (or more) reviewers
+- Dismiss stale reviews
+
+Follow the instructions to add protected branches rules for
+https://learn.microsoft.com/en-us/azure/devops/repos/git/branch-permissions[Azure] |
+https://confluence.atlassian.com/bitbucketserver050/using-branch-permissions-913474668.html[BitBucket] |
+https://docs.github.com/en/repositories/configuring-branches-and-merges-in-your-repository/defining-the-mergeability-of-pull-requests/about-protected-branches#about-branch-protection-rules[GitHub] |
+https://docs.gitlab.com/ee/user/project/protected_branches.html[GitLab].
+
+Please note that in certain special cases the rules may need to be suspended. For example, if a past commit includes illegal or critical content, it may be necessary to use a force push to rewrite the history rather than simply hide the commit.
+
+== Configuration
+
+To change these options you can modify `SCANNER_DIR/conf/misconfigurations/custom_unreviewed_branch.yml`. The following are the default configuration properties:
+
+[source,yaml]
+----
+# Configuration for the checks on branch protection.
+properties:
+  # If true, force push must be disabled
+  forcePushDisabled: true
+  # If true, branch delete must be disabled
+  branchDeleteDisabled: true
+  # If true, settings must also apply to administrators for the branch
+  # For GitHub, retrieving this information needs administrator permissions
+  enforceAdmins: false
+  # If true, reviews are required for allowing a pull request merge into branch
+  requiredApprovingReviewCount: true
+  # The minimum number of reviews that need to concur for allowing a pull request merge into branch
+  minReviews: 1
+  # If true, code owners must review changes done on sensitive code or configuration
+  requireCodeOwnerReviews: true
+  # If true, stale review dismissal must be enabled for the branch (need admin permissions)
+  dismissStaleReviews: false
+  # If true, it is required for branches to be up-to-date with the base branch before merging.
+  upToDateBeforeMerge: false
+----

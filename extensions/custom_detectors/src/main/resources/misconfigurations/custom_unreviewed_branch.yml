@@ -1,0 +1,29 @@
+id: custom_unreviewed_branch
+enabled: true
+type: config
+misconfigurationType: unreviewed_branch
+
+description: >-
+  This check determines whether a project's default and release branches are protected with source code repository's 
+  *branch protection* settings, enforcing code review.
+
+# Severity of the misconfiguration: One of critical, high, low, info
+severity: critical
+# Confidence of the misconfiguration detected: One of highest, high, medium, low
+confidence: highest
+
+# Class name of the detector implementation
+classname: io.xygeni.extensions.custom_detectors.misconfigurations.UnreviewedBranch
+
+# These tags qualify misconfigurations for this detector
+tag: [ supply-chain, security, source-code, code-reviews, branch-protection, cicd-security, cicd-sec-01 ]
+
+# Configuration for the checks on branch protection.
+properties:
+  # If true, settings must also apply to administrators for the branch
+  # For GitHub, retrieving this information needs administrator permissions
+  enforceAdmins: false
+  # The minimum number of reviews that need to concur for allowing a pull request merge into branch
+  minReviews: 1
+  # Pattern for the release branches. Defaults to branches starting with 'release/'
+  releaseBranchesPattern: '^release/.+$'
