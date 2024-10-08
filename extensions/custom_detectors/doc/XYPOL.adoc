@@ -1,0 +1,478 @@
+= Xygeni Policy Language (XYPOL) Documentation
+:icons: font
+:toc:
+
+In Xygeni platform, evaluating the conformance of an _input configuration_ with respect to a _desired state_ is required in many places. Detecting flaws in IaC templates, or evaluating compliance with software supply chain standards, are common examples.
+
+The policy language documented here is a tool for defining such desired state in a declarative way, so users may add their own, custom _policy rules_.
+
+== About the Xygeni Policy Language
+
+XYPOL (Xygeni Policy Language) is a domain-level language for evaluating compliance of a given input graph composed by elements with properties and relations between elements. XYPOL can be seen as a general _Policy-as-Code_ language, with a declarative syntax loosely resembling SQL.
+
+The XYPOL syntax is built around _policy rules_. A XYPOL script may start with a `PARAMETERS` block describing the script arguments, followed by a list of `ON ... WHERE ...` policy rules:
+
+[,php,linenums]
+---------
+PARAMETERS [
+  ...
+]
+
+# First rule
+ON ... FROM ...
+CONNECTED_TO ...
+SET ...
+WHERE ...;
+
+# Other rules...
+ON ... WHERE ...;
+---------
+
+== General Syntax
+
+XYPOL is case-sensitive. All keywords are upper-case, for better separation of identifiers and literals.
+
+=== Keywords
+
+The following are the language keywords, that should not be used as identifiers: `CONNNECTED_TO, FROM, ON, PARAMETERS, SET, VIA, WHERE`.
+
+Operators like boolean (`AND, OR, NOT`), set (`EXISTS, IN, HAVING`) and string comparison (`MATCHES, EXACT_MATCHES, CONTAINS, STARTS_WITH, ENDS_WITH`) should not be used as identifiers.
+
+The boolean literals, `true` and `false`, should not be used as identifiers as well.
+
+=== Identifiers
+
+Parameter names, variables, resource types and their attributes, etc. are all _identifiers_. Identifiers can contain letters, digits, underscores (`_`) and hypens (`-`). An identifier cannot start with a digit, to avoid ambiguity with numeric literals. In fact, http://unicode.org/reports/tr31/[Unicode identifiers] with the addition of the hyphen (`-`) are allowed.
+
+=== Delimiters
+
+In XYPÔL, list of items are enclosed between `[` and `]` and `,` (comma) is the separator for items in a sequence of values.
+
+The semicolon (`;`) is used for terminating a rule started with the `ON` keyword.
+
+=== Comments
+
+_Line comments_ start with a `#` or `//` and terminate at the end of the line.
+They could be added at the end of any line of XYPOL code.
+
+_Block comments_ are delimited between an opening `/\*` and a closing `*/`, like in the C language. Nesting is not allowed
+
+Comments are ignored and do not have any relevance when evaluating XYPOL code.
+
+=== Whitespace, Line Endings and Character Encoding
+
+Whitespace only separates tokens and does not have any further syntax relevance. Line endings could be either Unix-style (LF only) or Windows-style (CR+LF).
+
+XYPOL must be encoded in UTF-8. While the language delimiters and keywords are all ASCII characters, the language accepts non-ASCII characters in identifiers, comments and string literals.
+
+== The PARAMETERS block
+
+The `PARAMETERS` block defines input arguments that could be used in rule expressions with user-chosen values.
+
+[,php,linenums]
+---------
+PARAMETERS [
+  param : type := expression;
+  ...
+]
+---------
+
+* `param` (required) is the parameter name. It can be referenced anywhere in policy rules using the `$\{param}` syntax.
+* `type` (optional) is the parameter type. Could be a primitive type (`string`, `boolean`, `integer`, `double`), a collection tpe (`array`, `map`), or an external type that the underlying engine supports for validation (like `regex` for regular expression patterns)
+* `expression` (optional) is the default value to use for the parameter when not provided externally.
+
+NOTE: Parameters are validated according to the type when specified, and then replaced at reference sites (`$\{param}`), like simple substitution macros.
+
+
+Example of `PARAMETERS` block:
+Some parameters may have default values. Coding the parameter type is also optional, and often helps with detecting incorrect values passed.
+
+[,php,linenums]
+---------
+PARAMETERS [
+  allowed_proto:array := ["HTTPS", "FTPS", "DNSSEC"];
+  allowed_name_pattern : regex := '^myorg_';
+  ip_set : array;
+  free_param; # Free parameters, without type and default value allowed
+]
+---------
+
+
+== Rules
+
+The syntax for each rule is simple:
+
+[,php,linenums]
+---------
+ON // <1>
+  variable FROM resourceTypeClause
+
+CONNECTED_TO // <2>
+  variable_2 FROM resourceTypeClause [VIA linkField]
+
+SET // <3>
+  variable_3 := expression
+
+WHERE // <4>
+  condition;
+---------
+<1> ON clause. Define the _targets_, input resources of selected type(s)
+<2> CONNECTED_TO clause. For each _target_ input resource, find related resource(s) linked with the target via one or more fields.
+<3> SET block. Allow defining constants or results fetched from defined variables, to simplify expressions in the WHERE condition.
+<4> WHERE condition. A boolean expression that must be true for the target to be compliant.
+
+The engine takes the externally-provided parameter values and input resources model, and evaluates policy rules, reporting as _failure_, `flaw` or `non-compliant` those target resources whose WHERE condition is false.
+
+=== ON clause
+
+The first step in a policy rule is to choose which of the input elements should be checked, according to the resource type.
+
+The syntax for ON clause is:
+
+[sidebar]
+--
+ON _<varname>_ FROM _<fromSource>_ (, _<fromSource>_)*
+--
+
+* _<varname>_ is the name that could be used in following expressions to refer to the target element fetched.
+
+* _<fromSource>_ is a selector for the types of items to consider for the target resources.
+
+:hardbreaks:
+[literal]
+--
+FROM
+_resType_
+| '_resType_'
+| resource_type = '_resType_'
+| resource_type IN  ['_resType1_', ..., '_resTypeN_']
+--
+
+When the input model have different kind of inputs, like IaC templates (where data sources and other types add to the resources base type), the long syntax
+
+:hardbreaks:
+[literal]
+--
+FROM
+kind = 'type'
+| kind IN ['type1', ... 'typeN']
+--
+
+could be used.
+
+Examples:
+
+[,php]
+-----
+  # These are equivalent
+  ON cluster FROM resource_type = 'aws_emr_cluster'
+  ON cluster FROM 'aws_emr_cluster'
+  ON cluster FROM aws_emr_cluster
+
+  # These are equivalent
+  ON lb FROM resource_type IN ['aws_lb', 'aws_alb']
+  ON lb FROM 'aws_lb', 'aws_alb'
+
+  # Other input models provide more types of items
+  ON image FROM data_type = 'aws_ami'
+-----
+
+NOTE: The long syntax for resource type in FROM clause is mostly used in this documentation, because syntax highlighting helps stands out what resources are the targets for the rule and the types of connected resources with `CONNECTED_TO`. XYPOL allows both styles for your convenience.
+
+
+=== CONNECTED_TO clause
+
+`CONNECTED_TO` clause is similar to `ON` clause, but it defines a relationship between the target and related resources:
+
+[source]
+----
+CONNECTED_TO var
+FROM resourceType
+VIA othervar.member.member2
+----
+
+states that the asset `var` must be related to a resource of the given `resourceType` using the fields path `othervar.member.member2`. That means the identifier of the `var` asset and the value of the `othervar.member.member2` field must be equal.
+
+The `VIA` clause could provide different alternative paths between brackets:  `VIA [var.member1, var2.member2]` when multiple fields could join both assets.
+
+=== SET block
+
+A `SET` block assigns variables to expressions:
+
+[source]
+----
+SET var := expression
+SET var := expr, var2 := expr2, ...
+----
+
+expr could be any expression, and var could be any variable name. This is common for aliasing paths to asset fields, to make the code more readable.
+
+=== WHERE condition
+
+The last part of a policy rule `ON ... WHERE ...` is the `WHERE logicalExpression` condition. The expression is evaluated as boolean and serves to qualify which targets are compliant with the policy.
+
+== Expressions
+
+XYPOL expressions have ternary operator `condition ? expr1 : expr2`, OR/AND/NOT logical operators, arithmetic operators including modulus (+ - * / %), INSTANCEOF operator, comparison operators, IN operator, EXISTS and HAVING operator, and string matching operators such as MATCHES, EXACT_MATCHES, CONTAINS, STARTS_WITH, ENDS_WITH.
+
+The summary of the grammar is, in Backus-Naur form:
+
+```bnf
+Expression := TernaryExpression
+
+TernaryExpression := ConditionalOrExpression '?' Expression ':' Expression
+
+ConditionalOrExpression := ConditionalAndExpression ('OR' ConditionalAndExpression)*
+ConditionalAndExpression := EqualityExpression ('AND' EqualityExpression)*
+
+EqualityExpression := InstanceOfExpression [('=' | '!=') InstanceOfExpression]
+InstanceOfExpression := RelationalExpression ['INSTANCEOF' ResourceType]
+RelationalExpression := AdditiveExpression [('>' | '<' | '>=' | '<=') AdditiveExpression]
+
+AdditiveExpression := MultiplicativeExpression [('+' | '-') AdditiveExpression]
+MultiplicativeExpression := UnaryExpression [('*' | '/' | '%') MultiplicativeExpression]
+
+UnaryExpression :=
+  [('+' | '-')] UnaryExpression |
+  ExistsExpression | InExpression | StringTestExpression |
+  HavingExpression | ConnectedToExpression |
+  PrimaryExpression
+
+ExistsExpression := 'EXISTS' '(' ( ConnectedTarget [WhereClause] | MemberPath ) ')'
+
+InExpression := PrimaryExpression ['NOT'] 'IN' '('  AdditiveExpression (',' AdditiveExpression)* ')'
+HavingExpression := MemberPath ['NOT'] 'HAVING' PrimaryExpression
+StringTestExpression := MemberPath ['NOT'] ('MATCHES' | 'EXACT_MATCHES' | 'CONTAINS' | 'STARTS_WITH' | 'ENDS_WITH') PrimaryExpression
+
+PrimaryExpression := MemberPath | LiteralExpression | '(' Expression ')'
+LiteralExpression := INTEGER | REAL | STRING | 'true' | 'false' | 'null' | ArrayLiteral
+ArrayLiteral := '[' (Expression (',' Expression)*)? ']'
+
+Variable := IDENTIFIER
+Member := IDENTIFIER
+MemberPath := Variable ('.' Member)*
+```
+
+The best way to understand the grammar is to look at expressions in the examples below.
+
+== Examples
+
+=== Policy rules, simple to complex
+
+A simple rule for Google Cloud service accounts, possibly one of the shortest security-related checks that could be encoded in XYPOL:
+
+[,php,linenums]
+---------
+# GCP service accounts must NOT have public_key_data:
+
+ON account FROM 'google_service_account_key'
+WHERE NOT EXISTS account.public_key_data;
+---------
+
+The next example uses `CONNECTED_TO` to find the public access block configured for the target AWS S3 bucket (linked by the `bucket` attribute). The desired state is to have `block_public_acls` and `block_public_policy` enabled:
+
+[,php,linenums]
+---------
+# Check that S3 buckets have a public access block
+# with block_public_acls=true and block_public_policy=true
+
+ON s3_bucket FROM resource_type = 'aws_s3_bucket'
+CONNECTED_TO
+  pub_acc_blk FROM resource_type = 'aws_s3_bucket_public_access_block'
+  VIA pub_acc_blk.bucket
+WHERE
+  pub_acc_blk.block_public_acls = true AND
+  pub_acc_blk.block_public_policy = true;
+---------
+
+The `resource_type = '_res_type_'` can be simplified to `'_res_type_'` or even `_res_type_` for a more compact style:
+
+[,php,linenums]
+---------
+ON s3_bucket FROM aws_s3_bucket
+CONNECTED_TO
+  pub_acc_blk FROM aws_s3_bucket_public_access_block
+  VIA pub_acc_blk.bucket
+WHERE
+  ....
+---------
+
+If we need to code something that reads like 'Public-facing application load balancers (ALBs) should be protected by Web Application Firewall (WAF) service', we have two factors here: public-facing and WAF-protected.
+
+Now think in the opposite: internal load balancer (either with attribute internal = true, OR with a networking role instead of serving applications), or load balancers that are protected by a WAF
+
+[,php,linenums]
+---------
+# Ensure public facing ALB are protected by WAF
+
+# These are the load balancers
+ON lb FROM resource_type IN ['aws_lb', 'aws_alb']
+WHERE
+  # Protected by WAF
+  lb CONNECTED_TO
+  acl FROM resource_type IN ['aws_wafv2_web_acl_association', 'aws_wafregional_web_acl_association'] OR
+  #
+  lb.internal = true OR
+  lb.load_balancer_type IN ['network', 'gateway']
+;
+---------
+
+A similar XYPOL rule on load balancers exposing unsecure HTTP protocol, except when redirect to HTTPS:
+
+[,php,linenums]
+---------
+# Check that AWS load balancer does not have listener,
+# or the listener is not HTTP,
+# except when redirects to HTTPS
+
+ON lb FROM resource_type IN ['aws_lb', 'aws_alb']
+WHERE
+  lb NOT CONNECTED_TO _ FROM resource_type IN ['aws_lb_listener', 'aws_alb_listener']
+  OR
+  (
+    lb CONNECTED_TO lsnr FROM resource_type IN ['aws_lb_listener', 'aws_alb_listener']
+    WHERE
+      # is not raw HTTP
+      ( lsnr.port != 80 AND lsnr.protocol != 'HTTP' )
+      OR
+      # default action is a redirect to HTTPS
+      (
+        lsnr.port = 80 AND lsnr.protocol = 'HTTP' AND
+        lsnr.default_action.type = 'redirect' AND
+        lsnr.default_action.port = 443 AND
+        lsnr.default_action.protocol = 'HTTPS'
+      )
+);
+---------
+
+In the following, `VIA` clause connects AWS MapReduce cluster (`aws_emr_cluster` resource type) with its security group (`aws_security_group`), using any of the two attributes `emr_managed_master_security_group` or `emr_managed_slave_security_group` in the `ec2_attributes` block:
+
+[,php,linenums]
+---------
+# Check that Amazon MapReduce clusters are not exposed to public.
+
+ON cluster FROM 'aws_emr_cluster'
+
+CONNECTED_TO
+  sec_grp FROM 'aws_security_group'
+  VIA
+  [
+    cluster.ec2_attributes.emr_managed_master_security_group,
+    cluster.ec2_attributes.emr_managed_slave_security_group
+  ]
+
+WHERE
+  EXISTS sec_grp.ingress AND
+  # Do not allows access from anywhere
+  sec_grp.ingress.cidr_blocks NOT HAVING '0.0.0.0/0'
+;
+---------
+
+=== More complex policy rules
+
+A more complex rule on AWS CloudFront, with many checks on the response headers: `Content-Security-Policy` (CSP) settings, and other security-related headers like `X-Content-Type-Options`, `X-Frame-Options` or `X-XSS-Protection`, `Referrer -Policy` and `Strict-Transport-Security`.
+
+[,php,linenums]
+---------
+# Ensure that CSP for AWS CloudFront has appropriate
+#
+# The policy could be modified to have different CSP configurations,
+# according to organization naming pattern for the cloudfront distributions.
+
+ON
+  cf_dist FROM 'aws_cloudfront_distribution'
+CONNECTED_TO
+  policy FROM 'aws_cloudfront_response_headers_policy'
+  VIA cf_dist.default_cache_behavior.response_headers_policy_id
+SET
+  # an alias to reduce clutter in the WHERE clause
+  shc := policy.security_headers_config
+WHERE (
+    # Content-Security-Policy
+    shc.content_security_policy.override = true AND
+    shc.content_security_policy.content_security_policy CONTAINS "default-src 'none';"
+    ) AND (
+    # X-Content-Type-Options
+    shc.content_type_options.override = true
+    ) AND (
+    # X-Frame-Options
+    shc.frame_options.override = true AND
+    shc.frame_options.frame_option = 'DENY'
+    ) AND (
+    # Referrer-Policy
+    shc.referrer_policy.override = true AND
+    shc.referrer_policy.referrer_policy = 'same-origin'
+    ) AND (
+    # Strict-Transport-Security
+    shc.strict_transport_security.override = true AND
+    shc.strict_transport_security.access_control_max_age_sec >= 31536000 # ${max_age}
+    ) AND (
+    # X-XSS-Protection
+    shc.xss_protection.override = true AND
+    shc.xss_protection.mode_block = true AND
+    shc.xss_protection.protection = true
+    );
+---------
+
+
+
+[,php,linenums]
+---------
+# All EIP addresses allocated to a VPC are attached to EC2 instances
+
+ON eip FROM resource_type = 'aws_eip'
+WHERE
+  eip.vpc = true AND
+(
+  (
+    # instance directly reference in eip.instance
+    eip CONNECTED_TO _ FROM resource_type = 'aws_instance' VIA eip.instance
+  ) OR (
+    # eip and instance connected via eip_association
+    eip CONNECTED_TO assoc FROM resource_type = 'aws_eip_association' VIA assoc.allocation_id AND
+    assoc CONNECTED_TO instance FROM resource_type = 'aws_instance' VIA assoc.instance_id
+  ) OR (
+    eip CONNECTED_TO nat_gw FROM resource_type = 'aws_nat_gateway' VIA nat_gw.allocation_id
+  ) OR (
+    eip CONNECTED_TO transfer_server FROM resource_type = 'aws_transfer_server'
+        VIA transfer_server.endpoint_details.address_allocation_ids
+  ) OR (
+    eip.instance MATCHES '^(module|data)\\.'
+  )
+);
+---------
+
+This example shows how to check accept as OK that a resource is either NOT connected to another (because the default is safe), or when  connected that the linked resources that not add 'surprises'.
+
+The `member` (single user) and `members` (array of users) attributes for the `google_kms_crypto_key_iam_member` block must be considered, to cover all possibilities.
+
+
+[,php,linenums]
+---------
+/*
+  Google Cloud Key Management Service (KMS) is a critical component of the GCP.
+
+  This enforces that Cloud KMS cryptokeys should not be anonymously
+  or publicly accessible.
+
+  A bad configuration allowing an unspecified IAM member (even an authenticated one)
+  to the cryptographic key would be detected by this policy rule.
+
+*/
+ON kms_key FROM google_kms_crypto_key
+WHERE (
+  # NOT
+  kms_key NOT CONNECTED_TO o FROM google_kms_crypto_key_iam_member VIA o.crypto_key_id
+  OR (
+    kms_key CONNECTED_TO iam_member FROM google_kms_crypto_key_iam_member VIA iam_member.crypto_key_id AND
+    iam_member.member NOT IN ['allUsers', 'allAuthenticatedUsers']
+  )
+) AND (
+  kms_key NOT CONNECTED_TO o FROM google_kms_crypto_key_iam_binding VIA o.crypto_key_id
+  OR (
+    kms_key CONNECTED_TO iam_member FROM google_kms_crypto_key_iam_member VIA iam_member.crypto_key_id AND
+    iam_member.members NOT HAVING 'allUsers' AND
+    iam_member.members NOT HAVING 'allAuthenticatedUsers'
+  )
+);
+---------

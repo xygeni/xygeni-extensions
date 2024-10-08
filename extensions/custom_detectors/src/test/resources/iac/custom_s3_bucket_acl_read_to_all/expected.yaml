@@ -1,0 +1,6 @@
+pass:
+  - "aws_s3_bucket.good_0"
+  - "aws_s3_bucket.good_1"
+fail:
+  - "main.tf:aws_s3_bucket:bad_0"
+  - "main.tf:aws_s3_bucket:website"

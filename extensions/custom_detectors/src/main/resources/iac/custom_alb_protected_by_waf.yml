@@ -1,0 +1,38 @@
+# Public facing ALB not protected by WAF
+id: custom_alb_protected_by_waf
+enabled: yes
+
+# The kind of issue detected.
+type: network
+severity: low
+
+framework: terraform
+provider: aws
+
+description: Public facing ALB not protected by WAF
+
+classname:
+
+tag: [ reachable ]
+
+# File type matching the detector: terraform, json, yaml, etc.
+fileTypes:
+  - terraform
+  #- json
+
+# The pattern of (relative) file paths that this detector will consider.
+# Leave empty if no specific pattern.
+fileRegex:
+
+# List of patterns for the resource names to consider. If empty, no restriction.
+resourcesToCheck:
+# List of patterns for the resource names to ignore. If empty, no restriction.
+resourcesToIgnore:
+
+xypol: |
+  ON lb FROM resource_type IN ['aws_lb', 'aws_alb']
+  WHERE
+    lb CONNECTED_TO acl FROM resource_type IN ['aws_wafv2_web_acl_association', 'aws_wafregional_web_acl_association'] OR 
+    lb.internal = true OR 
+    lb.load_balancer_type IN ['network', 'gateway'];  
+

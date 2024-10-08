@@ -1,0 +1,118 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+  <modelVersion>4.0.0</modelVersion>
+
+  <groupId>io.xygeni.extensions</groupId>
+  <artifactId>custom_detectors</artifactId>
+  <version>1.0</version>
+  <packaging>jar</packaging>
+
+  <name>custom_detectors</name>
+  <url>http://maven.apache.org</url>
+
+  <properties>
+    <maven.compiler.source>11</maven.compiler.source>
+    <maven.compiler.target>11</maven.compiler.target>
+    <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+    <project.rootdir>${maven.multiModuleProjectDirectory}</project.rootdir>
+
+    <xygeni.scanner.dir>${env.XYGENI_DIR}</xygeni.scanner.dir>
+    <xygeni.version>4.35.0-SNAPSHOT</xygeni.version>
+
+    <lombok.version>1.18.34</lombok.version>
+    <junit.version>5.11.2</junit.version>
+    <assertj.version>3.24.2</assertj.version>
+  </properties>
+
+  <dependencies>
+    <dependency>
+      <groupId>com.depsdoctor</groupId>
+      <artifactId>secrets-scanner</artifactId>
+      <version>${xygeni.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>com.depsdoctor</groupId>
+      <artifactId>misconfigurations-scanner</artifactId>
+      <version>${xygeni.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>com.depsdoctor</groupId>
+      <artifactId>iac-flaws-scanner</artifactId>
+      <version>${xygeni.version}</version>
+    </dependency>
+
+
+    <dependency>
+      <groupId>org.junit.jupiter</groupId>
+      <artifactId>junit-jupiter-engine</artifactId>
+      <version>${junit.version}</version>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.junit.jupiter</groupId>
+      <artifactId>junit-jupiter-api</artifactId>
+      <version>${junit.version}</version>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.junit.jupiter</groupId>
+      <artifactId>junit-jupiter-params</artifactId>
+      <version>${junit.version}</version>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.assertj</groupId>
+      <artifactId>assertj-core</artifactId>
+      <version>${assertj.version}</version>
+      <scope>test</scope>
+    </dependency>
+    <!-- provided -->
+    <dependency>
+      <groupId>org.projectlombok</groupId>
+      <artifactId>lombok</artifactId>
+      <version>${lombok.version}</version>
+      <scope>provided</scope>
+    </dependency>
+  </dependencies>
+
+  <build>
+    <plugins>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-surefire-plugin</artifactId>
+        <version>3.2.5</version>
+        <configuration>
+          <excludedGroups>slow</excludedGroups>
+          <excludes>
+            <exclude>**/*IntegrationTest</exclude>
+          </excludes>
+          <systemPropertyVariables>
+            <project.basedir>${project.basedir}/</project.basedir>
+            <project.rootdir>${project.rootdir}/</project.rootdir>
+            <!--suppress UnresolvedMavenProperty -->
+            <maven.home>${maven.home}</maven.home>
+          </systemPropertyVariables>
+        </configuration>
+        <executions>
+          <execution>
+            <id>integration-test</id>
+            <goals>
+              <goal>test</goal>
+            </goals>
+            <phase>integration-test</phase>
+            <configuration>
+              <excludes>
+                <exclude>none</exclude>
+              </excludes>
+              <includes>
+                <include>**/*IntegrationTest.java</include>
+              </includes>
+            </configuration>
+          </execution>
+        </executions>
+      </plugin>
+    </plugins>
+  </build>
+
+
+</project>

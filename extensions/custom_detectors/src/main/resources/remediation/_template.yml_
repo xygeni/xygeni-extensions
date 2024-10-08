@@ -1,0 +1,29 @@
+id: __id_of_the_detector__
+# The type of issue: misconfiguration, suspect_dependency, secret, checkpoint_failed,
+#  iac_flaw, suspect_activity, code_tampering, sca_vulnerability, code_vulnerability,
+#  malware_evidence
+issueKind: secret
+# Set 'no' or 'false' to disable this remediation.
+enabled: yes
+
+description: Description of the remediation
+
+# Where the remediation can run. Choose between scan, guardrail, backend, or workflow
+on: scan, guardrail, backend, workflow
+
+# Set the remediation inputs. See the remediation documentation for the format.
+inputs:
+  varname:
+    description: describe the input
+    kind: string|integer|real|bool|list|map
+    default: the default value
+    options: [] # the allowed values, for string or list items
+    min: 0 # minimum value for integer|real
+    max: 100 # maximum value for integer|real
+
+# The change to do on the issue when it is successfully remediated
+# One of set_info (default), decrease_severity, discard, or do_nothing
+action: set_info
+
+playbook: |
+  // add your remediation playbook here

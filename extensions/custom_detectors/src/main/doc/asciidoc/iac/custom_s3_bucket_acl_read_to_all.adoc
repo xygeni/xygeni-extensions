@@ -1,0 +1,135 @@
+= S3 Bucket ACL allows public read access
+:icons: font
+
+[cols="1,3" width="60%" frame="none" grid="rows" stripes="odd" .toc]
+|===
+|ID
+| custom_s3_bucket_acl_read_to_all
+|Severity
+| [red]#high#
+|Vendor
+| AWS
+|Resource
+| S3
+|===
+
+== Description
+
+Unprotected S3 buckets are possibly the major causes of data leaks in AWS-based systems.
+
+An S3 bucket that allows READ access to everyone can provide unintended actors the ability to read object data within the bucket, which can lead to the exposure of sensitive data.
+
+The only publicly accessible S3 buckets for read are those used for hosting static websites. Otherwise, a bucket ACL should control access to S3 bucket data and limit public read access.
+
+Read https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/s3_bucket_acl[aws_s3_bucket_acl] for more details on the S3 bucket ACL configuration.
+
+== Examples
+
+=== CloudFormation
+
+[,json,linenums,highlight=3]
+-----
+{
+  "Resources": {
+    "S3Bucket": {
+      "Type": "AWS::S3::Bucket",
+      "Properties": {
+        "AccessControl": "PublicRead" <1>
+      }
+    }
+  }
+}
+-----
+<1> `AccessControl` set to `PublicRead` means that S3 bucket allow READs from everyone.
+
+
+[,yaml,linenums,highlight=2]
+-----
+Resources:
+  S3Bucket:
+    Type: AWS::S3::Bucket
+    Properties:
+      AccessControl: PublicRead <1>
+-----
+<1> `AccessControl` set to `PublicRead` means that S3 bucket allow READs from everyone.
+
+=== Terraform
+
+This example uses the (now deprecated) `acl` attribute on the bucket:
+
+[,go,linenums,highlight=3]
+-----
+resource "aws_s3_bucket" "my_bucket" {
+  bucket        = "${local.resource_prefix.value}-data"
+  acl           = "public-read" <1>
+  // ...
+}
+-----
+<1> public READ access, too permissive.
+
+Similarly, the same too-permissive ACL using the `aws_s3_bucket_acl` resource:
+
+[,go,linenums,highlight=3]
+-----
+resource "aws_s3_bucket" "my_bucket" {
+  bucket        = "${local.resource_prefix.value}-data"
+  // ...
+}
+
+resource "aws_s3_bucket_acl" "example_bucket_acl" {
+  bucket = aws_s3_bucket.my_bucket.id
+  acl    = "public-read" <1>
+}
+-----
+
+== Mitigation / Fix
+
+S3 buckets should typically be protected with restrictive bucket ACL and bucket policies.
+
+=== Buildtime
+==== CloudFormation
+
+[,json,linenums,highlight=3]
+-----
+{
+  "Resources": {
+    "S3Bucket": {
+      "Type": "AWS::S3::Bucket",
+      "Properties": {
+        "AccessControl": "Private" <1>
+      }
+    }
+  }
+}
+-----
+<1> `AccessControl` set to `Private` means that S3 bucket does not allow READ permissions to everyone.
+
+
+[,yaml,linenums,highlight=2]
+-----
+Resources:
+  S3Bucket:
+    Type: AWS::S3::Bucket
+    Properties:
+      AccessControl: Private <1>
+-----
+<1> `AccessControl` set to `Private` means that S3 bucket does not allow READ permissions to everyone.
+
+==== Terraform
+
+[,go,linenums,highlight=3]
+-----
+resource "aws_s3_bucket" "example_bucket_acl" {
+  bucket        = aws_s3_bucket.my_bucket.id
+  acl           = "private" // Fixed
+}
+-----
+
+AWS provides pre-signed temporary URLs for sharing data with other users via S3 buckets, as described in https://docs.aws.amazon.com/AmazonS3/latest/userguide/ShareObjectPreSignedURL.html[sharing objects using pre-signed URLs].
+
+
+== Configuration
+
+The `forbidden` property specifies the canned ACLs forbidden by this detector. You may comment the ones that you want to allow, for example `website` or `authenticated-read`.
+
+In addition, you may ignore by bucket resource name by providing a pattern in the `resourcesToIgnore` property.

@@ -1,0 +1,57 @@
+# Simple template for IaC flaw detector
+id: my_detector
+# Is the detector enabled? If no, the detector will not be loaded (default is enabled: yes)
+enabled: yes
+
+# The kind of issue detected.
+# One of: appsec, backup_recovery, convention, encryption, gensec, iam, logging, network, secrets (or other as fallback)
+type: other
+
+# Framework
+# Could be arm, bicep, aws_cloudformation, gcp_deployment_manager, dockerfile,
+# github_config, github_action, gitlab_config, bitbucket_config, helm, json, yaml, kubernetes,
+# kustomize, serverless, terraform, terraform_plan, or all
+framework: terraform
+
+# Cloud provider.
+# One of: aws, azure, gcp, kubernetes, alibaba_cloud, ibm_cloud, oracle_cloud (or other as fallback)
+provider: other
+
+# Short description of the flaw the detector aims at.
+description:
+
+# The (optional) classname for non-standard detectors.
+# If not provided, the standard detector will be used.
+# Could be a fully-qualified class, or relative to com.depsdoctor.iac.scanner.detector package
+classname:
+
+# Default severity of the flaw, one of critical, high, low, info
+severity: info
+
+# File type matching the detector: terraform, json, yaml, etc.
+fileTypes:
+  #- terraform
+  #- json
+  #- yaml
+  #- toml
+  #- dockerfile
+
+# The pattern of (relative) file paths that this detector will consider.
+# Leave empty if no specific pattern.
+fileRegex:
+
+#
+# List of patterns for the resource names to consider. If empty, no restriction.
+resourcesToCheck:
+# List of patterns for the resource names to ignore. If empty, no restriction.
+resourcesToIgnore:
+
+# The XYPOL code ('policy rule') giving the conditions that resources must comply with.
+# Resources selected NOT matching the rule will be reported as IaC flaws.
+xypol: |
+  # Check that ...
+  ON res FROM aws_instance
+  CONNECTED_TO
+    var FROM resource_type IN ['aws_resource_one', 'aws_resource_two']
+  WHERE
+    ...;

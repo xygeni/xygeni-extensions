@@ -1,0 +1,62 @@
+= Public facing ALB not protected by WAF
+:icons: font
+
+[cols="1,3" width="60%" frame="none" grid="rows" stripes="odd" .toc]
+|===
+|ID
+| custom_alb_protected_by_waf
+|Severity
+| [olive]#*low*#
+|Vendor
+| AWS
+|Resource
+| Networking
+|===
+
+== Description
+
+Public facing (application) load balancers should be protected by Web Application Firewall (WAF) rules.
+
+WAF provides some protection against application-layer attacks, and this rule enforces that public facing LBs / ALBs are associated with a WAF Web ACL. A load balancer is considered public and serving applications when neither internal=true nor load_balancer_type is network or gateway.
+
+See https://docs.aws.amazon.com/waf/latest/developerguide/getting-started.html[WAF Getting Started] for an introduction to AWS WAF.
+
+== Examples
+
+[,go,linenums]
+-----
+resource "aws_alb" "my_alb" { // <1>
+  internal = false
+  load_balancer_type = "application"
+}
+-----
+<1> is a public facing ALB without explicit association with a WAF Web ACL.
+
+== Mitigation / Fix
+=== Buildtime
+==== Terraform
+
+[,go,linenums,highlight=6-9]
+-----
+resource "aws_alb" "my_alb" {
+  internal = false
+  load_balancer_type = "application"
+}
+
+resource "aws_wafv2_web_acl_association" "my_acl" {
+  resource_arn = aws_alb.my_alb.arn // <1>
+  web_acl_arn = aws_wafv2_web_acl.my_acl.arn
+}
+-----
+<1> links the ALB to the WAFv2 Web ACL.
+
+=== Runtime
+==== CLI Command
+
+Often the WAF ACL is created with `aws` command like this:
+
+[,console]
+------
+$ aws waf create-web-acl --name 'my_acl' --metric-name METRIC-NAME --default-action Type=BLOCK --change-token TOKEN
+
+------

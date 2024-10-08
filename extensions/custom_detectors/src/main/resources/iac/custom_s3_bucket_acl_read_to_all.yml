@@ -1,0 +1,50 @@
+# S3 Bucket ACL allows public read access
+# This is a simplification for the official s3_bucket_acl_read_to_all
+id: custom_s3_bucket_acl_read_to_all
+
+description: S3 Bucket ACL allows public read access
+
+enabled: yes
+severity: high
+# The kind of issue detected.
+# One of: appsec, backup_recovery, convention, encryption, gensec, iam, logging, network, secrets (or other as fallback)
+type: gensec
+
+# List of frameworks supported by the detector.
+# One of (See IacFramework enum):
+#   arm, bicep, aws_cloudformation, gcp_deployment_manager, dockerfile, github_config, github_action,
+#   gitlab_config, bitbucket_config, helm, json, yaml, kubernetes, kustomize, twistcli, serverless, terraform,
+#   terraform_plan, unknown, all
+frameworks:
+  - terraform
+
+# Cloud provider.
+# One of: aws, azure, gcp, kubernetes, alibaba_cloud, ibm_cloud, oracle_cloud (or other as fallback)
+provider: aws
+
+# A Map of class names with the detector implementation, one for each supported framework.
+classnames:
+  terraform: io.xygeni.extensions.custom_detectors.iac.S3PublicACLRead
+
+tag: [ reachable ]
+
+fileTypes:
+  - terraform
+
+# The pattern of (relative) file paths that this detector will consider.
+# Leave empty if no specific pattern.
+fileRegex:
+
+# List of patterns for the resource names to consider. If empty, no restriction.
+resourcesToCheck:
+# List of patterns for the resource names to ignore. If empty, no restriction.
+resourcesToIgnore:
+
+properties:
+  # The 'canned' ACLs forbidden by this detector.
+  # You may remove website if needed.
+  forbidden:
+    - public-read
+    - public-read-write
+    - website
+    - authenticated-read
