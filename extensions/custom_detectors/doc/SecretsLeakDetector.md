@@ -29,12 +29,18 @@ value:
 Adding a verifier allows to check if the secret is active, reducing the rate of false positives:
 
 ```yaml
+# Verifier invokes /api/v4/user with the token,
+# and checks for 200 or 403 HTTP codes
+#
+# If the token is invalid, sets severity=info (no risk now)
+# bit it is sent so the user may investigate past accesses with the token
 verifier:
-  className: io.xygeni.extensions.custom_detectors.secrets.verifier.GitlabVerifier
+  className: io.xygeni.extensions.custom_detectors.secrets.verifier.ApiVerifier
   action: set_info_when_not_verified
   properties:
     host: gitlab.com/api/v4/user
     tokenPrefix: Bearer
+    httpCodes: [200, 403]
 ```
 
 ## Implementing a Detector Class
@@ -115,7 +121,7 @@ A detector for a Gitlab Personal Access Token has the following [YAML configurat
 ```yaml
 # Example of custom detector configuration for GitLab Personal Access Token
 # This checks for a GitLab Personal Access Token, which has a 'glpat-' prefix.
-# The verifier uses the 'gitlab.com/api/v4/user' endpoint with the token to verify as the bearer token.
+# The verifier uses the '/api/v4/user' endpoint with the token to verify.
 
 id: custom_gitlab_token
 enabled: yes
@@ -130,31 +136,12 @@ value:
     ignorecase: no
 
 verifier:
-  className: io.xygeni.extensions.custom_detectors.secrets.verifier.GitlabVerifier
-  # action: do_nothing | increase_severity_when_verified | decrease_severity_when_not_verified | set_info_when_not_verified | ignore_when_not_verified
+  className: io.xygeni.extensions.custom_detectors.secrets.verifier.ApiVerifier
   action: set_info_when_not_verified
   properties:
     host: gitlab.com/api/v4/user
     tokenPrefix: Bearer
-```
-
-This includes a [verifier](../src/main/java/io/xygeni/extensions/custom_detectors/secrets/verifier/GitlabVerifier.java) that checks if the token is valid. The mechanism is to call the Gitlab API endpoint `/api/v4/user` with the token as the bearer token, to test if the token is valid. The API returns 200 for a valid token and 403 for a valid token but not the right scope. Only 401 is returned for an invalid token.
-
-```java
-public class GitlabVerifier extends ApiVerifier {
-  @Override
-  protected boolean verifyStatus(Response<String> res) {
-    int code = res.statusCode();
-    switch (code) {
-      case HttpURLConnection.HTTP_OK: // 200: good PAT, read_user scope
-      case HttpURLConnection.HTTP_FORBIDDEN:  // 403: good PAT, but not the right scope
-        return true;
-      case HttpURLConnection.HTTP_UNAUTHORIZED: // 401: bad PAT
-        return false;
-    }
-    return false;
-  }
-}
+    httpCodes: [200, 403]
 ```
 
 ### Xygeni Token
