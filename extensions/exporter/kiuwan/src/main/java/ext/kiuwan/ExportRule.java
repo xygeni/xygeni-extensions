@@ -22,8 +22,8 @@ import java.io.OutputStream;
  * to be run at the end of the analysis. This task exports the report to XML, using the 'KIUWAN_JSON_REPORT'
  * property (either environment variable or java system property).
  *
- * @author lrodriguez
- * @version 30-Apr-2024 (lrodriguez)
+ * @author john.doe
+ * @version 01-Jan-1980 (john.doe)
  */
 public class ExportRule extends AbstractRule {
   @Override public boolean accept(String technology, RuleContext ctx) {

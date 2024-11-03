@@ -13,8 +13,8 @@ import static org.assertj.core.api.Assertions.assertThat;
 /**
  * Tests for {@link TrufflehogConverter}
  *
- * @author vdlr
- * @version 08-May-2024 (vdlr)
+ * @author john.doe
+ * @version 01-Jan-1980 (john.doe)
  */
 public class TrufflehogConverterTest {
 

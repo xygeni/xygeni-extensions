@@ -6,6 +6,69 @@ The secrets engine traverses all files of a filesystem directory, or alternative
 
 A detector may include a **verifier** that could check if the potential secret found is indeed active, to reduce the rate of false positives, and a **remediator** for fully automatic or user-controlled remediation (typically to revoke, rotate or deactivate a leaked credential, when possible and convenient).
 
+## Quick Start
+
+Imagine that you want to add a detector for Dropbox (short-lived) access tokens, including verifier and remediator. 
+This example is chosen because it is simple and easy to implement.
+
+### Investigate the secret format and the ways for verification and remediation
+
+Dropbox short-lived access tokens start with 'sl.' followed by between 130 and 140 alphanumeric characters with some dash and underscore characters. A simple regular expression will match such tokens. To verify the validity of the token, Dropbox provides a https://www.dropbox.com/developers/documentation/http/documentation#check-user[/check/user] API endpoint that returns 200 if the token is valid. And to remediate the leak, the https://www.dropbox.com/developers/documentation/http/documentation#auth-token-revoke[/auth/token/revoke] API endpoint is available. 
+
+### Implement the (declarative) detector and verifier
+
+Create a new [custom_dropbox_token.yml](../src/main/resources/secrets/custom_dropbox_token.yml), You can follow the [template YAML](../src/main/resources/secrets/_template.yml_). Please note the following:
+
+- The pattern for the Dropbox token will be `\bsl\.[A-Za-z0-9\-\_]{130,140}\b`. The pattern is between '\b' delimiters to ensure it is a whole word. 
+- 
+- The verifier uses the default ApiVerifier which can be configured with the url, method, and the prefix 'Bearer' needed in the Authorization header:
+
+```yaml
+verifier:
+  className: com.depsdoctor.secrets.scanner.detector.verifier.ApiVerifier
+  # action: do_nothing | increase_severity_when_verified | 
+  # decrease_severity_when_not_verified | ignore_when_not_verified
+  action: set_info_when_not_verified
+  properties:
+    host: api.dropboxapi.com/2/check/user
+    method: POST
+    tokenPrefix: Bearer
+```
+
+The `action` tells what to do when the secret is verified as valid or not. In this case, the secret severity is set to 'info' to indicate that inactive token does not pose any risk, but you can set `ignore_when_not_verified` which will remove the secret from the findings.
+
+You may add a unit test that 
+
+### Add remediation playbook
+
+Create a new [custom_dropbox_token.yml](../../custom_remediations/src/main/resources/remediation/secret/custom_dropbox_token.yml). You can follow the [template YAML](../../custom_remediations/src/main/resources/remediation/_template.yml_). This remediation playbook is simple:
+
+```java
+  // Get the token in clear
+  dropbox_token = secret.decrypt(issue);
+  require exists(dropbox_token);
+  // invoke the self-revoke endpoint, authenticating with the leaked token
+  api(
+    'https://api.dropbox.com/2', 'POST', '/auth/token/revoke', 
+    token = dropbox_token, body = 'null' 
+  );
+```
+
+### Add the custom detector to the scanner
+
+You can copy the YAML files to the `$SCANNER_DIR/conf.custom/secrets` directory (detector YAML) and the `$SCANNER_DIR/conf.custom/remediation/secret` directory (remediation YAML). 
+
+Alternatively, the build will do this for you. If you have maven installed, go to the `extensions/custom_detectors` directory and run `mvn package`. This will build all customizations, copy the configuration files to the `$SCANNER_DIR/conf.custom` directory, and the packaged jar file to the `$SCANNER_DIR/lib.custom`.
+
+You can now run the scanner with the new detector, using `xygeni secrets ...`, or alternatively `xygeni secrets --detectors=custom_dropbox_token` to test your custom detector separately. 
+You may also use the `xygeni util conf-upload` command to upload your custom detectors to the Xygeni platform.
+
+### Add unit test for detector, verifier and remediation playbook
+
+After deploying your detector, it is recommended to add a unit test for automated testing. See the [unit test](../src/test/java/io/xygeni/extensions/custom_detectors/secrets/DropboxDetectorTest.java) for our custom dropbox detector as an example.
+
+Running `mvn test` will run the unit tests. 
+
 ## Declarative Detector
 
 To create a secrets leak detector, typically it is _not necessary_ to develop a Java class with the detection login. The default `GenericSecretDetector` is sufficient, allowing for _purely declarative logic_ for the detection of the leak and its verification. Simply follow the instructions in the `$SCANNER_DIR/onf/secrets/_template.yml_` that you may use as the base for your detector. You simply need to specify patterns to match for the entry key / value or source file, with pre-defined patterns and options for additional checks.

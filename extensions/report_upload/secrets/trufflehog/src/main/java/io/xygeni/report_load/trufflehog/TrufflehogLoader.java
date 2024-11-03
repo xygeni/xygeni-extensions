@@ -1,6 +1,5 @@
 package io.xygeni.report_load.trufflehog;
 
-
 import com.depsdoctor.commons.io.IO;
 import com.depsdoctor.commons.json.JsonDeserializer;
 import io.xygeni.report.load.JsonLoader;
@@ -25,8 +24,8 @@ import static java.nio.charset.StandardCharsets.UTF_8;
  * A json like export from trufflehog can be obtained by using "--json" option and redirecting output to file.
  * The exported file will contain several lines in json format that can be load using this loader.
  *
- * @author vdlr
- * @version 08-May-2024 (vdlr)
+ * @author john.doe
+ * @version 01-Jan-1980 (john.doe)
  */
 public class TrufflehogLoader extends JsonLoader<TrufflehogSecret[]> {
 

@@ -31,8 +31,8 @@ import static com.depsdoctor.commons.time.TimestampHelper.isValidInstant;
  * This converter will convert the Trufflehog report into a SecretsReport by mapping each Trufflehog detector to xygeni SecretType.
  *
  *
- * @author vdlr
- * @version 9-May-2024 (vdlr)
+ * @author john.doe
+ * @version 01-Jan-1980 (john.doe)
  */
 public class TrufflehogConverter extends BaseReportConverter<TrufflehogSecret[], SecretsReport> {
 

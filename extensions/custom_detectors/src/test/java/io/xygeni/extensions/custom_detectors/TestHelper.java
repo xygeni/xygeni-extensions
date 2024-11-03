@@ -7,8 +7,8 @@ import static org.assertj.core.api.Assertions.assertThat;
 /**
  * TestHelper -
  *
- * @author lrodriguez
- * @version 07-Oct-2024 (lrodriguez)
+ * @author john.doe
+ * @version 01-Jan-1980 (john.doe)
  */
 public class TestHelper {
   /** Maven's {@code project.basedir}, the module's directory */
@@ -35,6 +35,12 @@ public class TestHelper {
     return dir;
   }
 
+  public static File getTestResourcesDir(String path) {
+    File dir = new File(getTestResourcesDir(), path);
+    assertThat(dir).as("%s is not a directory", dir).isDirectory();
+    return dir;
+  }
+
   /** The directory as given by a system property with given name.  */
   public static File getDirectoryFromProperty(String propname) {
     String dir = System.getProperty(propname);
@@ -49,4 +55,5 @@ public class TestHelper {
 
     return directory;
   }
+
 }

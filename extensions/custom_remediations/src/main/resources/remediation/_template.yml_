@@ -9,6 +9,10 @@ enabled: yes
 description: Description of the remediation
 
 # Where the remediation can run. Choose between scan, guardrail, backend, or workflow
+# - scan: run at scam time when the --auto-remediate option is set
+# - guardrail: run in a guardrail playbook with the remediate() function
+# - backend: run the remediation server-side, in a dashboard UI or using the API /remediate endpoint
+# - workflow: run the remediation server-side, in a workflow playbook
 on: scan, guardrail, backend, workflow
 
 # Set the remediation inputs. See the remediation documentation for the format.

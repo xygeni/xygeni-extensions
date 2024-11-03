@@ -7,8 +7,8 @@ import lombok.Setter;
 
 
 /**
- * @author vdlr
- * @version 10-May-2024 (vdlr)
+ * @author john.doe
+ * @version 01-Jan-1980 (john.doe)
  */
 @JsonIgnoreProperties(ignoreUnknown = true)
 @Getter @Setter

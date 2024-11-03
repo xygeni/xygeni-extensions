@@ -17,6 +17,7 @@
 - [Overview](#overview)
 - [How-To...](#how-to)
   - [Create a custom detector](#create-a-custom-detector) 
+  - [Create a custom remediation](#create-a-custom-remediation)
   - [Create a guardrail or workflow action](#create-a-guardrail-or-workflow-action)
   - [Create a report loader for a third-party tool](#create-a-report-loader-for-a-third-party-tool)
   - [Create an activity sensor for a software system](#create-an-activity-sensor-for-a-software-system)
@@ -50,7 +51,11 @@ Read [Developing Custom Detectors](extensions/custom_detectors/README.md) for fu
 
 ## Create a custom remediation
 
-TBD
+Remediation is an important part for fixing security issues. Xygeni provides a remediation framework (named 'Rectify') that allows to create a **remediation playbook** for issues reported by a given detector. 
+
+To add a custom remediation, create a new YAML file in the `conf.custom/remediation/<scan type>` directory.
+
+Read [Developing Remediation](extensions/custom_remediations/README.md) for full documentation.
 
 ## Create a guardrail or workflow action
 

@@ -16,8 +16,11 @@
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <project.rootdir>${maven.multiModuleProjectDirectory}</project.rootdir>
 
+    <!-- Pass XYGENI_DIR environment variable to maven -->
+    <!--suppress UnresolvedMavenProperty -->
     <xygeni.scanner.dir>${env.XYGENI_DIR}</xygeni.scanner.dir>
-    <xygeni.version>4.35.0-SNAPSHOT</xygeni.version>
+    <xygeni.conf.custom.dir>${xygeni.scanner.dir}/conf.custom</xygeni.conf.custom.dir>
+    <xygeni.version>4.38.0</xygeni.version>
 
     <lombok.version>1.18.34</lombok.version>
     <junit.version>5.11.2</junit.version>
@@ -40,7 +43,6 @@
       <artifactId>iac-flaws-scanner</artifactId>
       <version>${xygeni.version}</version>
     </dependency>
-
 
     <dependency>
       <groupId>org.junit.jupiter</groupId>
@@ -107,6 +109,35 @@
               <includes>
                 <include>**/*IntegrationTest.java</include>
               </includes>
+            </configuration>
+          </execution>
+        </executions>
+      </plugin>
+
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-resources-plugin</artifactId>
+        <version>3.3.1</version>
+        <executions>
+          <execution>
+            <!-- Copy custom detectors' configurations to scanner's conf.custom directory, and JAR to scanner's lib.custom -->
+            <id>copy-resources</id>
+            <phase>install</phase>
+            <goals><goal>copy-resources</goal></goals>
+            <configuration>
+              <outputDirectory>${xygeni.conf.custom.dir}</outputDirectory>
+              <resources>
+                <resource>
+                  <directory>${project.basedir}/src/main/resources</directory>
+                  <includes><include>**/*.yml</include></includes>
+                  <excludes><exclude>**/_template.yml_</exclude></excludes>
+                  <filtering>true</filtering>
+                </resource>
+                <resource>
+                  <file>${project.build.directory}/${project.build.finalName}.jar</file>
+                  <directory>${project.build.directory}</directory>
+                </resource>
+              </resources>
             </configuration>
           </execution>
         </executions>
