@@ -1,1 +1,4 @@
 /.idea
+/extensions/custom_detectors/target/
+/extensions/kiuwan/target/
+/extensions/report_upload/secrets/trufflehog/target/
