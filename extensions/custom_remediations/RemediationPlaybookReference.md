@@ -1,6 +1,6 @@
 # Remediation Playbook Reference
 
-Remediation actions are defined in the [remediation playbook](https://docs.xygeni.io/xygeni-scanner-cli/xygeni-cli-overview/remediation-playbooks). A playbook is a set of instructions that run remediation primitives when certain conditions are met. Custom remediations are configured in YAML files located in the `$XYGENI_DIR/conf.custom/remediation/<scan type>` directories.
+Automatic [remediation actions](https://docs.xygeni.io/introduction-to-xygeni/key-concepts/remediation-actions) are defined in a **remediation playbook**: a set of instructions that run remediation primitives when certain conditions are met. Custom remediations are configured in YAML files located in the `$XYGENI_DIR/conf.custom/remediation/<scan type>` directories.
 
 The configuration YAML for a remediation is as follows:
 
