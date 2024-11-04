@@ -26,12 +26,91 @@
     <xygeni.conf.custom.dir>${xygeni.home}/conf.custom</xygeni.conf.custom.dir>
     <xygeni.custom.libs>${xygeni.home}/lib.custom</xygeni.custom.libs>
 
+    <slf4j.version>2.0.9</slf4j.version>
+    <commons-lang3.version>3.14.0</commons-lang3.version>
+    <snakeyaml.version>2.0</snakeyaml.version>
+    <json.version>20231013</json.version>
+    <commons-codec.version>1.15</commons-codec.version>
+    <commons-io.version>2.15.1</commons-io.version>
+    <guava.version>33.0.0-jre</guava.version>
+    <jackson.version>2.15.2</jackson.version>
+    <okhttp-version>4.12.0</okhttp-version>
+    <reflections.version>0.10.2</reflections.version>
+    <zt-exec.version>1.12</zt-exec.version>
+
     <lombok.version>1.18.34</lombok.version>
     <junit.version>5.11.2</junit.version>
     <assertj.version>3.24.2</assertj.version>
   </properties>
 
   <dependencies>
+    <dependency>
+      <groupId>org.slf4j</groupId>
+      <artifactId>slf4j-api</artifactId>
+      <version>${slf4j.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>com.google.guava</groupId>
+      <artifactId>guava</artifactId>
+      <version>${guava.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>org.yaml</groupId>
+      <artifactId>snakeyaml</artifactId>
+      <version>${snakeyaml.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>org.apache.commons</groupId>
+      <artifactId>commons-lang3</artifactId>
+      <version>${commons-lang3.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>commons-codec</groupId>
+      <artifactId>commons-codec</artifactId>
+      <version>${commons-codec.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>commons-io</groupId>
+      <artifactId>commons-io</artifactId>
+      <version>${commons-io.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>org.json</groupId>
+      <artifactId>json</artifactId>
+      <version>${json.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>com.fasterxml.jackson.core</groupId>
+      <artifactId>jackson-core</artifactId>
+      <version>${jackson.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>com.fasterxml.jackson.dataformat</groupId>
+      <artifactId>jackson-dataformat-yaml</artifactId>
+      <version>${jackson.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>com.fasterxml.jackson.datatype</groupId>
+      <artifactId>jackson-datatype-jsr310</artifactId>
+      <version>${jackson.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>org.reflections</groupId>
+      <artifactId>reflections</artifactId>
+      <version>${reflections.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>com.squareup.okhttp3</groupId>
+      <artifactId>okhttp</artifactId>
+      <version>${okhttp-version}</version>
+    </dependency>
+    <dependency>
+      <groupId>org.zeroturnaround</groupId>
+      <artifactId>zt-exec</artifactId>
+      <version>${zt-exec.version}</version>
+    </dependency>
+
+
     <dependency>
       <groupId>org.junit.jupiter</groupId>
       <artifactId>junit-jupiter-engine</artifactId>

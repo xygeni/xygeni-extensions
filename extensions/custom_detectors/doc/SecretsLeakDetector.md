@@ -98,7 +98,7 @@ Adding a verifier allows to check if the secret is active, reducing the rate of 
 # If the token is invalid, sets severity=info (no risk now)
 # bit it is sent so the user may investigate past accesses with the token
 verifier:
-  className: io.xygeni.extensions.custom_detectors.secrets.verifier.ApiVerifier
+  className: com.depsdoctor.secrets.scanner.detector.verifier.ApiVerifier
   action: set_info_when_not_verified
   properties:
     host: gitlab.com/api/v4/user
@@ -199,7 +199,7 @@ value:
     ignorecase: no
 
 verifier:
-  className: io.xygeni.extensions.custom_detectors.secrets.verifier.ApiVerifier
+  className: com.depsdoctor.secrets.scanner.detector.verifier.ApiVerifier
   action: set_info_when_not_verified
   properties:
     host: gitlab.com/api/v4/user
