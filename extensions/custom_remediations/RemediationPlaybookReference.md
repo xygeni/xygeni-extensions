@@ -299,7 +299,7 @@ num = 0;
 for i in range(0, length(list), 2) {
   num += list[i].count;
 }
-when num > threshold { ... }
+when num > threshold then { ... }
 ```
 
 
@@ -356,7 +356,7 @@ lines_using_key = grep(file, secret.key, fixed_string = true);
 
 # Change the version of react-dom to 18.3.1
 lib_version = 'react-dom: 18.2.0';
-when matches(lib_version, 'react-dom: 18.2.\d+') 
+when matches(lib_version, 'react-dom: 18.2.\d+') then
   fix_version = sed(lib_version, "s/18.2.\d+/18.3.1/g");
 ```
 
@@ -435,7 +435,7 @@ Example:
 - body: (optional) the body for the request, a map or list of objects, or a JSON string.
 
 Examples:
-``` 
+```bash
   token = secret.decrypt(issue);
   require exists(token);
   api(
@@ -466,8 +466,12 @@ Examples:
 - checkExit: (optional) if true, the command will be checked for exit code, with 0 assumed as success. Defaults to true.
 
 Examples:
-```
+```bash
+# runs `npm token revoke` to revoke a leaked NPM token
+command('npm', ['token', 'revoke', token]);
 
+#runs aliyun command to deactivate a leaked access key
+command('aliyun', ['ram', 'UpdateAccessKey', '--UserAccessKeyId', issue.secretId, '--Status', 'Inactive']);
 ```
 
 The following are specific remediators with additional logic for remediation:
@@ -476,11 +480,35 @@ The following are specific remediators with additional logic for remediation:
 
 `auth0.rotate_secret(domain, client_id, client_secret)` rotates an Auth0 client secret.
 
+Example:
+```bash
+  // See $XYGENI_DIR/conf/remediation/secret/auth0_keys.yml
+  domain = auth0_host ? auth0_host : issue.secretUrl;
+  client_id = issue.secretId;
+  client_secret = secret.decrypt(issue);
+  
+  ret = auth0.rotate_secret(domain, client_id, client_secret);
+  
+  when ret.success then {
+    // Link user to the Auth0 dashnoard to get the renewed client secret
+    tenant = ret.body['tenant'];
+    client_id = ret.body['client_id'];
+    manage_url = "https://manage.auth0.com/dashboard/us/${tenant}/applications/${client_id}/setting";
+    return message("Open ${manage_url} to get the new secret and replace the old one.", level = 'warn');
+  }
+```
+
 #### aws.accessKey('delete' / 'disable' )
 
 `aws.accessKey('delete' / 'disable' )` deletes or disables an AWS access key. The `action` argument must be one of 'delete' or 'disable'.
 The implicit issue object must be a secret leak issue, with the AWS Key ID and Key Secret. The remediation will search for the key owner.
 This remediation is only available on the scan side.
+
+Example:
+```bash
+  action = 'delete';
+  aws.accessKey(action);
+```
 
 #### cloudflare.remediate(token, action)
 
@@ -497,10 +525,25 @@ The method does the following:
 
 Returns a RemediationResult indicating whether the deletion was successful or not.
 
+Example:
+```bash
+  cloudflare_token = secret.decrypt(issue);
+  require cloudflare_token;
+  cloudflare.remediate(token, 'delete');
+```
+
 #### slack.remediate(token)
 
 `slack.remediate(token)` revokes a Slack token.
 
+This method performs remediation on a Slack token by sending an HTTP DELETE request to the Slack API.
+
+Example:
+```bash
+  slack_token = secret.decrypt(issue);
+  require slack_token;
+  slack.remediate('https://slack.com/api', 'GET', '/auth.revoke', token = slack_token);
+```
 
 #### sca.version_bump(<args>)
 
@@ -524,29 +567,29 @@ The BumpTo map has the following entries:
 - tempdir: The temporary directory for the remediation commit.
 
 Example:
-```
-    repo = scm.qualifiedRepo;
-    ecosystem = scm.kind;
-    require with_token(ecosystem, repo);
+```bash
+repo = scm.qualifiedRepo;
+ecosystem = scm.kind;
+require with_token(ecosystem, repo);
+
+when
+    exists(fixedWith) && exists(fixedWith.toVersion)
+then {
+    version = issue.properties.version;
+    descriptor = issue.location.filepath;
+    line = issue.location.beginLine;
+    // User-friendly ID (for example, CVE)
+    vulnerability_id = issue.vulnerability.userId;
+    comment = "Bump version ${version} of ${ecosystem} dependency found in ${repo}, file ${descriptor} to fix ${vulnerability_id}";
     
-    when
-        exists(fixedWith) && exists(fixedWith.toVersion)
-    then {
-        version = issue.properties.version;
-        descriptor = issue.location.filepath;
-        line = issue.location.beginLine;
-        // User-friendly ID (for example, CVE)
-        vulnerability_id = issue.vulnerability.userId;
-        comment = "Bump version ${version} of ${ecosystem} dependency found in ${repo}, file ${descriptor} to fix ${vulnerability_id}";
-        
-        bumpTo = {
-          ecosystem: ecosystem, from: version, to: fixedWith.toVersion,
-          repo: repo, file: descriptor,  line: line,
-          comment: comment
-        };
-        
-        sca.version_bump( bumpTo, token = token(ecosystem, repo) );
-    }
+    bumpTo = {
+      ecosystem: ecosystem, from: version, to: fixedWith.toVersion,
+      repo: repo, file: descriptor,  line: line,
+      comment: comment
+    };
+    
+    sca.version_bump( bumpTo, token = token(ecosystem, repo) );
+}
 ```
 
 
