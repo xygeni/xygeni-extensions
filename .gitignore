@@ -2,3 +2,4 @@
 /extensions/custom_detectors/target/
 /extensions/kiuwan/target/
 /extensions/report_upload/secrets/trufflehog/target/
+/extensions/exporter/kiuwan/target/
