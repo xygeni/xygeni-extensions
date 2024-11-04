@@ -47,8 +47,13 @@ The general procedure for creating a custom detector is as follows:
 6. Create an AsciiDoc (.adoc) file in the `$PROJECT_DIR/src/docs/<scan_type>` directory. Use the same name as your .yml file, but with an .adoc extension instead.
 
 
-7. Deploy the detector with the scanner: call `mvn install -Dmaven.test.skip=true -DXYGENI_DIR=$XYGENI_DIR` so the compiled artifacts for your detector are deployed to your local scanner, in the `$XYGENI_DIR/conf.custom/<scan_type>`. 
+7. Compile and deploy the detector with the scanner: call `mvn install -Dmaven.test.skip=true -Dxygeni.home=$XYGENI_DIR` so the compiled artifacts for your detector are deployed to your local scanner, in the `$XYGENI_DIR/conf.custom/<scan_type>`. 
  Test your detector with `xygeni <scan_type> --detectors=<detector_id> ...`.
+
+TIP: You may need to pass both the location of the Xygeni scanner and version as a command line argument:
+```
+mvn install -Dxygeni.home=$XYGENI_DIR -Dxygeni.version=x.y.z
+```
 
 8. Once you are satisfied with your detector, you may upload your custom detectors with `xygeni util conf-upload`. 
    This will save all your custom detectors to your central configuration in the Xygeni platform.

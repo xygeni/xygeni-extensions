@@ -16,11 +16,15 @@
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <project.rootdir>${maven.multiModuleProjectDirectory}</project.rootdir>
 
-    <!-- Pass XYGENI_DIR environment variable to maven -->
+    <!-- These two properties must be configured so the Xygeni dependencies could be resolved -->
+    <!-- Pass XYGENI_DIR environment variable to maven, or use mvn -Dxygeni.home=PATH_TO_XYGENI -Dxygeni.version=x.y.z -->
     <!--suppress UnresolvedMavenProperty -->
-    <xygeni.scanner.dir>${env.XYGENI_DIR}</xygeni.scanner.dir>
-    <xygeni.conf.custom.dir>${xygeni.scanner.dir}/conf.custom</xygeni.conf.custom.dir>
+    <xygeni.home>${env.XYGENI_DIR}</xygeni.home>
     <xygeni.version>4.38.0</xygeni.version>
+
+    <xygeni.libs>${xygeni.home}/lib</xygeni.libs>
+    <xygeni.conf.custom.dir>${xygeni.home}/conf.custom</xygeni.conf.custom.dir>
+    <xygeni.custom.libs>${xygeni.home}/lib.custom</xygeni.custom.libs>
 
     <lombok.version>1.18.34</lombok.version>
     <junit.version>5.11.2</junit.version>
@@ -28,22 +32,6 @@
   </properties>
 
   <dependencies>
-    <dependency>
-      <groupId>com.depsdoctor</groupId>
-      <artifactId>secrets-scanner</artifactId>
-      <version>${xygeni.version}</version>
-    </dependency>
-    <dependency>
-      <groupId>com.depsdoctor</groupId>
-      <artifactId>misconfigurations-scanner</artifactId>
-      <version>${xygeni.version}</version>
-    </dependency>
-    <dependency>
-      <groupId>com.depsdoctor</groupId>
-      <artifactId>iac-flaws-scanner</artifactId>
-      <version>${xygeni.version}</version>
-    </dependency>
-
     <dependency>
       <groupId>org.junit.jupiter</groupId>
       <artifactId>junit-jupiter-engine</artifactId>
@@ -120,7 +108,7 @@
         <version>3.3.1</version>
         <executions>
           <execution>
-            <!-- Copy custom detectors' configurations to scanner's conf.custom directory, and JAR to scanner's lib.custom -->
+            <!-- Copy custom detectors' configurations to scanner's conf.custom directory -->
             <id>copy-resources</id>
             <phase>install</phase>
             <goals><goal>copy-resources</goal></goals>
@@ -133,9 +121,20 @@
                   <excludes><exclude>**/_template.yml_</exclude></excludes>
                   <filtering>true</filtering>
                 </resource>
+              </resources>
+            </configuration>
+          </execution>
+          <execution>
+            <!-- Copy custom detectors' JAR to scanner's lib.custom -->
+            <id>copy-resources-2</id>
+            <phase>install</phase>
+            <goals><goal>copy-resources</goal></goals>
+            <configuration>
+              <outputDirectory>${xygeni.custom.libs}</outputDirectory>
+              <resources>
                 <resource>
-                  <file>${project.build.directory}/${project.build.finalName}.jar</file>
                   <directory>${project.build.directory}</directory>
+                  <includes><include>${project.build.finalName}.jar</include></includes>
                 </resource>
               </resources>
             </configuration>
@@ -145,5 +144,49 @@
     </plugins>
   </build>
 
+  <profiles>
+    <profile>
+      <id>default</id>
+      <!-- This default profile is to build with the framework JARs: mvn install or mvn install -P default -->
+      <activation>
+        <activeByDefault>true</activeByDefault>
+      </activation>
+      <dependencies>
+        <dependency>
+          <groupId>io.xygeni</groupId>
+          <artifactId>scanner</artifactId>
+          <version>${xygeni.version}</version>
+          <scope>system</scope>
+          <optional>true</optional>
+          <systemPath>${xygeni.libs}/xygeni-scanner-${xygeni.version}.jar</systemPath>
+        </dependency>
+      </dependencies>
+    </profile>
+
+    <profile>
+      <!-- This profile is to run compilation with the framework JARs: mvn install -P internal -->
+      <id>internal</id>
+      <activation>
+        <activeByDefault>false</activeByDefault>
+      </activation>
+      <dependencies>
+        <dependency>
+          <groupId>com.depsdoctor</groupId>
+          <artifactId>secrets-scanner</artifactId>
+          <version>${xygeni.version}</version>
+        </dependency>
+        <dependency>
+          <groupId>com.depsdoctor</groupId>
+          <artifactId>misconfigurations-scanner</artifactId>
+          <version>${xygeni.version}</version>
+        </dependency>
+        <dependency>
+          <groupId>com.depsdoctor</groupId>
+          <artifactId>iac-flaws-scanner</artifactId>
+          <version>${xygeni.version}</version>
+        </dependency>
+      </dependencies>
+    </profile>
+  </profiles>
 
 </project>
