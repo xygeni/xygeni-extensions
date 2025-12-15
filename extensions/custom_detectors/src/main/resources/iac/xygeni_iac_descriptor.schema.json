@@ -1,0 +1,257 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://xygeni.io/schemas/iac/xygeni_iac_descriptor.schema.json",
+  "title": "Xygeni IaC Flaw Detector Descriptor",
+  "description": "Schema for Xygeni IaC flaw detector YAML configuration files",
+  "type": "object",
+  "required": ["id", "severity", "type", "provider", "description"],
+  "definitions": {
+    "extended_boolean": {
+      "oneOf": [
+        { "type": "boolean" },
+        { "type": "string", "enum": ["yes", "no", "true", "false"] }
+      ],
+      "description": "Boolean value that accepts true/false or yes/no strings"
+    },
+    "iacFramework": {
+      "type": "string",
+      "description": "IaC framework type",
+      "enum": [
+        "arm",
+        "bicep",
+        "aws_cloudformation",
+        "gcp_deployment_manager",
+        "dockerfile",
+        "docker_compose",
+        "github_action",
+        "github_config",
+        "gitlab_config",
+        "bitbucket_config",
+        "crossplane",
+        "helm",
+        "json",
+        "yaml",
+        "kubernetes",
+        "ansible",
+        "kustomize",
+        "openapi",
+        "pulumi",
+        "serverless",
+        "terraform",
+        "terraform_plan",
+        "knative",
+        "unknown",
+        "all"
+      ]
+    },
+    "fileType": {
+      "type": "string",
+      "description": "File type for IaC resources",
+      "enum": [
+        "terraform",
+        "bicep",
+        "dockerfile",
+        "docker_compose",
+        "json",
+        "yaml",
+        "xml",
+        "shell",
+        "makefile",
+        "jenkinsfile",
+        "html",
+        "jinja",
+        "erb",
+        "python",
+        "javascript",
+        "typescript",
+        "java",
+        "php",
+        "go",
+        "ruby",
+        "rust"
+      ]
+    }
+  },
+  "properties": {
+    "id": {
+      "type": "string",
+      "description": "Unique identifier for the detector",
+      "examples": ["container_runs_as_root", "s3_bucket_public_access_block", "eks_public_access_cidr"]
+    },
+    "enabled": {
+      "allOf": [{ "$ref": "#/definitions/extended_boolean" }],
+      "description": "Whether the detector is enabled",
+      "default": true
+    },
+    "severity": {
+      "type": "string",
+      "description": "Severity level of detected flaws",
+      "enum": ["info", "low", "high", "critical"]
+    },
+    "type": {
+      "type": "string",
+      "description": "Category/kind of IaC flaw being detected",
+      "enum": [
+        "appsec",
+        "backup_recovery",
+        "convention",
+        "encryption",
+        "gensec",
+        "iam",
+        "logging",
+        "network",
+        "secrets",
+        "other"
+      ]
+    },
+    "framework": {
+      "$ref": "#/definitions/iacFramework",
+      "description": "Single IaC framework this detector supports"
+    },
+    "frameworks": {
+      "type": "array",
+      "description": "Multiple IaC frameworks this detector supports",
+      "items": {
+        "$ref": "#/definitions/iacFramework"
+      }
+    },
+    "provider": {
+      "type": "string",
+      "description": "Cloud/infrastructure provider",
+      "enum": [
+        "aws",
+        "azure",
+        "gcp",
+        "kubernetes",
+        "openshift",
+        "alibaba_cloud",
+        "ibm_cloud",
+        "oracle_cloud",
+        "cloudstack",
+        "digitalocean",
+        "openstack",
+        "nifcloud",
+        "tencent_cloud",
+        "docker",
+        "podman",
+        "other"
+      ]
+    },
+    "description": {
+      "type": "string",
+      "description": "Human-readable description of what the detector looks for",
+      "minLength": 1
+    },
+    "classname": {
+      "type": "string",
+      "description": "Java class implementing the detector (relative to detector package)"
+    },
+    "classnames": {
+      "type": "object",
+      "description": "Framework-specific detector classnames mapping",
+      "additionalProperties": {
+        "type": "string"
+      },
+      "examples": [
+        {
+          "terraform": "terraform.aws.GlueComponentNoSecurityConfiguration",
+          "aws_cloudformation": "cf.GlueComponentNoSecurityConfiguration"
+        }
+      ]
+    },
+    "tag": {
+      "type": "array",
+      "description": "Tags qualifying the detector/flaws",
+      "items": {
+        "type": "string"
+      },
+      "examples": [["reachable"]]
+    },
+    "fileTypes": {
+      "type": ["array", "null"],
+      "description": "File types this detector applies to (empty = no restriction)",
+      "items": {
+        "$ref": "#/definitions/fileType"
+      }
+    },
+    "fileRegex": {
+      "type": ["string", "null"],
+      "description": "Regex pattern for file paths this detector applies to"
+    },
+    "resourcesToCheck": {
+      "type": ["array", "null"],
+      "description": "Resource name patterns to include (empty = all)",
+      "items": {
+        "type": "string"
+      }
+    },
+    "resourcesToIgnore": {
+      "type": ["array", "null"],
+      "description": "Resource name patterns to exclude",
+      "items": {
+        "type": "string"
+      }
+    },
+    "xypol": {
+      "type": "string",
+      "description": "XYPOL policy rule for resource compliance checks"
+    },
+    "defaultPolicies": {
+      "type": "array",
+      "description": "Security policies this detector applies to",
+      "items": {
+        "type": "string",
+        "enum": ["Very_Strict", "Standard", "Essential"]
+      }
+    }
+  },
+  "oneOf": [
+    { "required": ["framework"] },
+    { "required": ["frameworks"] }
+  ],
+  "additionalProperties": true,
+  "examples": [
+    {
+      "id": "container_runs_as_root",
+      "enabled": true,
+      "severity": "high",
+      "type": "appsec",
+      "framework": "dockerfile",
+      "provider": "docker",
+      "description": "Container runs as root",
+      "classname": "docker.ContainerRunsAsRoot",
+      "tag": ["reachable"],
+      "fileTypes": ["dockerfile"],
+      "defaultPolicies": ["Very_Strict", "Standard"]
+    },
+    {
+      "id": "glue_component_no_security_configuration",
+      "enabled": true,
+      "severity": "high",
+      "type": "encryption",
+      "frameworks": ["terraform", "aws_cloudformation"],
+      "provider": "aws",
+      "description": "AWS Glue component has no security configuration",
+      "classnames": {
+        "terraform": "terraform.aws.GlueComponentNoSecurityConfiguration",
+        "aws_cloudformation": "cf.GlueComponentNoSecurityConfiguration"
+      },
+      "tag": ["reachable"],
+      "fileTypes": ["terraform", "json", "yaml"],
+      "defaultPolicies": ["Very_Strict", "Standard", "Essential"]
+    },
+    {
+      "id": "alb_protected_by_waf",
+      "enabled": true,
+      "severity": "high",
+      "type": "network",
+      "framework": "terraform",
+      "provider": "aws",
+      "description": "ALB is not protected by WAF",
+      "tag": ["reachable"],
+      "fileTypes": ["terraform"],
+      "xypol": "ON lb FROM resource_type IN ['aws_lb', 'aws_alb']\nWHERE\n  lb CONNECTED_TO acl FROM resource_type IN ['aws_wafv2_web_acl_association', 'aws_wafregional_web_acl_association'] OR\n  lb.internal = true OR\n  lb.load_balancer_type IN ['network', 'gateway'];",
+      "defaultPolicies": ["Very_Strict", "Standard"]
+    }
+  ]
+}

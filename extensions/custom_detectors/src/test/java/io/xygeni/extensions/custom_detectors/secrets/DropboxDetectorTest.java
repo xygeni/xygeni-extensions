@@ -23,7 +23,7 @@ public class DropboxDetectorTest {
   void detect() {
     File dir = TestHelper.getTestResourcesDir("secrets/dropbox");
     var ctx = SecretTestHelper.runOnFiles("custom_dropbox_token", dir, "custom_dropbox_token.yml");
-    ctx.secrets().forEach(e -> out.println(JsonSerializer.dump(e, true)));
+    //ctx.secrets().forEach(e -> out.println(JsonSerializer.dump(e, true)));
     var secrets = ctx.secrets().findByDetector("custom_dropbox_token");
     assertThat(secrets).hasSize(1);
     var secret = secrets.get(0);
@@ -40,8 +40,8 @@ public class DropboxDetectorTest {
 
     var secrets = ctx.secrets().findByDetector("custom_dropbox_token");
     assertThat(secrets).hasSize(1);
-    var secret = secrets.get(0);
-    out.println(JsonSerializer.dump(secret, true));
+    //var secret = secrets.get(0);
+    //out.println(JsonSerializer.dump(secret, true));
   }
 
 

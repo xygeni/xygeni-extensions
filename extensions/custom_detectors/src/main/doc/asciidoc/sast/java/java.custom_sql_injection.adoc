@@ -1,0 +1,103 @@
+= SQL Injection ('SQLi')
+:icons: font
+:toc: left
+
+[cols="1,3" width="60%" frame="none" grid="rows" stripes="odd" .toc]
+|===
+|ID
+| java.custom_sql_injection
+|Severity
+| [red]#*critical*#
+|Resource
+| Injection
+|Language
+| Java
+|===
+
+== Description
+
+SQL injection (SQLi) is a code injection technique that exploits security vulnerabilities in an application's database layer. It occurs when user input is either incorrectly filtered or not strongly typed, and is unexpectedly executed as part of an SQL command.
+
+== Rationale
+
+SQL injection allows attackers to manipulate SQL queries, potentially leading to unauthorized data access, data modification, or even complete database compromise.
+
+[source,java]
+----
+public List<User> getUserByName(String name) throws SQLException {
+    Connection connection = null;
+    Statement statement = null;
+    ResultSet resultSet = null;
+    List<User> users = new ArrayList<>();
+
+    String query = "SELECT * FROM users WHERE username = '" + name + "'"; // FLAW
+
+    try {
+        connection = DriverManager.getConnection(DB_URL, USER, PASS);
+        statement = connection.createStatement();
+        resultSet = statement.executeQuery(query);
+
+        while (resultSet.next()) {
+            User user = new User();
+            user.setId(resultSet.getInt("id"));
+            user.setUsername(resultSet.getString("username"));
+            users.add(user);
+        }
+    } finally {
+        if (resultSet != null) resultSet.close();
+        if (statement != null) statement.close();
+        if (connection != null) connection.close();
+    }
+
+    return users;
+}
+----
+
+== Remediation
+
+Use parameterized queries (prepared statements) instead of string concatenation.
+
+[source,java]
+----
+public List<User> getUserByName(String name) throws SQLException {
+    Connection connection = null;
+    PreparedStatement preparedStatement = null;
+    ResultSet resultSet = null;
+    List<User> users = new ArrayList<>();
+
+    String query = "SELECT * FROM users WHERE username = ?";
+
+    try {
+        connection = DriverManager.getConnection(DB_URL, USER, PASS);
+        preparedStatement = connection.prepareStatement(query);
+        preparedStatement.setString(1, name);
+        resultSet = preparedStatement.executeQuery();
+
+        while (resultSet.next()) {
+            User user = new User();
+            user.setId(resultSet.getInt("id"));
+            user.setUsername(resultSet.getString("username"));
+            users.add(user);
+        }
+    } finally {
+        if (resultSet != null) resultSet.close();
+        if (preparedStatement != null) preparedStatement.close();
+        if (connection != null) connection.close();
+    }
+
+    return users;
+}
+----
+
+== Configuration
+
+The detector has the following configurable parameters:
+
+- `sources`: The kinds of source sites to check (e.g., external_input, user_input).
+- `neutralizations`: The kinds of neutralization sites to check.
+
+== References
+
+- https://cwe.mitre.org/data/definitions/89.html[CWE-89]: Improper Neutralization of Special Elements used in an SQL Command
+- https://cwe.mitre.org/data/definitions/564.html[CWE-564]: SQL Injection: Hibernate
+- https://wiki.sei.cmu.edu/confluence/display/java/IDS00-J.+Prevent+SQL+injection[CERT IDS00-J]: Prevent SQL injection

@@ -1,0 +1,17 @@
+id: csharp.custom_dangerous_api
+enabled: yes
+kind: api
+
+severity: low
+
+description: Use of potentially dangerous API
+
+classname: io.xygeni.extensions.custom_detectors.sast.csharp.CustomDangerousApi
+
+properties:
+  banned:
+  - System.Runtime.Serialization.Formatters.Binary.BinaryFormatter.Serialize
+  - System.Runtime.Serialization.Formatters.Binary.BinaryFormatter.Deserialize
+
+tag: [CWE:676, NIST.SP.800-53]
+

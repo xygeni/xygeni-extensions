@@ -1,0 +1,63 @@
+= Command Injection
+:icons: font
+:toc: left
+
+[cols="1,3" width="60%" frame="none" grid="rows" stripes="odd" .toc]
+|===
+|ID
+| csharp.custom_command_injection
+|Severity
+| [red]#*critical*#
+|Resource
+| Injection
+|Language
+| CSharp
+|===
+
+== Description
+
+Improper neutralization of special elements used in a command ('Command Injection').
+
+== Rationale
+
+The `System.Diagnostics.Process` and `System.Diagnostics.ProcessStartInfo` classes in .NET are used to execute external OS processes that may allow for command injection if untrusted input is concatenated into command strings.
+
+[source,csharp]
+----
+// Vulnerable to command injection
+var psi = new ProcessStartInfo("cmd.exe", "/c ping -c 3 " + userInput);
+Process.Start(psi); // FLAW
+----
+
+== Remediation
+
+Avoid using the shell to execute commands, when possible. Use `ArgumentList` (from .NET 6+) to separate executable and arguments safely:
+
+[source,csharp]
+----
+var ipOrHostname = ValidateIPOrHostname(userInput);
+
+// No shell invocation, it is not needed
+var psi = new ProcessStartInfo("ping")
+{
+    RedirectStandardOutput = true,
+    RedirectStandardError = true,
+    UseShellExecute = false,
+    ArgumentList = { "-c", "3", ipOrHostname } // FIXED
+};
+Process.Start(psi);
+----
+
+Input validation is the first line of defense against injection-type attacks.
+
+== Configuration
+
+The detector has the following configurable parameters:
+
+- `sources`: The kinds of source sites to check (e.g., external_input, user_input).
+- `neutralizations`: The kinds of neutralization sites to check.
+
+== References
+
+- https://cwe.mitre.org/data/definitions/77.html[CWE-77]: Improper Neutralization of Special Elements used in a Command
+- https://cwe.mitre.org/data/definitions/78.html[CWE-78]: Improper Neutralization of Special Elements used in an OS Command

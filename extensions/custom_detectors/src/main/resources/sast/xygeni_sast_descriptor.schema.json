@@ -1,0 +1,509 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://xygeni.io/schemas/sast/xygeni_sast_descriptor.schema.json",
+  "title": "Xygeni SAST Rule Descriptor",
+  "description": "Schema for Xygeni SAST detector YAML configuration files",
+  "type": "object",
+  "required": ["id", "kind", "severity", "description", "classname"],
+  "definitions": {
+    "extended_boolean": {
+      "oneOf": [
+        { "type": "boolean" },
+        { "type": "string", "enum": ["yes", "no", "true", "false"] }
+      ],
+      "description": "Boolean value that accepts true/false or yes/no strings"
+    }
+  },
+  "properties": {
+    "id": {
+      "type": "string",
+      "description": "Unique identifier for the detector in format {language}.{detector_name}",
+      "pattern": "^[a-z]+\\.[a-z][a-z0-9_]*$",
+      "examples": ["java.sql_injection", "python.hardcoded_credentials", "swift.weak_encryption_algorithm"]
+    },
+    "enabled": {
+      "allOf": [{ "$ref": "#/definitions/extended_boolean" }],
+      "description": "Whether the detector is enabled",
+      "default": true
+    },
+    "kind": {
+      "type": "string",
+      "description": "Vulnerability category classification",
+      "enum": [
+        "access_control",
+        "api",
+        "authentication",
+        "channel",
+        "cryptography",
+        "entry_points",
+        "exception_management",
+        "failure_to_release_memory",
+        "faulty_resource_release",
+        "information_leak",
+        "injection",
+        "malware",
+        "memory_access",
+        "memory_management",
+        "misconfiguration",
+        "path_resolution",
+        "predictability",
+        "privilege",
+        "resource_management",
+        "risky_values",
+        "synchronization",
+        "ui",
+        "unused_entities",
+        "incorrect_validation",
+        "other"
+      ]
+    },
+    "severity": {
+      "type": "string",
+      "description": "Default severity level for detected issues",
+      "enum": ["info", "low", "high", "critical"]
+    },
+    "confidence": {
+      "type": "string",
+      "description": "Confidence level for detected issues",
+      "enum": ["low", "medium", "high", "highest"],
+      "default": "high"
+    },
+    "description": {
+      "type": "string",
+      "description": "Short, user-friendly description of what the detector looks for",
+      "minLength": 1
+    },
+    "fullDescription": {
+      "type": "string",
+      "description": "More detailed description than the short description"
+    },
+    "classname": {
+      "type": "string",
+      "description": "Fully-qualified Java class implementing the rule",
+      "examples": [
+        "java.tainting.SqlInjection",
+        "javascript.regular.ReactDangerouslySetInnerHTML",
+        "python.regular.HardcodedCredentials"
+      ]
+    },
+    "name": {
+      "type": "string",
+      "description": "User-friendly report identifier"
+    },
+    "rank": {
+      "type": "number",
+      "description": "Relative priority for triage and prioritization",
+      "minimum": -1,
+      "maximum": 100,
+      "default": -1
+    },
+    "help": {
+      "type": "string",
+      "description": "Help text and remediation advice"
+    },
+    "helpUrl": {
+      "type": "string",
+      "description": "URL for further information",
+      "format": "uri-reference"
+    },
+    "tag": {
+      "type": "array",
+      "description": "Tags for categorization (CWE, OWASP, NIST, PCI-DSS, framework tags)",
+      "items": {
+        "type": "string"
+      },
+      "examples": [
+        ["CWE:89", "OWASP:2021:A3", "PCI-DSS:6.5.1"],
+        ["CWE:327", "crypto", "NIST.SP.800-53"]
+      ]
+    },
+    "cwes": {
+      "type": "array",
+      "description": "CWE identifiers (auto-extracted from tags if not specified)",
+      "items": {
+        "type": "string",
+        "pattern": "^CWE-[0-9]+$"
+      },
+      "examples": [["CWE-89", "CWE-564"]]
+    },
+    "cve": {
+      "type": "string",
+      "description": "CVE identifier if applicable",
+      "pattern": "^CVE-[0-9]{4}-[0-9]+$"
+    },
+    "identifiers": {
+      "type": "object",
+      "description": "Alternative vulnerability database identifiers (GHSA, OSV, etc.)",
+      "additionalProperties": {
+        "type": "string"
+      }
+    },
+    "references": {
+      "type": "array",
+      "description": "References as text or URLs, can be raw or Markdown links",
+      "items": {
+        "type": "string"
+      }
+    },
+    "defaultPolicies": {
+      "type": "array",
+      "description": "Security policies this detector applies to",
+      "items": {
+        "type": "string",
+        "enum": ["Very_Strict", "Standard", "Essential"]
+      }
+    },
+    "properties": {
+      "type": ["object", "null"],
+      "description": "Detector-specific configuration parameters",
+      "properties": {
+        "sources": {
+          "type": "array",
+          "description": "Types of source sites for tainting rules (origin of untrusted data)",
+          "items": {
+            "type": "string",
+            "enum": [
+              "clipboard_leakage",
+              "cookie_security_decision",
+              "crypto_key",
+              "database_input",
+              "decoded_input",
+              "decrypted_input",
+              "environment_input",
+              "error_details_source",
+              "external_input",
+              "external_storage",
+              "file_input",
+              "insecure_dor",
+              "insecure_random",
+              "memory_allocation",
+              "missing_access_control",
+              "network_input",
+              "other_input",
+              "registry_input",
+              "secure_random",
+              "sensitive_data",
+              "sensitive_error_info",
+              "sensitive_info",
+              "sensitive_system_info",
+              "system_information",
+              "system_input",
+              "user_input",
+              "user_output",
+              "web_input",
+              "xml_entity_injection",
+              "zip_input"
+            ]
+          }
+        },
+        "sinks": {
+          "type": "array",
+          "description": "Types of sink sites for tainting rules (dangerous operations)",
+          "items": {
+            "type": "string",
+            "enum": [
+              "action_manipulation",
+              "android_fragment_injection",
+              "android_uri_permission_manipulation",
+              "anonymous_ldap_bind",
+              "buffer_overflow",
+              "clickjacking",
+              "client_side_template_injection",
+              "clipboard_tampering",
+              "code_injection",
+              "code_injection_deserialization",
+              "command_injection",
+              "configuration_setting_injection",
+              "connection_string_injection",
+              "content_provider_path_traversal",
+              "content_provider_uri_injection",
+              "controller_manipulation",
+              "cookie_plaintext_storage",
+              "cookie_poisoning",
+              "cookie_security",
+              "credentials_manipulation",
+              "cross_frame_scripting",
+              "csrf",
+              "csv_formula_injection",
+              "dangerous_file_upload",
+              "dos_decompression_bomb",
+              "encryption",
+              "error_details",
+              "execution_after_redirect",
+              "external_variable_modification",
+              "file_disclosure",
+              "file_inclusion",
+              "file_output",
+              "file_permissions_manipulation",
+              "format_injection",
+              "hardcoded_absolute_path",
+              "hardcoded_credentials",
+              "hardcoded_crypto_key",
+              "hardcoded_info",
+              "hardcoded_key",
+              "hardcoded_password",
+              "hardcoded_salt",
+              "header_manipulation",
+              "host_name_check",
+              "http_parameter_pollution",
+              "improper_authentication",
+              "improper_validation_array_index",
+              "information_leak",
+              "insecure_dor",
+              "insecure_random",
+              "insecure_ssl",
+              "insecure_transport",
+              "integer_overflow",
+              "intent_manipulation",
+              "javascript_injection_webview",
+              "json_injection",
+              "jsonp_hijacking",
+              "ldap_injection",
+              "local_redirect",
+              "log_forging",
+              "log_leakage",
+              "loop_condition",
+              "mail_command_injection",
+              "mail_content_injection",
+              "mail_header_manipulation",
+              "malicious_command_execution",
+              "memcached_injection",
+              "missing_access_control",
+              "missing_authorization",
+              "ml_injection",
+              "network_output",
+              "nosql_injection",
+              "open_redirect",
+              "password_in_comment",
+              "path_canonicalization",
+              "path_traversal",
+              "plaintext_storage",
+              "predicate_injection",
+              "primary_controlled_key",
+              "privacy_violation",
+              "process_control",
+              "protocol_manipulation",
+              "reflected_file_download",
+              "regex_dos",
+              "registry_injection",
+              "registry_manipulation",
+              "resource_injection",
+              "resource_manipulation",
+              "security_decision",
+              "security_setting_injection",
+              "sensitive_data",
+              "sensitive_file_disclosure",
+              "sensitive_info",
+              "sensitive_nosql",
+              "sensitive_sql",
+              "sensitive_system_info",
+              "server_insecure_transport",
+              "server_side_template_injection",
+              "setting_manipulation",
+              "sleep_injection",
+              "some_injection",
+              "sql_injection",
+              "ssrf",
+              "system_permissions_manipulation",
+              "temporary_file_left",
+              "timing_dos",
+              "trust_boundary",
+              "unsafe_reflection",
+              "unsafe_whitelist",
+              "url_validation",
+              "user_output",
+              "view_manipulation",
+              "weak_crypto_algorithm",
+              "weak_crypto_mode",
+              "weak_hash_algorithm",
+              "weak_initialization_vector",
+              "weak_key",
+              "weak_key_derivation_iteration",
+              "weak_key_size",
+              "weak_mode",
+              "weak_padding",
+              "weak_password_hash",
+              "weak_password_hashing",
+              "web_storage",
+              "xaml_injection",
+              "xml_entity_injection",
+              "xml_injection",
+              "xpath_injection",
+              "xquery_injection",
+              "xshm",
+              "xslt_injection",
+              "xss",
+              "xss_protection_disabled",
+              "zip_slip"
+            ]
+          }
+        },
+        "neutralizations": {
+          "oneOf": [
+            {
+              "type": "array",
+              "description": "Types of sanitization/validation sites for tainting rules",
+              "items": {
+                "type": "string",
+                "enum": [
+                  "*",
+                  "android_fragment_injection",
+                  "android_uri_permission_manipulation",
+                  "authorization",
+                  "client_side_template_injection",
+                  "code_injection",
+                  "code_injection_deserialization",
+                  "command_injection",
+                  "configuration_setting_injection",
+                  "connection_string_injection",
+                  "cookie_security",
+                  "cookie_poisoning",
+                  "csrf",
+                  "csv_formula_injection",
+                  "dangerous_file_upload",
+                  "database_leak",
+                  "decryption",
+                  "django_password_requirements_not_enforced",
+                  "encoding",
+                  "encryption",
+                  "external_variable_modification",
+                  "file",
+                  "file_disclosure",
+                  "file_inclusion",
+                  "file_upload",
+                  "format_injection",
+                  "hash",
+                  "header_manipulation",
+                  "html_sanitization",
+                  "http_parameter_pollution",
+                  "http_strict_transport_security",
+                  "improper_validation_array_index",
+                  "input_validation",
+                  "insecure_random",
+                  "javascript_injection_webview",
+                  "json_injection",
+                  "jsonp_hijacking",
+                  "ldap_injection",
+                  "ldap_leak",
+                  "log_forging",
+                  "log_leakage",
+                  "loop_condition",
+                  "mac",
+                  "mail_command_injection",
+                  "mail_content_injection",
+                  "mail_header_manipulation",
+                  "memcached_injection",
+                  "memory-set",
+                  "missing_access_control",
+                  "missing_authorization",
+                  "nosql_injection",
+                  "nullable",
+                  "numeric2numeric",
+                  "numeric2string",
+                  "open_redirect",
+                  "path_canonicalization",
+                  "path_normalization",
+                  "path_traversal",
+                  "predicate_injection",
+                  "preg",
+                  "primary_controlled_key",
+                  "process_control",
+                  "reflected_file_download",
+                  "regex_dos",
+                  "registry_leak",
+                  "resource_injection",
+                  "secure_random",
+                  "sensitive_data",
+                  "sensitive_error_message",
+                  "server_insecure_transport",
+                  "server_side_template_injection",
+                  "sleep_injection",
+                  "some_injection",
+                  "sql_injection",
+                  "ssrf",
+                  "stream_leak",
+                  "string",
+                  "string2numeric",
+                  "sync_leak",
+                  "trust_boundary",
+                  "unsafe_reflection",
+                  "url_validation",
+                  "weak_password_hash",
+                  "xaml_injection",
+                  "xml_entity_injection",
+                  "xml_injection",
+                  "xpath_injection",
+                  "xslt_injection",
+                  "xss",
+                  "zip_slip"
+                ]
+              }
+            },
+            {
+              "type": "array",
+              "description": "Exclude neutralizations",
+              "items": {
+                "type": "string",
+                "pattern": "^\\^[a-z][a-z0-9_]*$"
+              }
+            }
+          ]
+        }
+      },
+      "additionalProperties": true
+    },
+    "language": {
+      "type": "string",
+      "description": "Programming language (auto-derived from id prefix)",
+      "enum": ["java", "python", "javascript", "typescript", "swift", "go", "csharp", "php", "kotlin", "ruby", "scala"]
+    },
+    "type": {
+      "type": "string",
+      "description": "Vulnerability type (auto-derived from id suffix)"
+    }
+  },
+  "additionalProperties": false,
+  "examples": [
+    {
+      "id": "java.sql_injection",
+      "enabled": true,
+      "kind": "injection",
+      "severity": "critical",
+      "description": "SQL Injection vulnerability",
+      "classname": "java.JavaTaintingRule",
+      "properties": {
+        "sources": ["external_input", "user_input"],
+        "sinks": ["sql_injection"],
+        "neutralizations": ["sql_injection", "hash", "*"]
+      },
+      "tag": ["CWE:89", "CWE:564", "OWASP:2021:A3", "PCI-DSS:6.5.1"],
+      "defaultPolicies": ["Very_Strict", "Standard", "Essential"]
+    },
+    {
+      "id": "swift.weak_encryption_algorithm",
+      "enabled": true,
+      "kind": "cryptography",
+      "severity": "high",
+      "description": "Weak encryption algorithm detected",
+      "classname": "swift.regular.WeakEncryptionAlgorithm",
+      "properties": {
+        "forbiddenAlgorithms": ["DES", "3DES", "RC4", "Blowfish"]
+      },
+      "tag": ["CWE:327", "crypto", "MASWE:0020"],
+      "defaultPolicies": ["Very_Strict", "Standard", "Essential"]
+    },
+    {
+      "id": "javascript.react_dangerously_set_innerhtml",
+      "enabled": true,
+      "kind": "risky_values",
+      "severity": "high",
+      "description": "React dangerouslySetInnerHTML should not be used",
+      "classname": "javascript.regular.ReactDangerouslySetInnerHTML",
+      "properties": {
+        "sanitizers": ["sanitizer?", ".*\\.sanitize", "xss|filterXSS"]
+      },
+      "tag": ["CWE:79", "OWASP:2021:A3", "React"],
+      "defaultPolicies": ["Very_Strict", "Standard", "Essential"]
+    }
+  ]
+}

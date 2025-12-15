@@ -1,0 +1,63 @@
+= Dangerous API
+:icons: font
+:toc: left
+
+[cols="1,3" width="60%" frame="none" grid="rows" stripes="odd" .toc]
+|===
+|ID
+| csharp.custom_dangerous_api
+|Severity
+| [olive]#low#
+|Resource
+| Api
+|Language
+| CSharp
+|===
+
+== Description
+
+Use of potentially dangerous API.
+
+== Rationale
+
+The product invokes a potentially dangerous function that could introduce a vulnerability if it is used incorrectly.
+
+This rule specifically examines the usage of `BinaryFormatter` in C# applications. BinaryFormatter serialization is obsolete and should not be used due to deserialization vulnerabilities.
+
+[source,csharp]
+----
+using System.Runtime.Serialization.Formatters.Binary;
+
+public class Example {
+    public void SerializeData(object data, Stream stream) {
+        var formatter = new BinaryFormatter();
+        formatter.Serialize(stream, data); // FLAW
+    }
+}
+----
+
+== Remediation
+
+Do not use `BinaryFormatter`. Use safer alternatives like `System.Text.Json` or `XmlSerializer`.
+
+[source,csharp]
+----
+using System.Text.Json;
+
+public class Example {
+    public void SerializeData(object data, Stream stream) {
+        JsonSerializer.Serialize(stream, data);
+    }
+}
+----
+
+== Configuration
+
+The detector has the following configurable parameters:
+
+- `banned`: List of APIs that the detector considers as banned.
+
+== References
+
+- https://cwe.mitre.org/data/definitions/676.html[CWE-676]: Use of Potentially Dangerous Function.
+- https://aka.ms/binaryformatter[BinaryFormatter obsolete]: Deserialization risks in use of BinaryFormatter and related types.

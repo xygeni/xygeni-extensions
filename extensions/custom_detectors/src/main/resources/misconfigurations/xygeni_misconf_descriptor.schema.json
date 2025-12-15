@@ -1,0 +1,227 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://xygeni.io/schemas/misc/xygeni_misconf_descriptor.schema.json",
+  "title": "Xygeni Misconfiguration Detector Descriptor",
+  "description": "Schema for Xygeni misconfiguration detector YAML configuration files",
+  "type": "object",
+  "required": ["id", "enabled", "type", "misconfigurationType", "description", "severity", "classname"],
+  "definitions": {
+    "extended_boolean": {
+      "oneOf": [
+        { "type": "boolean" },
+        { "type": "string", "enum": ["yes", "no", "true", "false"] }
+      ],
+      "description": "Boolean value that accepts true/false or yes/no strings"
+    },
+    "applyConfig": {
+      "type": "object",
+      "description": "Scope/filter specifying where detector applies",
+      "properties": {
+        "technology": {
+          "type": "string",
+          "description": "Technology/language filter",
+          "examples": ["java", "javascript", "dotnet", "python", "go", "ruby"]
+        },
+        "repository": {
+          "type": "string",
+          "description": "Package repository type filter",
+          "examples": ["maven", "npm", "nuget", "pip", "go", "gems"]
+        },
+        "onlyDirectDependency": {
+          "type": "boolean",
+          "description": "Filter to only direct dependencies"
+        },
+        "filename": {
+          "type": "string",
+          "description": "Filename pattern to match"
+        }
+      },
+      "additionalProperties": false
+    }
+  },
+  "properties": {
+    "id": {
+      "type": "string",
+      "description": "Unique identifier for the detector",
+      "examples": ["container_runs_as_root", "unsecured_communication", "app_permissions"]
+    },
+    "enabled": {
+      "allOf": [{ "$ref": "#/definitions/extended_boolean" }],
+      "description": "Whether the detector is enabled",
+      "default": true
+    },
+    "type": {
+      "type": "string",
+      "description": "Detector category type",
+      "enum": ["dependency", "file", "config", "image"]
+    },
+    "misconfigurationType": {
+      "type": "string",
+      "description": "Kind of misconfiguration detected",
+      "enum": [
+        "avoid_open_versions",
+        "avoid_public_repositories",
+        "backup",
+        "binary_artifacts",
+        "cicd_security",
+        "code_review",
+        "confusing_names",
+        "credentials",
+        "dangerous_workflow",
+        "dependency_update_tool",
+        "dockerfile_best_practice",
+        "dockerfile_cache_busting",
+        "dockerfile_deprecation",
+        "dockerfile_flaw",
+        "dockerfile_optimization",
+        "dockerfile_security",
+        "fuzzing",
+        "issues_deletion",
+        "lack_version_pinning",
+        "malicious_image",
+        "malicious_script",
+        "maximum_admins_org",
+        "network",
+        "organization_mfa",
+        "org_default_repo_permission",
+        "package_hooks",
+        "pipeline_external_dependencies",
+        "pipeline_scan_vuln",
+        "plugin_vulnerabilities",
+        "repositories_admins",
+        "repository_creation",
+        "repository_deletion",
+        "sast_in_use",
+        "secrets_scan",
+        "secure_pipeline",
+        "security_policy",
+        "signed_commits",
+        "signed_releases",
+        "status_checks",
+        "steps_sbom",
+        "token_permissions",
+        "unprotected_branch",
+        "unreviewed_branch",
+        "url_dependency",
+        "use_https_remote_repositories",
+        "vulnerabilities",
+        "webhooks"
+      ]
+    },
+    "description": {
+      "type": "string",
+      "description": "Human-readable description of what the detector looks for",
+      "minLength": 1
+    },
+    "severity": {
+      "type": "string",
+      "description": "Severity level of detected misconfigurations",
+      "enum": ["info", "low", "high", "critical"]
+    },
+    "confidence": {
+      "type": "string",
+      "description": "Confidence level for detections",
+      "enum": ["low", "medium", "high", "highest"]
+    },
+    "classname": {
+      "type": "string",
+      "description": "Java class implementing the detector"
+    },
+    "tag": {
+      "type": "array",
+      "description": "Tags for classification and filtering",
+      "items": {
+        "type": "string"
+      },
+      "examples": [
+        ["security", "infrastructure", "supply-chain"],
+        ["cicd-security", "cicd-sec-02", "reachable"],
+        ["dockerfile", "excessive-privileges"]
+      ]
+    },
+    "apply": {
+      "$ref": "#/definitions/applyConfig",
+      "description": "Scope/filter specifying where detector applies"
+    },
+    "properties": {
+      "type": "object",
+      "description": "Detector-specific configuration parameters",
+      "additionalProperties": true
+    },
+    "defaultPolicies": {
+      "type": "array",
+      "description": "Security policies this detector applies to",
+      "items": {
+        "type": "string",
+        "enum": ["Very_Strict", "Standard", "Essential"]
+      }
+    }
+  },
+  "additionalProperties": true,
+  "examples": [
+    {
+      "id": "container_runs_as_root",
+      "enabled": true,
+      "type": "image",
+      "misconfigurationType": "dockerfile_security",
+      "description": "Container runs as root",
+      "severity": "high",
+      "confidence": "highest",
+      "classname": "docker.ContainerRunsAsRoot",
+      "tag": ["supply-chain", "security", "dockerfile", "excessive-privileges", "reachable"],
+      "defaultPolicies": ["Very_Strict", "Standard"]
+    },
+    {
+      "id": "avoid_public_repositories_nuget",
+      "enabled": false,
+      "type": "config",
+      "misconfigurationType": "avoid_public_repositories",
+      "description": "Detects if the nuget configuration references directly a public repository.",
+      "severity": "high",
+      "confidence": "high",
+      "classname": "NugetAvoidAccessPublicRepositoriesDetector",
+      "apply": {
+        "technology": "dotnet",
+        "repository": "nuget"
+      },
+      "properties": {
+        "nuget": {
+          "public-repositories": ["https://api.nuget.org/v3/index.json"],
+          "private-repositories": []
+        }
+      },
+      "defaultPolicies": ["Very_Strict", "Standard"]
+    },
+    {
+      "id": "app_permissions",
+      "enabled": true,
+      "type": "config",
+      "misconfigurationType": "cicd_security",
+      "description": "Ensure that CI/CD apps do not use too broad permissions.",
+      "severity": "critical",
+      "confidence": "highest",
+      "classname": "AppPermissionsDetector",
+      "tag": ["supply-chain", "security", "infrastructure", "cicd-security", "reachable"],
+      "properties": {
+        "policy": [
+          {
+            "cicd": "github_actions",
+            "permissions": {
+              "pages": "read",
+              "checks": "read",
+              "actions": "read",
+              "secrets": "none",
+              "contents": "read",
+              "workflows": "read"
+            }
+          },
+          {
+            "cicd": "azure_pipelines",
+            "events": []
+          }
+        ]
+      },
+      "defaultPolicies": ["Very_Strict", "Standard", "Essential"]
+    }
+  ]
+}

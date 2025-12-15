@@ -1,0 +1,41 @@
+// Often the short description from the .yml descriptor
+= #Short description#
+:icons: font
+:toc: left
+
+[cols="1,3" width="50%" frame="ends" grid="rows" stripes="odd" options=noheader]
+|===
+// Must equal the .yml id
+| ID | #id#
+
+// Choose a colored severity name from alternatives
+| Severity | [red]#*critical*# [red]#high# [Olive]#low# [green]#info#
+
+// What resource is affected / which security control is weakened
+// Could be the detector kind:, as text: 'Buffer Handling" for buffer_handling, etc.
+| Resource | #resource#
+
+// CSharp, Go, Java ... Swift
+| Language | #language#
+|===
+
+== Description
+
+// Short description of the detector
+
+== Rationale
+
+// Why this detector exist? What is the risk if unfixed?
+// Add code blocks with vulnerable examples to help developers understand the cause
+
+== Remediation
+
+// How to fix this, with code examples to help developers with remediation
+
+== Configuration
+
+// Parameters for the detector, and their allowed values
+
+== References
+
+- https://cwe.mitre.org/data/definitions/<code>.html

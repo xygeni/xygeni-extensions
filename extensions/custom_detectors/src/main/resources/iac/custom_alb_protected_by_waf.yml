@@ -11,8 +11,6 @@ provider: aws
 
 description: Public facing ALB not protected by WAF
 
-classname:
-
 tag: [ reachable ]
 
 # File type matching the detector: terraform, json, yaml, etc.

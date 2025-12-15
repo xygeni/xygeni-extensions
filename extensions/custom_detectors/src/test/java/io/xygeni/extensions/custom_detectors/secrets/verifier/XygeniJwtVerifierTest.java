@@ -16,7 +16,7 @@ class XygeniJwtVerifierTest {
   @Test @DisplayName("verify(revoked token) must be FALSE")
   void verify_revoked() {
     var verifier = new XygeniJwtVerifier();
-    TriState result = verifier.verify(revoked);
+    TriState result = verifier.verifyJwtToken(revoked, null);
     assertThat(result).isEqualTo(TriState.FALSE);
   }
 
@@ -27,7 +27,7 @@ class XygeniJwtVerifierTest {
     Assumptions.assumeThat(token).isNotBlank();
 
     var verifier = new XygeniJwtVerifier();
-    TriState result = verifier.verify(token);
+    TriState result = verifier.verifyJwtToken(token, null);
     assertThat(result).isEqualTo(TriState.TRUE);
   }
 

@@ -1,0 +1,30 @@
+id: java.custom_sql_injection
+
+enabled: yes
+
+kind: injection
+
+severity: critical
+
+description: Improper neutralization of special elements in SQL Commands ('SQL Injection' aka 'SQLi')
+
+classname: io.xygeni.extensions.custom_detectors.sast.java.CustomSqlInjection
+
+properties:
+  # The kinds of the source sites
+  sources:
+    - external_input
+    - user_input
+
+  # The kinds of the sinks sites
+  sinks:
+    - sql_injection
+
+  # The kinds of the neutralization sites
+  neutralizations:
+    - sql_injection
+    - hash
+    - '*'
+
+tag: [CWE:89, CWE:564, NIST.SP.800-53, OWASP:2021:A3, PCI-DSS:6.5.1]
+

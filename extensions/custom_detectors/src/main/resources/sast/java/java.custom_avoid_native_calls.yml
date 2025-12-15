@@ -1,0 +1,19 @@
+id: java.custom_avoid_native_calls
+
+enabled: yes
+
+kind: api
+
+severity: high
+
+description: Avoid native calls ('JNI')
+
+classname: io.xygeni.extensions.custom_detectors.sast.java.CustomAvoidNativeCalls
+
+tag: [CWE:246, NIST.SP.800-53, PCI-DSS:6.5.6]
+
+properties:
+  # List of native methods that are allowed by this rule.
+  # The list contains Fully Qualified Methods, like com.my.package.DummyClass.testMethod
+  allowedMethods: []
+

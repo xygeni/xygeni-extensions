@@ -1,0 +1,37 @@
+# Simple template for Sast rule
+id: my_detector
+# Is the detector enabled? If no, the detector will not be loaded (default is enabled: yes)
+enabled: yes
+
+# The kind of affected resource.
+# One of:
+#   buffer_handling, control_flow_handling, design_error, encryption_and_randomness, error_handling_and_fault_isolation,
+#   file_handling, information_leaks, initialization_and_shutdown, injection, misconfiguration, number_handling,
+#   permissions_privileges_and_access_controls, pointer_and_reference_handling, system_element_isolation, other
+kind:
+
+# Default severity of the evidence, one of: critical, high, low, info
+severity: info
+
+# Short description of the evidence the detector aims at.
+description:
+
+# The classname for the rule.
+# Could be a fully-qualified class, or relative to io.xygeni.sast.scanner.detector package
+classname:
+
+# Configuration properties to pass to the detector
+properties:
+   # The kinds of the source sites
+  sources:
+    - user_input
+
+  # The kinds of the sinks sites
+  sinks:
+    - sql_injection
+
+  # The kinds of the neutralization sites
+  neutralizations: [ '*' ]
+
+# tags
+tag: []

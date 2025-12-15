@@ -1,0 +1,27 @@
+id: csharp.custom_command_injection
+enabled: yes
+kind: injection
+
+severity: critical
+
+description: Improper neutralization of special elements used in a command ('Command Injection')
+
+classname: io.xygeni.extensions.custom_detectors.sast.csharp.CustomCommandInjection
+
+properties:
+  # The kinds of the source sites
+  sources:
+    - external_input
+    - user_input
+
+  # The kinds of the sinks sites
+  sinks:
+    - command_injection
+
+  # The kinds of the neutralization sites
+  neutralizations:
+    - command_injection
+    - string
+
+tag: [CWE:77, CWE:78, NIST.SP.800-53, OWASP:2021:A3, PCI-DSS:6.5.1]
+

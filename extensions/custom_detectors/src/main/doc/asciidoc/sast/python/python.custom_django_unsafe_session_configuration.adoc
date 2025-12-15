@@ -1,0 +1,76 @@
+= Django Unsafe Session Configuration
+:icons: font
+:toc: left
+
+[cols="1,3" width="60%" frame="none" grid="rows" stripes="odd" .toc]
+|===
+|ID
+| python.custom_django_unsafe_session_configuration
+|Severity
+| [red]#high#
+|Resource
+| Misconfiguration
+|Language
+| Python
+|===
+
+== Description
+
+Detects insecure session cookie configuration in Django applications.
+
+== Rationale
+
+Session cookies contain sensitive authentication data. Misconfigured session cookies can lead to session hijacking, cross-site scripting attacks, and other security vulnerabilities.
+
+[source,python]
+----
+MIDDLEWARE_CLASSES = (
+    'django.middleware.common.CommonMiddleware',
+    'django.contrib.sessions.middleware.SessionMiddleware',
+    'django.contrib.auth.middleware.AuthenticationMiddleware',
+)
+
+SESSION_COOKIE_AGE = 3600 # FLAW
+SESSION_COOKIE_DOMAIN = '.com' # FLAW
+SESSION_COOKIE_PATH = "/" # FLAW
+SESSION_COOKIE_HTTPONLY = False # FLAW
+SESSION_COOKIE_SECURE = False # FLAW
+SESSION_COOKIE_SAMESITE = "Lax" # FLAW
+----
+
+== Remediation
+
+Configure session cookies with secure settings:
+
+[source,python]
+----
+MIDDLEWARE_CLASSES = (
+    'django.middleware.common.CommonMiddleware',
+    'django.contrib.sessions.middleware.SessionMiddleware',
+    'django.contrib.auth.middleware.AuthenticationMiddleware',
+)
+
+SESSION_COOKIE_AGE = 0
+SESSION_COOKIE_DOMAIN = 'www.example.com'
+SESSION_COOKIE_PATH = "/dashboard"
+SESSION_COOKIE_HTTPONLY = True
+SESSION_COOKIE_SECURE = True
+SESSION_COOKIE_SAMESITE = "Strict"
+----
+
+== Configuration
+
+The detector has the following configurable parameters:
+
+- `checkPersistence`: Whether to check session persistence configuration.
+- `invalidDomainPattern`: Pattern for invalid domain values.
+- `invalidPathPattern`: Pattern for invalid path values.
+- `enforceHttpOnly`: Whether to enforce HttpOnly flag.
+- `enforceSecure`: Whether to enforce Secure flag.
+- `sameSiteValue`: Expected value for SameSite attribute.
+
+== References
+
+- https://cwe.mitre.org/data/definitions/315.html[CWE-315]: Cleartext Storage of Sensitive Information in a Cookie
+- https://cwe.mitre.org/data/definitions/614.html[CWE-614]: Sensitive Cookie in HTTPS Session Without 'Secure' Attribute
+- https://cwe.mitre.org/data/definitions/1004.html[CWE-1004]: Sensitive Cookie Without 'HttpOnly' Flag

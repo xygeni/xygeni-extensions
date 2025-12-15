@@ -20,7 +20,7 @@
     <!-- Pass XYGENI_DIR environment variable to maven, or use mvn -Dxygeni.home=PATH_TO_XYGENI -Dxygeni.version=x.y.z -->
     <!--suppress UnresolvedMavenProperty -->
     <xygeni.home>${env.XYGENI_DIR}</xygeni.home>
-    <xygeni.version>4.38.0</xygeni.version>
+    <xygeni.version>5.36.0</xygeni.version>
 
     <xygeni.libs>${xygeni.home}/lib</xygeni.libs>
     <xygeni.conf.custom.dir>${xygeni.home}/conf.custom</xygeni.conf.custom.dir>
@@ -161,6 +161,10 @@
             <!--suppress UnresolvedMavenProperty -->
             <maven.home>${maven.home}</maven.home>
           </systemPropertyVariables>
+          <additionalClasspathElements>
+            <additionalClasspathElement>${xygeni.home}/lib/commons-text-1.11.0.jar</additionalClasspathElement>
+            <additionalClasspathElement>${xygeni.home}/lib/tika-core-2.9.1.jar</additionalClasspathElement>
+          </additionalClasspathElements>
         </configuration>
         <executions>
           <execution>
@@ -262,6 +266,11 @@
         <dependency>
           <groupId>com.depsdoctor</groupId>
           <artifactId>iac-flaws-scanner</artifactId>
+          <version>${xygeni.version}</version>
+        </dependency>
+        <dependency>
+          <groupId>io.xygeni</groupId>
+          <artifactId>sast-scanner</artifactId>
           <version>${xygeni.version}</version>
         </dependency>
       </dependencies>

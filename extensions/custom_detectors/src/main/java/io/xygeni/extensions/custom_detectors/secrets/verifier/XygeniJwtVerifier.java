@@ -1,6 +1,7 @@
 package io.xygeni.extensions.custom_detectors.secrets.verifier;
 
 import com.depsdoctor.commons.TriState;
+import com.depsdoctor.core.model.secrets.PotentialSecret;
 import com.depsdoctor.depsscanner.services.HttpClient;
 import com.depsdoctor.depsscanner.services.exception.ServiceException;
 import com.depsdoctor.depsscanner.services.exception.TimeoutException;
@@ -26,10 +27,10 @@ import static com.depsdoctor.commons.config.ApiConfig.APIKEY_PREFIX;
  */
 public class XygeniJwtVerifier extends JwtVerifier {
 
-  @Override protected TriState verify(String token) {
+  @Override protected TriState verifyJwtToken(String token, PotentialSecret secret) {
     if(!token.startsWith(APIKEY_PREFIX)) return TriState.FALSE;
     String jwtToken = token.substring(APIKEY_PREFIX.length());
-    TriState result = super.verify(jwtToken); // validate JWT expiration
+    TriState result = super.verifyJwtToken(jwtToken, secret); // validate JWT expiration
     if(result.isTrue()) {
       // additionally check with /user/current API
       result = UserApi.isValidToken(token);

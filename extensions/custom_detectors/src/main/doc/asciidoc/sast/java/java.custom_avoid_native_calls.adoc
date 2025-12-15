@@ -1,0 +1,70 @@
+= Avoid Native Calls
+:icons: font
+:toc: left
+
+[cols="1,3" width="60%" frame="none" grid="rows" stripes="odd" .toc]
+|===
+|ID
+| java.custom_avoid_native_calls
+|Severity
+| [red]#high#
+|Resource
+| Api
+|Language
+| Java
+|===
+
+== Description
+
+Avoid native calls ('JNI').
+
+== Rationale
+
+Calling native code from Java can introduce significant security risks and maintenance challenges.
+
+Native methods can compromise Java's platform independence and the built-in security mechanisms that the Java Virtual Machine (JVM) offers, such as memory safety and automatic garbage collection. Moreover, improper implementation of JNI can lead to vulnerabilities like buffer overflows, null pointer dereferences, and arbitrary code execution.
+
+[source,java]
+----
+public class NativeExample {
+    // Declaration of a native method
+    public native void nativeMethod();
+
+    static {
+        // Load native library
+        System.loadLibrary("NativeLib");
+    }
+
+    public static void main(String[] args) {
+        new NativeExample().nativeMethod(); // FLAW
+    }
+}
+----
+
+== Remediation
+
+Evaluate the necessity of JNI and leverage Java's extensive range of built-in libraries and APIs wherever possible.
+
+[source,java]
+----
+public class SaferJavaExample {
+    public void javaEquivalentMethod() {
+        // Implementation using Java's standard API
+        System.out.println("Native method replaced with Java API equivalent.");
+    }
+
+    public static void main(String[] args) {
+        new SaferJavaExample().javaEquivalentMethod();
+    }
+}
+----
+
+== Configuration
+
+The rule has the following configurable parameters:
+
+- `allowedMethods`: List of fully qualified native methods that are allowed by this rule.
+
+== References
+
+- https://cwe.mitre.org/data/definitions/246.html[CWE-246]: J2EE Bad Practices: Direct Use of Sockets

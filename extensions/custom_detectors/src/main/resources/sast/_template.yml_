@@ -1,0 +1,23 @@
+# Simple template for Sast rule
+id: language.my_detector
+# Is the detector enabled? If no, the detector will not be loaded (default is enabled: yes)
+enabled: yes
+
+# The kind of affected resource.
+# One of:
+#   buffer_handling, control_flow_handling, design_error, encryption_and_randomness, error_handling_and_fault_isolation,
+#   file_handling, information_leaks, initialization_and_shutdown, injection, misconfiguration, number_handling,
+#   permissions_privileges_and_access_controls, pointer_and_reference_handling, system_element_isolation, other
+kind:
+
+# Default severity of the evidence, one of: critical, high, low, info
+severity: info
+
+# Short description of the evidence the detector aims at.
+description: Some
+
+# The classname for the rule (fully-qualified)
+classname: my.org.MyDetector
+
+# tags
+tag: []

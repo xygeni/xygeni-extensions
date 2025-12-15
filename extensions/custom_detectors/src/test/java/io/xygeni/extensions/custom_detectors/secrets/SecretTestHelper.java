@@ -1,6 +1,7 @@
 package io.xygeni.extensions.custom_detectors.secrets;
 
 import com.depsdoctor.commons.Resources;
+import com.depsdoctor.commons.config.DepsDoctorConfig;
 import com.depsdoctor.commons.file.FileType;
 import com.depsdoctor.commons.git.Git;
 import com.depsdoctor.core.model.secrets.SecretsReport;
@@ -84,7 +85,7 @@ public class SecretTestHelper {
     var ctx = buildContext(testName, dir);
     var conf = ctx.getConfiguration();
     conf.setTimeout(0);
-    conf.setParsingTimeout(0);
+    conf.setFileTimeout(0);
     conf.setNoVerify(false);
 
     // Load detector configurations to test
@@ -139,6 +140,8 @@ public class SecretTestHelper {
   public static SecretsContext buildContext(String projName, File dir) {
     SecretsConfig conf = new SecretsConfig();
     conf.setGitRoot(Git.getRootDirectory(dir));
+    DepsDoctorConfig global = new DepsDoctorConfig();
+    conf.setGlobalConfig(global);
     SecretsReport report = new SecretsReport(projName, dir, null, true, null);
     return SecretsContext.builder()
       .projectName(projName)

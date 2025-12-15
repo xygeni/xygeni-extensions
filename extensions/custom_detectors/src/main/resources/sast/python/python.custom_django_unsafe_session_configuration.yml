@@ -1,0 +1,20 @@
+id: python.custom_django_unsafe_session_configuration
+enabled: yes
+kind: misconfiguration
+
+severity: high
+
+description: Django unsafe session configuration
+
+classname: io.xygeni.extensions.custom_detectors.sast.python.CustomDjangoUnsafeSessionConfiguration
+
+properties:
+  checkPersistence: true
+  invalidDomainPattern: '\.[^\.]+'
+  invalidPathPattern: '/'
+  enforceHttpOnly: true
+  enforceSecure: true
+  sameSiteValue: 'strict'
+
+tag: [django, CWE:315, CWE:539, CWE:614, CWE:1004, CWE:1275, NIST.SP.800-53, PCI-DSS:6.5.10]
+

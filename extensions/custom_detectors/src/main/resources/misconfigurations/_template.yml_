@@ -1,0 +1,56 @@
+# Document me!
+
+# Detector id
+id: binary_artifacts
+
+# Set to true|yes to enable the detector, false|no to disable it
+enabled: true
+
+# The target of the detector. One of :
+# - dependency (for project dependencies),
+# - config (for system/tool configuration)
+# - file (for project source files)
+# - image (for container images)
+type: config
+
+# Give a one-word misconfiguration type.
+misconfigurationType: binary_artifacts
+
+# The detector class. Default package is com.depsdoctor.misc.scanner.detector.impl, use full class name otherwise.
+classname: BinaryArtifactsDetector
+
+# User-friendly description
+description: >-
+  Binary artifacts found.
+
+# The severity of the misconfiguration. One of : critical, high, low, info
+severity: critical
+# The confidence of the misconfiguration. One of : highest, high, medium, low
+confidence: highest
+
+
+# List of tags to add to the misconfiguration.
+# Ideas: supply-chain for software supply-chain vulnerabilities, cicd-security for CI/CD flaws,
+# cicd-sec-n for OWASP CI/CD Top10 Risks, reachable|non-reachable for prioritization funnel, slsa-N for SLSA Level requirement.
+tag: [ ]
+
+# Configuration (map of properties)
+properties:
+
+# Condition to apply the detector
+# apply:
+  # Technology to apply the detector. One of : java, javascript, dotnet, python...
+  #technology: javascript
+  # Repository to apply the detector. One of : maven, npm, nuget, PyPI...
+  #repository: npm
+  # If true|yes, only direct dependencies will be checked, ignore indirect ones.
+  # Set to false|no for checking all dependencies.
+  #onlyDirectDependency: true
+  # Filename pattern to apply the detector (type: file)
+  #filename: package-lock.json
+
+# Default policies where the detector is enabled.
+defaultPolicies:
+  - Very_Strict
+  - Standard
+  - Essential

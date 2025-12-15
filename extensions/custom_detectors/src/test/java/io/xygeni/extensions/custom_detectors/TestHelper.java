@@ -11,6 +11,8 @@ import static org.assertj.core.api.Assertions.assertThat;
  * @version 01-Jan-1980 (john.doe)
  */
 public class TestHelper {
+  public static final File TEST_DIR = TestHelper.getTestResourcesDir();
+
   /** Maven's {@code project.basedir}, the module's directory */
   public static File getModuleBasedir() {
     return getDirectoryFromProperty("project.rootdir");

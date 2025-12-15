@@ -5,6 +5,7 @@
 
 - [About](#about)
 - [Creating a Custom Detector](#creating-a-custom-detector)
+    - [SAST Detector](doc/SastDetector.md)
     - [Secrets Leak Detector](doc/SecretsLeakDetector.md)
     - [IaC Flaws Detector](doc/IacFlawsDetector.md)
     - [CI/CD Misconfigurations Detector](doc/CicdMisconfigurationsDetector.md)
@@ -62,6 +63,7 @@ mvn install -Dxygeni.home=$XYGENI_DIR -Dxygeni.version=x.y.z
 
 The following sections provide additional details on how to create custom detectors for a given type.
 
+- [SAST Detector](doc/SastDetector.md)
 - [Secrets Leak Detector](doc/SecretsLeakDetector.md)
 - [IaC Flaws Detector](doc/IacFlawsDetector.md)
 - [CI/CD Misconfigurations Detector](doc/CicdMisconfigurationsDetector.md)

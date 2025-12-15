@@ -1,6 +1,7 @@
 package io.xygeni.extensions.custom_detectors.iac;
 
 import com.depsdoctor.commons.Resources;
+import com.depsdoctor.commons.config.DepsDoctorConfig;
 import com.depsdoctor.commons.file.FileType;
 import com.depsdoctor.commons.io.Files;
 import com.depsdoctor.commons.io.IO;
@@ -430,7 +431,7 @@ public class IacRuleTestHelper {
 
     try {
       BaseParser p = parserClazz.getDeclaredConstructor().newInstance();
-      return p.parse(f, tfile, fileType, basedir);
+      return p.parse(f, tfile, fileType, context(basedir));
 
     } catch (InstantiationException | IllegalAccessException | InvocationTargetException | NoSuchMethodException e) {
       throw new ParseException("Illegal parser class", e);
@@ -441,7 +442,7 @@ public class IacRuleTestHelper {
       throws ParseException {
     try {
       BaseParser p = parserClazz.getDeclaredConstructor().newInstance();
-      return p.parse(dir, dir.getPath(), fileType, dir);
+      return p.parse(dir, dir.getPath(), fileType, context(dir));
 
     } catch (InstantiationException | IllegalAccessException | InvocationTargetException | NoSuchMethodException e) {
       throw new ParseException("Illegal parser class", e);
@@ -469,11 +470,14 @@ public class IacRuleTestHelper {
     var config = new IacScanConfig();
     var report = new IacFlawsReport("test", directory, false, null);
 
+    DepsDoctorConfig global = new DepsDoctorConfig();
+    config.setGlobalConfig(global);
+
     return IacContext.builder()
-        .projectName("test").directory(directory)
-        .configuration(config).report(report)
-        .listener(IacScanListener.NULL)
-        .build();
+      .projectName("test").directory(directory).branch("main")
+      .configuration(config).report(report)
+      .listener(IacScanListener.NULL)
+      .build();
   }
 
   @Data
