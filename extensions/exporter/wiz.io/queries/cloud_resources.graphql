@@ -1,0 +1,89 @@
+# Wiz Cloud Resources Query for Runtime Inventory Export
+#
+# Exports cloud resources (compute workloads, network assets) from Wiz
+# for ASPM correlation with security findings.
+#
+# Usage:
+#   ./wiz_cnapp_exporter.sh -c wiz.config --cloud-resources
+#
+# Variables:
+#   first: Number of results per page (max 500)
+#   after: Cursor for pagination
+#   filter: CloudResourceFilters
+
+query ListCloudResources($first: Int, $after: String, $filter: CloudResourceFilters) {
+  cloudResources(first: $first, after: $after, filterBy: $filter) {
+    pageInfo {
+      hasNextPage
+      endCursor
+    }
+    totalCount
+    nodes {
+      # Identity
+      id
+      name
+      type
+      nativeType
+      providerUniqueId
+
+      # Location
+      cloudPlatform
+      region
+      subscriptionId
+      subscriptionExternalId
+      subscriptionName
+
+      # Classification
+      status
+      tags {
+        key
+        value
+      }
+
+      # Network Exposure
+      isAccessibleFromInternet
+      hasHighPrivileges
+      hasSecrets
+      hasSensitiveData
+
+      # Container-specific fields
+      ... on ContainerResource {
+        podName
+        namespace
+        clusterName
+        containerImageId
+      }
+
+      # VM-specific fields
+      ... on VirtualMachineResource {
+        operatingSystem
+        ipAddresses
+      }
+
+      # Serverless-specific fields
+      ... on ServerlessResource {
+        runtime
+        handler
+        memorySize
+      }
+
+      # Kubernetes workload fields
+      ... on KubernetesWorkloadResource {
+        namespace
+        clusterName
+        kind
+        containerImages
+      }
+
+      # Projects (business context)
+      projects {
+        id
+        name
+        businessUnit
+        riskProfile {
+          businessImpact
+        }
+      }
+    }
+  }
+}

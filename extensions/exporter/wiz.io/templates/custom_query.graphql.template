@@ -1,0 +1,47 @@
+# Custom GraphQL Query Template for Wiz CNAPP Export
+#
+# This template can be used as a starting point for creating custom queries.
+# Copy this file to the queries/ directory and modify as needed.
+#
+# Usage:
+#   1. Copy this file: cp templates/custom_query.graphql.template queries/my_custom.graphql
+#   2. Modify the query to fit your needs
+#   3. Run: ./wiz_cnapp_exporter.sh -c wiz.config --query queries/my_custom.graphql
+#
+# Tips:
+#   - Use the Wiz API Console to explore available fields
+#   - Use pagination (first, after) for large result sets
+#   - Add filters to reduce the result set size
+#
+# Example: Custom query for high-severity unresolved vulnerabilities in AWS
+
+query CustomVulnerabilities($first: Int, $after: String, $filter: VulnerabilityFindingFilters) {
+  vulnerabilityFindings(first: $first, after: $after, filterBy: $filter) {
+    pageInfo {
+      hasNextPage
+      endCursor
+    }
+    totalCount
+    nodes {
+      id
+      name
+      severity: vendorSeverity
+      score
+      detailedName
+      version
+      fixedVersion
+      status
+      hasExploit
+      hasCisaKevExploit
+      portalUrl
+      vulnerableAsset {
+        ... on VulnerableAssetBase {
+          id
+          type
+          name
+          cloudPlatform
+        }
+      }
+    }
+  }
+}

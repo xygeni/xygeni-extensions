@@ -1,0 +1,74 @@
+query ListIssuesV2($first: Int, $after: String, $filterBy: IssueFilters, $orderBy: IssueOrder) {
+  issues: issuesV2(first: $first, after: $after, filterBy: $filterBy, orderBy: $orderBy) {
+    pageInfo {
+      hasNextPage
+      endCursor
+    }
+    nodes {
+      id
+      type
+      status
+      severity
+      createdAt
+      updatedAt
+      resolvedAt
+      sourceRule {
+        __typename
+        ... on Control {
+          id
+          name
+          controlDescription: description
+          resolutionRecommendation
+          securitySubCategories {
+            id
+            title
+            category {
+              id
+              name
+              framework {
+                id
+                name
+              }
+            }
+          }
+        }
+      }
+      entitySnapshot {
+        id
+        type
+        name
+        cloudPlatform
+        region
+        providerId
+        nativeType
+        tags
+        status
+        createdAt
+      }
+      projects {
+        id
+        name
+        businessUnit
+        riskProfile {
+          businessImpact
+        }
+      }
+      serviceTickets {
+        id
+        name
+        url
+        externalId
+      }
+      notes {
+        id
+        text
+        createdAt
+        updatedAt
+        user {
+          id
+          name
+        }
+      }
+    }
+  }
+}

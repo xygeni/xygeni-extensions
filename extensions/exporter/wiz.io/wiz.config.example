@@ -1,0 +1,113 @@
+# Wiz CNAPP Exporter Configuration
+# Copy this file to wiz.config and fill in your credentials
+#
+# SECURITY: This file may contain sensitive credentials. Keep it secure!
+#           Add wiz.config to .gitignore to prevent accidental commits.
+
+# =============================================================================
+# Wiz API Credentials
+# =============================================================================
+# Create a Service Account in Wiz with the appropriate permissions:
+#   - read:vulnerabilities (for vulnerability findings)
+#   - read:issues (for issues)
+#   - read:cloud_configuration (for configuration findings)
+#
+# See: https://docs.wiz.io/wiz-docs/docs/using-the-wiz-api
+
+# You may comment these and provide them using environment variables
+WIZ_CLIENT_ID="your-service-account-client-id"
+WIZ_CLIENT_SECRET="your-service-account-client-secret"
+
+# =============================================================================
+# Wiz Region
+# =============================================================================
+# Your Wiz tenant region. Common values:
+#   - us1, us2 (United States)
+#   - eu1, eu2 (Europe)
+#   - ap1, ap2 (Asia Pacific)
+# Check your Wiz portal URL to determine your region (e.g., app.us1.wiz.io)
+
+WIZ_REGION="us1"
+
+# =============================================================================
+# Export Options
+# =============================================================================
+# Directory where exported JSON files will be saved
+
+OUTPUT_DIR="./output"
+
+# Which report types to export (true/false)
+
+EXPORT_VULNERABILITIES=true
+EXPORT_ISSUES=true
+EXPORT_CONFIG_FINDINGS=true
+
+# =============================================================================
+# Vulnerability Findings Query Variables
+# =============================================================================
+# Maximum results per page (max 500 for vulnerabilities)
+VULN_FIRST=500
+
+# Filter by status: UNRESOLVED, RESOLVED, PASSED, IGNORED
+VULN_STATUS='["UNRESOLVED"]'
+
+# Filter by severity: CRITICAL, HIGH, MEDIUM, LOW, NONE
+VULN_SEVERITY='["CRITICAL", "HIGH"]'
+
+# Optional: Filter by detection method: PACKAGE, LIBRARY, OS, CONFIG_FILE
+# VULN_DETECTION_METHOD='["LIBRARY", "PACKAGE"]'
+
+# Optional: Filter by exploit availability
+# VULN_HAS_EXPLOIT=true
+# VULN_HAS_CISA_KEV_EXPLOIT=true
+
+# =============================================================================
+# Issues Query Variables
+# =============================================================================
+# Maximum results per page (max 500)
+ISSUES_FIRST=500
+
+# Filter by status: OPEN, IN_PROGRESS, RESOLVED, REJECTED
+ISSUES_STATUS='["OPEN", "IN_PROGRESS"]'
+
+# Filter by issue type: TOXIC_COMBINATION, THREAT_DETECTION, CLOUD_CONFIGURATION
+ISSUES_TYPES='["TOXIC_COMBINATION", "THREAT_DETECTION", "CLOUD_CONFIGURATION"]'
+
+# Filter by severity: CRITICAL, HIGH, MEDIUM, LOW, INFORMATIONAL
+# ISSUES_SEVERITY='["CRITICAL", "HIGH"]'
+
+# Optional: Filter by project ID
+# ISSUES_PROJECT_ID="your-project-uuid"
+
+# =============================================================================
+# Configuration Findings Query Variables
+# =============================================================================
+# Maximum results per page (max 500)
+CONFIG_FIRST=500
+
+# Filter by result: FAIL, ERROR, PASS, NOT_ASSESSED
+CONFIG_RESULT='["FAIL", "ERROR"]'
+
+# Filter by severity: CRITICAL, HIGH, MEDIUM, LOW, NONE
+CONFIG_SEVERITY='["CRITICAL", "HIGH", "MEDIUM"]'
+
+# Optional: Filter by status: OPEN, IN_PROGRESS, RESOLVED, REJECTED
+# CONFIG_STATUS='["OPEN"]'
+
+# Optional: Filter by cloud provider
+# CONFIG_CLOUD_PROVIDER='["AWS", "AZURE", "GCP"]'
+
+# =============================================================================
+# Advanced Options
+# =============================================================================
+# Enable pagination to fetch all results (may take longer for large datasets)
+ENABLE_PAGINATION=true
+
+# Maximum number of pages to fetch (0 = unlimited)
+MAX_PAGES=0
+
+# Delay between API requests in seconds (to respect rate limits)
+REQUEST_DELAY=0.5
+
+# Enable verbose output for debugging
+VERBOSE=false
