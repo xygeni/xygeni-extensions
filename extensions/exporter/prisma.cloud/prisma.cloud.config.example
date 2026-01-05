@@ -1,0 +1,107 @@
+# Prisma Cloud CSPM Exporter Configuration
+# Copy this file to prisma.cloud.config and fill in your credentials
+#
+# SECURITY: This file may contain sensitive credentials. Keep it secure!
+#           The prisma.cloud.config file is excluded via .gitignore.
+
+# =============================================================================
+# Prisma Cloud API Credentials
+# =============================================================================
+# Create an Access Key in Prisma Cloud console:
+#   Settings > Access Control > Access Keys > Add > Access Key
+#
+# See: https://docs.prismacloud.io/en/enterprise-edition/content-collections/administration/create-access-keys
+#
+# You may also set these via environment variables:
+#   PRISMA_CLOUD_ACCESS_KEY
+#   PRISMA_CLOUD_SECRET_KEY
+#   PRISMA_CLOUD_REGION
+
+[credentials]
+access_key = your-access-key-id
+secret_key = your-secret-key
+
+# Prisma Cloud API region
+# Common values:
+#   us      - api.prismacloud.io (US)
+#   us-2    - api2.prismacloud.io (US-2)
+#   us-3    - api3.prismacloud.io (US-3)
+#   eu      - api.eu.prismacloud.io (EU)
+#   eu-2    - api2.eu.prismacloud.io (EU-2)
+#   ca      - api.ca.prismacloud.io (Canada)
+#   sg      - api.sg.prismacloud.io (Singapore)
+#   anz     - api.anz.prismacloud.io (Australia/New Zealand)
+#   ind     - api.ind.prismacloud.io (India)
+#   jp      - api.jp.prismacloud.io (Japan)
+#   uk      - api.uk.prismacloud.io (UK)
+#   fr      - api.fr.prismacloud.io (France)
+#   de      - api.de.prismacloud.io (Germany)
+#
+# Check your Prisma Cloud portal URL to determine your region
+# (e.g., app.prismacloud.io -> us, app.eu.prismacloud.io -> eu)
+region = us
+
+# =============================================================================
+# Output Configuration
+# =============================================================================
+
+[output]
+# Directory where exported JSON files will be saved
+output_dir = ./output
+
+# =============================================================================
+# Security Alerts Export Configuration
+# =============================================================================
+# API Documentation: https://pan.dev/prisma-cloud/api/cspm/get-alerts-v-2/
+
+[alerts]
+# Time range in days for alert export (default: 30)
+time_range_days = 30
+
+# Alert status filter (default: open)
+# Values: open, dismissed, resolved, snoozed
+status = open
+
+# Severity filter (optional, comma-separated)
+# Values: critical, high, medium, low, informational
+# Leave empty for all severities
+severity =
+
+# Cloud provider filter (optional, comma-separated)
+# Values: aws, azure, gcp, alibaba_cloud, oci
+# Leave empty for all cloud providers
+cloud_types =
+
+# Maximum number of alerts to export (default: 10000)
+limit = 10000
+
+# =============================================================================
+# Cloud Asset Inventory Export Configuration
+# =============================================================================
+# API Documentation: https://pan.dev/prisma-cloud/api/cspm/get-resource/
+
+[assets]
+# Time range in days for asset export (default: 1)
+# Assets are point-in-time snapshots, so 1 day is usually sufficient
+time_range_days = 1
+
+# Cloud provider filter (optional, comma-separated)
+# Values: aws, azure, gcp, alibaba_cloud, oci
+# Leave empty for all cloud providers
+cloud_types =
+
+# Resource type filter (optional, comma-separated)
+# Examples: aws_ec2_instance, azure_vm, gcp_compute_instance
+# Leave empty for all resource types
+resource_types =
+
+# Maximum number of resources to export (default: 10000)
+limit = 10000
+
+# =============================================================================
+# Advanced Configuration
+# =============================================================================
+
+[advanced]
+# Delay between API requests in seconds (to respect rate limits)
+request_delay = 0.5

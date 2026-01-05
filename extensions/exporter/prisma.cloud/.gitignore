@@ -1,0 +1,10 @@
+# Prisma Cloud config file (may contain credentials)
+prisma.cloud.config
+
+# Output directory
+output/
+
+# Python artifacts
+__pycache__/
+*.pyc
+*.pyo
