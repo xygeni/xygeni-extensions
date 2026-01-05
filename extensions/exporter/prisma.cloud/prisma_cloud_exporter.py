@@ -1,4 +1,10 @@
 #!/usr/bin/env python3
+# /// script
+# requires-python = ">=3.7"
+# dependencies = [
+#   "requests",
+# ]
+# ///
 """
 Prisma Cloud CSPM Exporter for Xygeni
 

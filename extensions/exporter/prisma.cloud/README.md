@@ -5,33 +5,51 @@ This script exports security alerts and cloud asset inventory from Prisma Cloud 
 ## Prerequisites
 
 - Python 3.7+
-- `requests` library: `pip install requests`
 - Prisma Cloud account with API access
 - Access Key and Secret Key from Prisma Cloud console
 
 ## Quick Start
 
-1. **Install dependencies:**
-   ```bash
-   pip install requests
-   ```
+The script uses [PEP 723 inline script metadata](https://packaging.python.org/en/latest/specifications/inline-script-metadata/) to declare dependencies. You can run it with tools that support this standard:
 
-2. **Create configuration file:**
+### Option A: Using `uv` (Recommended)
+
+```bash
+# No manual dependency installation needed
+uv run prisma_cloud_exporter.py -c prisma.cloud.config --all
+```
+
+### Option B: Using `pipx`
+
+```bash
+pipx run prisma_cloud_exporter.py -c prisma.cloud.config --all
+```
+
+### Option C: Traditional pip install
+
+```bash
+pip install requests
+python prisma_cloud_exporter.py -c prisma.cloud.config --all
+```
+
+### Configuration Steps
+
+1. **Create configuration file:**
    ```bash
    cp prisma.cloud.config.example prisma.cloud.config
    ```
 
-3. **Edit configuration with your credentials:**
+2. **Edit configuration with your credentials:**
    ```bash
    # Edit prisma.cloud.config with your Access Key and Secret Key
    ```
 
-4. **Run the exporter:**
+3. **Run the exporter:**
    ```bash
    python prisma_cloud_exporter.py -c prisma.cloud.config --all
    ```
 
-5. **Upload to Xygeni:**
+4. **Upload to Xygeni:**
    ```bash
    xygeni report-upload --report=./output/prisma_cloud_alerts.json --format iac-prisma-cloud
    xygeni report-upload --report=./output/prisma_cloud_assets.json --format inventory-prisma-cloud
