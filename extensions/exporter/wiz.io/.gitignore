@@ -1,0 +1,10 @@
+# Wiz config file (may contain sensitive credentials)
+wiz.config
+
+# Output directory
+output/
+
+# Python artifacts
+__pycache__/
+*.pyc
+*.pyo

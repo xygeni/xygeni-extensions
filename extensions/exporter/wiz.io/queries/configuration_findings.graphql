@@ -1,0 +1,71 @@
+query ListConfigurationFindings($first: Int, $after: String, $filter: ConfigurationFindingFilters) {
+  configurationFindings(first: $first, after: $after, filterBy: $filter) {
+    pageInfo {
+      hasNextPage
+      endCursor
+    }
+    totalCount
+    nodes {
+      id
+      severity
+      result
+      status
+      remediation
+      analyzedAt
+      targetExternalId
+      targetObjectProviderUniqueId
+      firstSeenAt
+      resolutionReason
+      resource {
+        id
+        providerId
+        name
+        type
+        nativeType
+        region
+        cloudPlatform
+        status
+        tags {
+          key
+          value
+        }
+        subscription {
+          id
+          name
+          externalId
+          cloudProvider
+        }
+        projects {
+          id
+          name
+          riskProfile {
+            businessImpact
+          }
+        }
+      }
+      rule {
+        id
+        graphId
+        name
+        description
+        remediationInstructions
+        functionAsControl
+      }
+      securitySubCategories {
+        id
+        title
+        category {
+          id
+          name
+          framework {
+            id
+            name
+          }
+        }
+      }
+      note {
+        text
+      }
+    }
+  }
+}
