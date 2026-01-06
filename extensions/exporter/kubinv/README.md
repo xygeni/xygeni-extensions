@@ -300,7 +300,7 @@ After generating the inventory report:
 
 ```bash
 # Upload to Xygeni platform
-xygeni report-upload --report=k8s_inventory.json --format inventory-k8s
+xygeni report-upload --report=k8s_inventory.json --format inventory-xygeni
 ```
 
 ## Use Cases

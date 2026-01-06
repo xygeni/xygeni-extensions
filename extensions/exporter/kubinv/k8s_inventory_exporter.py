@@ -276,60 +276,71 @@ class K8sInventoryExporter:
             return None
         return int(dt.timestamp() * 1000)
 
-    def _parse_image_name(self, image: str) -> Dict[str, Any]:
-        """Parse a container image name into components."""
+    def _parse_image_name(self, image_ref: str) -> Dict[str, Any]:
+        """Parse a container image name into components matching ImageName class.
+
+        ImageName fields:
+        - hostname: registry hostname (nullable)
+        - port: registry port (0 if not specified)
+        - repository: namespace/path (nullable)
+        - image: the actual image name (REQUIRED, non-null)
+        - tag: image tag (nullable)
+        - digest: image digest (nullable)
+        """
         result = {
-            "registry": "",
-            "namespace": "",
-            "repository": "",
-            "tag": "latest",
-            "digest": "",
-            "shortName": "",
-            "tagOrDigest": ""
+            "hostname": None,
+            "port": 0,
+            "repository": None,
+            "image": "",  # Required field
+            "tag": None,
+            "digest": None
         }
 
-        # Handle digest
-        if "@sha256:" in image:
-            image_part, digest = image.rsplit("@sha256:", 1)
-            result["digest"] = f"sha256:{digest}"
-            image = image_part
-        elif "@" in image:
-            image_part, digest = image.rsplit("@", 1)
+        working = image_ref
+
+        # Handle digest (e.g., @sha256:abc123)
+        if "@" in working:
+            working, digest = working.rsplit("@", 1)
             result["digest"] = digest
-            image = image_part
 
-        # Handle tag
-        if ":" in image.split("/")[-1]:
-            image_part, tag = image.rsplit(":", 1)
+        # Handle tag (e.g., :latest)
+        # Be careful: tag is only after the last / and contains :
+        last_part = working.split("/")[-1]
+        if ":" in last_part:
+            working, tag = working.rsplit(":", 1)
             result["tag"] = tag
-            image = image_part
 
-        # Parse registry/namespace/repository
-        parts = image.split("/")
+        # Parse hostname/repository/image
+        parts = working.split("/")
 
         if len(parts) == 1:
             # Simple image name (e.g., "nginx")
-            result["registry"] = "docker.io"
-            result["namespace"] = "library"
-            result["repository"] = parts[0]
+            # hostname defaults to docker.io, repository to library
+            result["image"] = parts[0]
         elif len(parts) == 2:
-            # Could be registry/image or namespace/image
+            # Could be hostname/image or repository/image
+            # If first part looks like a hostname (has . or : or is localhost), treat as hostname
             if "." in parts[0] or ":" in parts[0] or parts[0] == "localhost":
-                result["registry"] = parts[0]
-                result["namespace"] = "library"
-                result["repository"] = parts[1]
+                result["hostname"] = parts[0]
+                result["image"] = parts[1]
             else:
-                result["registry"] = "docker.io"
-                result["namespace"] = parts[0]
-                result["repository"] = parts[1]
+                # It's repository/image (e.g., "myuser/myimage")
+                result["repository"] = parts[0]
+                result["image"] = parts[1]
         else:
-            # Full path with registry
-            result["registry"] = parts[0]
-            result["namespace"] = "/".join(parts[1:-1])
-            result["repository"] = parts[-1]
+            # Full path: hostname/repository.../image
+            result["hostname"] = parts[0]
+            result["repository"] = "/".join(parts[1:-1])
+            result["image"] = parts[-1]
 
-        result["shortName"] = result["repository"]
-        result["tagOrDigest"] = result["digest"] if result["digest"] else result["tag"]
+        # Handle hostname:port
+        if result["hostname"] and ":" in result["hostname"]:
+            hostname, port_str = result["hostname"].rsplit(":", 1)
+            try:
+                result["port"] = int(port_str)
+                result["hostname"] = hostname
+            except ValueError:
+                pass  # Not a port, keep as-is
 
         return result
 
@@ -365,19 +376,19 @@ class K8sInventoryExporter:
     def _create_cluster_asset(self) -> str:
         """Create the cluster asset and return its ID."""
         cluster_id = self._generate_asset_id(
-            self.KIND_CLOUD_RESOURCE, "kubernetes", self.cluster_name
+            self.KIND_CLOUD_RESOURCE, "kubernetes", "kubernetes_cluster", "", self.cluster_name
         )
 
         cluster_asset = {
             "kind": self.KIND_CLOUD_RESOURCE,
             "id": cluster_id,
             "name": self.cluster_name,
-            "qualifiedName": f"kubernetes/{self.cluster_name}",
+            "qualifiedName": f"{self.cluster_name} (kubernetes)",
             "type": "kubernetes_cluster",
+            "provider": "kubernetes",
             "properties": {
                 "resource_type": "kubernetes_cluster",
-                "resource_category": "Container",
-                "provider": "kubernetes"
+                "resource_category": "Container"
             }
         }
 
@@ -390,20 +401,21 @@ class K8sInventoryExporter:
     def _create_namespace_asset(self, namespace: str, cluster_id: str) -> str:
         """Create a namespace asset and return its ID."""
         ns_id = self._generate_asset_id(
-            self.KIND_CLOUD_RESOURCE, "kubernetes", self.cluster_name, "namespace", namespace
+            self.KIND_CLOUD_RESOURCE, "kubernetes", "kubernetes_namespace", "", namespace
         )
 
         ns_asset = {
             "kind": self.KIND_CLOUD_RESOURCE,
             "id": ns_id,
             "name": namespace,
-            "qualifiedName": f"kubernetes/{self.cluster_name}/namespace/{namespace}",
+            "qualifiedName": f"{namespace} (kubernetes)",
             "type": "kubernetes_namespace",
+            "provider": "kubernetes",
             "belongsTo": cluster_id,
             "properties": {
                 "resource_type": "kubernetes_namespace",
                 "resource_category": "Container",
-                "provider": "kubernetes"
+                "cluster": self.cluster_name
             }
         }
 
@@ -411,17 +423,17 @@ class K8sInventoryExporter:
         self._add_link(ns_id, cluster_id, self.LINK_BELONGS_TO)
         return ns_id
 
-    def _create_container_image_asset(self, image: str) -> str:
+    def _create_container_image_asset(self, image_ref: str) -> str:
         """Create a container image asset and return its ID."""
-        parsed = self._parse_image_name(image)
+        parsed = self._parse_image_name(image_ref)
 
         # Use digest if available, otherwise use tag for uniqueness
-        unique_suffix = parsed["digest"] if parsed["digest"] else f"{parsed['tag']}"
+        unique_suffix = parsed["digest"] if parsed["digest"] else (parsed["tag"] or "latest")
         image_id = self._generate_asset_id(
             self.KIND_CONTAINER_IMAGE,
-            parsed["registry"],
-            parsed["namespace"],
-            parsed["repository"],
+            parsed["hostname"] or "docker.io",
+            parsed["repository"] or "library",
+            parsed["image"],
             unique_suffix
         )
 
@@ -429,20 +441,23 @@ class K8sInventoryExporter:
         if image_id in self.asset_ids:
             return image_id
 
+        # Build ImageName object matching the Java class structure
+        # Required field: image (non-null)
+        image_name_obj = {
+            "hostname": parsed["hostname"],
+            "port": parsed["port"],
+            "repository": parsed["repository"],
+            "image": parsed["image"],  # REQUIRED - the actual image name
+            "tag": parsed["tag"],
+            "digest": parsed["digest"]
+        }
+
         image_asset = {
             "kind": self.KIND_CONTAINER_IMAGE,
             "id": image_id,
-            "name": image,
-            "qualifiedName": image,
-            "image": {
-                "registry": parsed["registry"],
-                "namespace": parsed["namespace"],
-                "repository": parsed["repository"],
-                "tag": parsed["tag"],
-                "digest": parsed["digest"],
-                "shortName": parsed["shortName"],
-                "tagOrDigest": parsed["tagOrDigest"]
-            },
+            "name": image_ref,
+            "qualifiedName": image_ref,
+            "image": image_name_obj,
             "properties": {}
         }
 
@@ -488,15 +503,16 @@ class K8sInventoryExporter:
                     "kind": self.KIND_CLOUD_RESOURCE,
                     "id": deploy_id,
                     "name": deploy_name,
-                    "qualifiedName": f"kubernetes/{self.cluster_name}/{namespace}/deployment/{deploy_name}",
+                    "qualifiedName": f"{deploy_name} (kubernetes)",
                     "type": "kubernetes_deployment",
+                    "provider": "kubernetes",
                     "belongsTo": ns_id,
                     "createdAt": self._timestamp_to_millis(deploy.metadata.creation_timestamp),
                     "properties": {
                         "resource_type": "kubernetes_deployment",
                         "resource_category": "Container",
-                        "provider": "kubernetes",
                         "namespace": namespace,
+                        "cluster": self.cluster_name,
                         "replicas": deploy.spec.replicas or 1,
                         "availableReplicas": deploy.status.available_replicas or 0,
                         "readyReplicas": deploy.status.ready_replicas or 0,
@@ -543,15 +559,16 @@ class K8sInventoryExporter:
                     "kind": self.KIND_CLOUD_RESOURCE,
                     "id": sts_id,
                     "name": sts_name,
-                    "qualifiedName": f"kubernetes/{self.cluster_name}/{namespace}/statefulset/{sts_name}",
+                    "qualifiedName": f"{sts_name} (kubernetes)",
                     "type": "kubernetes_statefulset",
+                    "provider": "kubernetes",
                     "belongsTo": ns_id,
                     "createdAt": self._timestamp_to_millis(sts.metadata.creation_timestamp),
                     "properties": {
                         "resource_type": "kubernetes_statefulset",
                         "resource_category": "Container",
-                        "provider": "kubernetes",
                         "namespace": namespace,
+                        "cluster": self.cluster_name,
                         "replicas": sts.spec.replicas or 1,
                         "readyReplicas": sts.status.ready_replicas or 0,
                         "serviceName": sts.spec.service_name
@@ -594,15 +611,16 @@ class K8sInventoryExporter:
                     "kind": self.KIND_CLOUD_RESOURCE,
                     "id": ds_id,
                     "name": ds_name,
-                    "qualifiedName": f"kubernetes/{self.cluster_name}/{namespace}/daemonset/{ds_name}",
+                    "qualifiedName": f"{ds_name} (kubernetes)",
                     "type": "kubernetes_daemonset",
+                    "provider": "kubernetes",
                     "belongsTo": ns_id,
                     "createdAt": self._timestamp_to_millis(ds.metadata.creation_timestamp),
                     "properties": {
                         "resource_type": "kubernetes_daemonset",
                         "resource_category": "Container",
-                        "provider": "kubernetes",
                         "namespace": namespace,
+                        "cluster": self.cluster_name,
                         "desiredNumberScheduled": ds.status.desired_number_scheduled or 0,
                         "currentNumberScheduled": ds.status.current_number_scheduled or 0,
                         "numberReady": ds.status.number_ready or 0
@@ -659,15 +677,16 @@ class K8sInventoryExporter:
                     "kind": self.KIND_CLOUD_RESOURCE,
                     "id": job_id,
                     "name": job_name,
-                    "qualifiedName": f"kubernetes/{self.cluster_name}/{namespace}/job/{job_name}",
+                    "qualifiedName": f"{job_name} (kubernetes)",
                     "type": "kubernetes_job",
+                    "provider": "kubernetes",
                     "belongsTo": ns_id,
                     "createdAt": self._timestamp_to_millis(job.metadata.creation_timestamp),
                     "properties": {
                         "resource_type": "kubernetes_job",
                         "resource_category": "Container",
-                        "provider": "kubernetes",
                         "namespace": namespace,
+                        "cluster": self.cluster_name,
                         "status": status,
                         "succeeded": succeeded,
                         "failed": failed,
@@ -719,15 +738,16 @@ class K8sInventoryExporter:
                     "kind": self.KIND_CLOUD_RESOURCE,
                     "id": cj_id,
                     "name": cj_name,
-                    "qualifiedName": f"kubernetes/{self.cluster_name}/{namespace}/cronjob/{cj_name}",
+                    "qualifiedName": f"{cj_name} (kubernetes)",
                     "type": "kubernetes_cronjob",
+                    "provider": "kubernetes",
                     "belongsTo": ns_id,
                     "createdAt": self._timestamp_to_millis(cj.metadata.creation_timestamp),
                     "properties": {
                         "resource_type": "kubernetes_cronjob",
                         "resource_category": "Container",
-                        "provider": "kubernetes",
                         "namespace": namespace,
+                        "cluster": self.cluster_name,
                         "schedule": cj.spec.schedule,
                         "suspend": cj.spec.suspend or False,
                         "concurrencyPolicy": cj.spec.concurrency_policy or "Allow"
@@ -777,15 +797,16 @@ class K8sInventoryExporter:
                     "kind": self.KIND_CLOUD_RESOURCE,
                     "id": pod_id,
                     "name": pod_name,
-                    "qualifiedName": f"kubernetes/{self.cluster_name}/{namespace}/pod/{pod_name}",
+                    "qualifiedName": f"{pod_name} (kubernetes)",
                     "type": "kubernetes_pod",
+                    "provider": "kubernetes",
                     "belongsTo": ns_id,
                     "createdAt": self._timestamp_to_millis(pod.metadata.creation_timestamp),
                     "properties": {
                         "resource_type": "kubernetes_pod",
                         "resource_category": "Container",
-                        "provider": "kubernetes",
                         "namespace": namespace,
+                        "cluster": self.cluster_name,
                         "phase": pod.status.phase,
                         "nodeName": pod.spec.node_name or "",
                         "hostIP": pod.status.host_ip or "",
@@ -886,15 +907,16 @@ class K8sInventoryExporter:
                     "kind": self.KIND_CLOUD_RESOURCE,
                     "id": rs_id,
                     "name": rs_name,
-                    "qualifiedName": f"kubernetes/{self.cluster_name}/{namespace}/replicaset/{rs_name}",
+                    "qualifiedName": f"{rs_name} (kubernetes)",
                     "type": "kubernetes_replicaset",
+                    "provider": "kubernetes",
                     "belongsTo": ns_id,
                     "createdAt": self._timestamp_to_millis(rs.metadata.creation_timestamp),
                     "properties": {
                         "resource_type": "kubernetes_replicaset",
                         "resource_category": "Container",
-                        "provider": "kubernetes",
                         "namespace": namespace,
+                        "cluster": self.cluster_name,
                         "replicas": rs.spec.replicas or 0,
                         "readyReplicas": rs.status.ready_replicas or 0,
                         "availableReplicas": rs.status.available_replicas or 0
@@ -947,16 +969,17 @@ class K8sInventoryExporter:
                     "kind": self.KIND_CLOUD_RESOURCE,
                     "id": svc_id,
                     "name": svc_name,
-                    "qualifiedName": f"kubernetes/{self.cluster_name}/{namespace}/service/{svc_name}",
+                    "qualifiedName": f"{svc_name} (kubernetes)",
                     "type": "kubernetes_service",
+                    "provider": "kubernetes",
                     "belongsTo": ns_id,
                     "createdAt": self._timestamp_to_millis(svc.metadata.creation_timestamp),
                     "properties": {
                         "resource_type": "kubernetes_service",
                         "resource_category": "Network",
-                        "provider": "kubernetes",
                         "namespace": namespace,
-                        "type": svc.spec.type,
+                        "cluster": self.cluster_name,
+                        "serviceType": svc.spec.type,
                         "clusterIP": svc.spec.cluster_ip or "",
                         "ports": []
                     }
@@ -1154,15 +1177,16 @@ class K8sInventoryExporter:
                     "kind": self.KIND_CLOUD_RESOURCE,
                     "id": np_id,
                     "name": np_name,
-                    "qualifiedName": f"kubernetes/{self.cluster_name}/{namespace}/networkpolicy/{np_name}",
+                    "qualifiedName": f"{np_name} (kubernetes)",
                     "type": "kubernetes_networkpolicy",
+                    "provider": "kubernetes",
                     "belongsTo": ns_id,
                     "createdAt": self._timestamp_to_millis(np.metadata.creation_timestamp),
                     "properties": {
                         "resource_type": "kubernetes_networkpolicy",
                         "resource_category": "Network",
-                        "provider": "kubernetes",
                         "namespace": namespace,
+                        "cluster": self.cluster_name,
                         "policyTypes": list(np.spec.policy_types) if np.spec.policy_types else []
                     }
                 }
@@ -1375,7 +1399,7 @@ def main() -> int:
         print()
         log_info("To upload to Xygeni, run:")
         print()
-        print(f"  xygeni report-upload --report={args.output} --format inventory-k8s")
+        print(f"  xygeni report-upload --report={args.output} --format inventory-xygeni")
         print()
 
     return 0
