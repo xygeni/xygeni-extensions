@@ -1,4 +1,5 @@
 /.idea
+CLAUDE.md
 /extensions/custom_detectors/target/
 /extensions/kiuwan/target/
 /extensions/report_upload/secrets/trufflehog/target/
