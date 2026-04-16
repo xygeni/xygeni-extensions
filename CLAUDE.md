@@ -116,7 +116,8 @@ xygeni util conf-upload
 
 ## SAST Rules Development
 
-SAST (Static Application Security Testing) detectors are developed in the main DepsDoctor repository (`/home/lrodriguez/projects/xygeni/DepsDoctor`), not in xygeni-extensions. This section provides context for cross-repository work.
+SAST (Static Application Security Testing) detectors developed by Xygeni are not in xygeni-extensions. 
+This section provides context for cross-repository work.
 
 ### SAST Scanner Architecture
 
