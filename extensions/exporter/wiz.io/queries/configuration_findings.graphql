@@ -1,12 +1,18 @@
-# Wiz CNAPP configuration findings (CSPM policy violations against cloud resources).
+# Wiz CNAPP cloud configuration findings — CSPM policy violations against cloud resources.
 #
-# Every field below is confirmed present in a real tenant response, so the previously conservative
-# selection has been restored. In particular `resolutionReason` and `note { text }` do exist (they
-# come back null while a finding is open), as do `analyzedAt` and `totalCount`.
+# Usage:
+#   python wiz_cnapp_exporter.py -c wiz.config --config-findings
 #
-# `targetExternalId` is selected deliberately and must not be dropped: it is the provider-assigned
-# identifier of the object the rule evaluated, it is present on every finding — including those
-# whose resource has no `providerId` — and it anchors the flaw's identity. See IacFlaw.targetId.
+# Variables:
+#   first    Number of results per page (max 500)
+#   after    Cursor for pagination, supplied by the exporter
+#   filterBy ConfigurationFindingFilters — result and severity come from the [config_findings]
+#            config section, plus updatedAt when --updated-after is given
+#   orderBy  ConfigurationFindingOrder
+#
+# `targetExternalId` identifies the object the rule evaluated and is present on every finding,
+# including those whose resource has no `providerId`. Xygeni uses it to identify the finding, so
+# keep it in the selection.
 query ListConfigurationFindings($first: Int, $after: String, $filterBy: ConfigurationFindingFilters, $orderBy: ConfigurationFindingOrder) {
   configurationFindings(first: $first, after: $after, filterBy: $filterBy, orderBy: $orderBy) {
     pageInfo { hasNextPage endCursor }

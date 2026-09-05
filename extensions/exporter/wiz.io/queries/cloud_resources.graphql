@@ -1,17 +1,17 @@
 # Wiz CNAPP cloud asset inventory.
 #
-# Uses cloudResourcesV2: v1 `cloudResources` is deprecated, and its `CloudResourceFilters` has no
-# `status` field. Note the v2 filter grammar takes objects — `type: {equals: [...]}` — not the bare
-# arrays v1 accepted.
+# Usage:
+#   python wiz_cnapp_exporter.py -c wiz.config --cloud-resources
 #
-# Per-resource attributes are NOT flat fields on the node. Four independent integrations (Cortex
-# XSOAR, Netskope, Infoblox's CloudQuery source, and Wiz's own CSV export) all route them through
-# a JSON `properties` bag on the graph entity, so region, status, tags and exposure flags are read
-# from `graphEntity.properties` rather than selected individually.
+# Variables:
+#   first    Number of results per page (max 500)
+#   after    Cursor for pagination, supplied by the exporter
+#   filterBy CloudResourceV2Filters — type and status come from the [cloud_resources] config
+#            section. Note the v2 grammar takes objects, `type: {equals: [...]}`, rather than
+#            the bare arrays the other filters use.
 #
-# UNVALIDATED: unlike the other three queries, this one has never run against a live tenant — no
-# public integration queries v1 `cloudResources` successfully and Steampipe has no cloud-resources
-# table at all. Confirm by introspection before relying on it.
+# Per-resource attributes such as region, status, tags and exposure flags are not flat fields on
+# the node: they arrive inside the JSON `properties` bag on `graphEntity`.
 query ListCloudResources($first: Int, $after: String, $filterBy: CloudResourceV2Filters) {
   cloudResourcesV2(first: $first, after: $after, filterBy: $filterBy) {
     pageInfo { hasNextPage endCursor }

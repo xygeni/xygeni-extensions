@@ -115,8 +115,8 @@ severity = CRITICAL, HIGH, MEDIUM
 # =============================================================================
 # API: cloudResourcesV2 GraphQL query
 #
-# NOTE: unlike the other three, this export has not been validated against a live tenant.
-# Confirm the field selection by introspection before relying on it.
+# Note the v2 filter grammar takes objects rather than bare arrays; the exporter builds that
+# shape for you from the plain values below.
 
 [cloud_resources]
 # Maximum results per page (max 500)

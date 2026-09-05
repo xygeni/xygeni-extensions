@@ -1,11 +1,18 @@
-# Wiz CNAPP issues — Toxic Combinations, Threats, Cloud Misconfigurations.
+# Wiz CNAPP issues — Toxic Combinations, Threats and Cloud Misconfigurations.
 #
-# sourceRule is a UNION. The three issue types we request are backed by three different rule
-# types, so all three fragments are required: selecting only `... on Control` returns an empty
-# rule object for THREAT_DETECTION and CLOUD_CONFIGURATION issues, losing the rule name,
-# description, remediation and framework mapping — precisely what an ASPM ingest needs.
-# Verified against three independent integrations (Cortex XSOAR, Port Ocean, Elastic).
+# Usage:
+#   python wiz_cnapp_exporter.py -c wiz.config --issues
 #
+# Variables:
+#   first    Number of results per page (max 500)
+#   after    Cursor for pagination, supplied by the exporter
+#   filterBy IssueFilters — status and type come from the [issues] config section,
+#            plus updatedAt when --updated-after is given
+#   orderBy  IssueOrder — CREATED_AT descending
+#
+# `sourceRule` is a union type. Each issue type is backed by a different rule type, so all three
+# fragments are needed: without them the rule name, description, remediation and framework
+# mapping come back empty for THREAT_DETECTION and CLOUD_CONFIGURATION issues.
 # Each member's `description` is aliased so the union members cannot collide in the response.
 query ListIssuesV2($first: Int, $after: String, $filterBy: IssueFilters, $orderBy: IssueOrder) {
   issuesV2(first: $first, after: $after, filterBy: $filterBy, orderBy: $orderBy) {

@@ -285,15 +285,15 @@ wiz.io/
 - Pages are appended to a `.part` file as they arrive. A run that fails on page 40 of 50 leaves
   those 40 pages on disk (as NDJSON) instead of discarding them, and says where.
 
-## Known limitations
+## Notes
 
-- **Cloud resources is not validated end to end.** Unlike the other three exports, no response
-  from a live tenant has been seen for it, and no public Wiz integration queries v1
-  `cloudResources` successfully. The query targets `cloudResourcesV2` and reads per-resource
-  attributes from `graphEntity.properties`, which is where four independent integrations agree
-  they live — but confirm by introspection before relying on it.
+- **Cloud resources** uses the `cloudResourcesV2` API. Per-resource attributes such as region,
+  status, tags and exposure flags arrive inside the JSON `properties` bag on `graphEntity` rather
+  than as flat fields on the node. If your tenant exposes resource types this export does not
+  cover, adjust `types` in the `[cloud_resources]` section or use a custom query.
 - `THREAT_DETECTION` issues require a Wiz Defend licence. Without one that type simply returns
   nothing rather than erroring.
+- The Wiz API Explorer in the console is the reference for field names if you extend a query.
 
 ## Rate Limits
 
