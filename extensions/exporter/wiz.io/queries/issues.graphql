@@ -1,9 +1,23 @@
+# Wiz CNAPP issues — Toxic Combinations, Threats and Cloud Misconfigurations.
+#
+# Usage:
+#   python wiz_cnapp_exporter.py -c wiz.config --issues
+#
+# Variables:
+#   first    Number of results per page (max 500)
+#   after    Cursor for pagination, supplied by the exporter
+#   filterBy IssueFilters — status and type come from the [issues] config section,
+#            plus updatedAt when --updated-after is given
+#   orderBy  IssueOrder — CREATED_AT descending
+#
+# `sourceRule` is a union type. Each issue type is backed by a different rule type, so all three
+# fragments are needed: without them the rule name, description, remediation and framework
+# mapping come back empty for THREAT_DETECTION and CLOUD_CONFIGURATION issues.
+# Each member's `description` is aliased so the union members cannot collide in the response.
 query ListIssuesV2($first: Int, $after: String, $filterBy: IssueFilters, $orderBy: IssueOrder) {
-  issues: issuesV2(first: $first, after: $after, filterBy: $filterBy, orderBy: $orderBy) {
-    pageInfo {
-      hasNextPage
-      endCursor
-    }
+  issuesV2(first: $first, after: $after, filterBy: $filterBy, orderBy: $orderBy) {
+    pageInfo { hasNextPage endCursor }
+    totalCount
     nodes {
       id
       type
@@ -12,6 +26,8 @@ query ListIssuesV2($first: Int, $after: String, $filterBy: IssueFilters, $orderB
       createdAt
       updatedAt
       resolvedAt
+      statusChangedAt
+      dueAt
       sourceRule {
         __typename
         ... on Control {
@@ -32,6 +48,20 @@ query ListIssuesV2($first: Int, $after: String, $filterBy: IssueFilters, $orderB
             }
           }
         }
+        ... on CloudEventRule {
+          id
+          name
+          cloudEventRuleDescription: description
+          sourceType
+          type
+        }
+        ... on CloudConfigurationRule {
+          id
+          name
+          cloudConfigurationRuleDescription: description
+          remediationInstructions
+          serviceType
+        }
       }
       entitySnapshot {
         id
@@ -41,8 +71,14 @@ query ListIssuesV2($first: Int, $after: String, $filterBy: IssueFilters, $orderB
         region
         providerId
         nativeType
-        tags
+        externalId
         status
+        cloudProviderURL
+        resourceGroupExternalId
+        subscriptionExternalId
+        subscriptionName
+        tags
+        subscriptionTags
         createdAt
       }
       projects {

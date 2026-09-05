@@ -1,9 +1,21 @@
-query ListConfigurationFindings($first: Int, $after: String, $filter: ConfigurationFindingFilters) {
-  configurationFindings(first: $first, after: $after, filterBy: $filter) {
-    pageInfo {
-      hasNextPage
-      endCursor
-    }
+# Wiz CNAPP cloud configuration findings — CSPM policy violations against cloud resources.
+#
+# Usage:
+#   python wiz_cnapp_exporter.py -c wiz.config --config-findings
+#
+# Variables:
+#   first    Number of results per page (max 500)
+#   after    Cursor for pagination, supplied by the exporter
+#   filterBy ConfigurationFindingFilters — result and severity come from the [config_findings]
+#            config section, plus updatedAt when --updated-after is given
+#   orderBy  ConfigurationFindingOrder
+#
+# `targetExternalId` identifies the object the rule evaluated and is present on every finding,
+# including those whose resource has no `providerId`. Xygeni uses it to identify the finding, so
+# keep it in the selection.
+query ListConfigurationFindings($first: Int, $after: String, $filterBy: ConfigurationFindingFilters, $orderBy: ConfigurationFindingOrder) {
+  configurationFindings(first: $first, after: $after, filterBy: $filterBy, orderBy: $orderBy) {
+    pageInfo { hasNextPage endCursor }
     totalCount
     nodes {
       id
@@ -12,10 +24,11 @@ query ListConfigurationFindings($first: Int, $after: String, $filter: Configurat
       status
       remediation
       analyzedAt
-      targetExternalId
-      targetObjectProviderUniqueId
+      updatedAt
       firstSeenAt
       resolutionReason
+      targetExternalId
+      targetObjectProviderUniqueId
       resource {
         id
         providerId
