@@ -1,87 +1,44 @@
-# Wiz Cloud Resources Query for Runtime Inventory Export
+# Wiz CNAPP cloud asset inventory.
 #
-# Exports cloud resources (compute workloads, network assets) from Wiz
-# for ASPM correlation with security findings.
+# Uses cloudResourcesV2: v1 `cloudResources` is deprecated, and its `CloudResourceFilters` has no
+# `status` field. Note the v2 filter grammar takes objects — `type: {equals: [...]}` — not the bare
+# arrays v1 accepted.
 #
-# Usage:
-#   ./wiz_cnapp_exporter.sh -c wiz.config --cloud-resources
+# Per-resource attributes are NOT flat fields on the node. Four independent integrations (Cortex
+# XSOAR, Netskope, Infoblox's CloudQuery source, and Wiz's own CSV export) all route them through
+# a JSON `properties` bag on the graph entity, so region, status, tags and exposure flags are read
+# from `graphEntity.properties` rather than selected individually.
 #
-# Variables:
-#   first: Number of results per page (max 500)
-#   after: Cursor for pagination
-#   filter: CloudResourceFilters
-
-query ListCloudResources($first: Int, $after: String, $filter: CloudResourceFilters) {
-  cloudResources(first: $first, after: $after, filterBy: $filter) {
-    pageInfo {
-      hasNextPage
-      endCursor
-    }
+# UNVALIDATED: unlike the other three queries, this one has never run against a live tenant — no
+# public integration queries v1 `cloudResources` successfully and Steampipe has no cloud-resources
+# table at all. Confirm by introspection before relying on it.
+query ListCloudResources($first: Int, $after: String, $filterBy: CloudResourceV2Filters) {
+  cloudResourcesV2(first: $first, after: $after, filterBy: $filterBy) {
+    pageInfo { hasNextPage endCursor }
     totalCount
     nodes {
-      # Identity
       id
       name
       type
-      nativeType
-      providerUniqueId
-
-      # Location
-      cloudPlatform
-      region
       subscriptionId
       subscriptionExternalId
-      subscriptionName
-
-      # Classification
-      status
-      tags {
-        key
-        value
-      }
-
-      # Network Exposure
-      isAccessibleFromInternet
-      hasHighPrivileges
-      hasSecrets
-      hasSensitiveData
-
-      # Container-specific fields
-      ... on ContainerResource {
-        podName
-        namespace
-        clusterName
-        containerImageId
-      }
-
-      # VM-specific fields
-      ... on VirtualMachineResource {
-        operatingSystem
-        ipAddresses
-      }
-
-      # Serverless-specific fields
-      ... on ServerlessResource {
-        runtime
-        handler
-        memorySize
-      }
-
-      # Kubernetes workload fields
-      ... on KubernetesWorkloadResource {
-        namespace
-        clusterName
-        kind
-        containerImages
-      }
-
-      # Projects (business context)
-      projects {
+      cloudAccount {
         id
+        externalId
         name
-        businessUnit
-        riskProfile {
-          businessImpact
+        cloudProvider
+      }
+      graphEntity {
+        id
+        providerUniqueId
+        name
+        type
+        properties
+        firstSeen
+        lastSeen
+        projects {
+          id
+          name
         }
       }
     }

@@ -3,6 +3,9 @@
 #
 # SECURITY: This file may contain sensitive credentials. Keep it secure!
 #           The wiz.config file is excluded via .gitignore.
+#
+# Every value here can also come from the environment, so the secret need not sit in a file at
+# all — and with WIZ_CLIENT_ID and WIZ_CLIENT_SECRET set, no config file is needed either.
 
 # =============================================================================
 # Wiz API Credentials
@@ -15,19 +18,33 @@
 #
 # See: https://docs.wiz.io/wiz-docs/docs/using-the-wiz-api
 #
-# You may also set these via environment variables:
-#   WIZ_CLIENT_ID
-#   WIZ_CLIENT_SECRET
-#   WIZ_REGION
+# Environment overrides:
+#   WIZ_CLIENT_ID  WIZ_CLIENT_SECRET  WIZ_REGION
+#   WIZ_AUTH_FLAVOUR  WIZ_TOKEN_URL  WIZ_AUDIENCE  WIZ_API_URL
 
 [credentials]
 client_id = your-service-account-client-id
 client_secret = your-service-account-client-secret
 
-# Wiz tenant region
-# Common values: us1, us2, eu1, eu2, ap1, ap2
-# Check your Wiz portal URL to determine your region (e.g., app.us1.wiz.io)
+# Wiz tenant region.
+# This appears in your API endpoint host — api.<region>.app.wiz.io — which you can read off the
+# service account's API endpoint URL in the Wiz console. It is NOT part of the portal URL.
+# Examples: us1, us2, eu1, eu2, ap1. Validated by shape, so newer regions work too.
 region = us1
+
+# Which auth backend your tenant uses. Getting this wrong fails at login, and it is the first
+# thing to check if authentication is refused.
+#   cognito      auth.app.wiz.io    audience wiz-api      (default)
+#   auth0        auth.wiz.io        audience beyond-api
+#   cognito-gov  auth.gov.wiz.io    audience wiz-api      (FedRAMP)
+#   auth0-gov    auth0.gov.wiz.io   audience beyond-api   (FedRAMP)
+auth_flavour = cognito
+
+# Individual overrides, for self-hosted or otherwise non-standard tenants. Each defaults from
+# auth_flavour and region above, so leave them commented out unless you need them.
+# token_url = https://auth.app.wiz.io/oauth/token
+# audience  = wiz-api
+# api_url   = https://api.us1.app.wiz.io/graphql
 
 # =============================================================================
 # Output Configuration
@@ -41,18 +58,21 @@ output_dir = ./output
 # Vulnerability Findings Configuration
 # =============================================================================
 # API: vulnerabilityFindings GraphQL query
+#
+# Lists accept either a JSON array (["A", "B"]) or a plain comma-separated list (A, B).
+# Enum values are checked before the request, naming the key if one is wrong.
 
 [vulnerabilities]
 # Maximum results per page (max 500)
 first = 500
 
-# Filter by status (JSON array)
-# Values: UNRESOLVED, RESOLVED, PASSED, IGNORED
-status = ["UNRESOLVED"]
+# Filter by status
+# Values: OPEN, IN_PROGRESS, RESOLVED, REJECTED
+status = OPEN
 
-# Filter by severity (JSON array)
-# Values: CRITICAL, HIGH, MEDIUM, LOW, NONE
-severity = ["CRITICAL", "HIGH"]
+# Filter by vendor severity
+# Values: CRITICAL, HIGH, MEDIUM, LOW, INFORMATIONAL, NONE
+severity = CRITICAL, HIGH
 
 # =============================================================================
 # Issues Configuration
@@ -63,13 +83,15 @@ severity = ["CRITICAL", "HIGH"]
 # Maximum results per page (max 500)
 first = 500
 
-# Filter by status (JSON array)
+# Filter by status
 # Values: OPEN, IN_PROGRESS, RESOLVED, REJECTED
-status = ["OPEN", "IN_PROGRESS"]
+status = OPEN, IN_PROGRESS
 
-# Filter by issue type (JSON array)
+# Filter by issue type
 # Values: TOXIC_COMBINATION, THREAT_DETECTION, CLOUD_CONFIGURATION
-types = ["TOXIC_COMBINATION", "THREAT_DETECTION", "CLOUD_CONFIGURATION"]
+# Note THREAT_DETECTION issues require a Wiz Defend licence; without one the export is simply
+# empty for that type rather than an error.
+types = TOXIC_COMBINATION, THREAT_DETECTION, CLOUD_CONFIGURATION
 
 # =============================================================================
 # Configuration Findings Configuration
@@ -80,30 +102,42 @@ types = ["TOXIC_COMBINATION", "THREAT_DETECTION", "CLOUD_CONFIGURATION"]
 # Maximum results per page (max 500)
 first = 500
 
-# Filter by result (JSON array)
+# Filter by result
 # Values: FAIL, ERROR, PASS, NOT_ASSESSED
-result = ["FAIL", "ERROR"]
+result = FAIL, ERROR
 
-# Filter by severity (JSON array)
-# Values: CRITICAL, HIGH, MEDIUM, LOW, NONE
-severity = ["CRITICAL", "HIGH", "MEDIUM"]
+# Filter by severity
+# Values: CRITICAL, HIGH, MEDIUM, LOW, INFORMATIONAL, NONE
+severity = CRITICAL, HIGH, MEDIUM
 
 # =============================================================================
 # Cloud Resources Configuration
 # =============================================================================
-# API: cloudResources GraphQL query
+# API: cloudResourcesV2 GraphQL query
+#
+# NOTE: unlike the other three, this export has not been validated against a live tenant.
+# Confirm the field selection by introspection before relying on it.
 
 [cloud_resources]
 # Maximum results per page (max 500)
 first = 500
 
-# Filter by resource type (JSON array)
-# Values: VIRTUAL_MACHINE, CONTAINER, SERVERLESS, KUBERNETES_CLUSTER, etc.
-types = ["VIRTUAL_MACHINE", "CONTAINER", "SERVERLESS", "KUBERNETES_CLUSTER"]
+# Filter by resource type
+types = VIRTUAL_MACHINE, CONTAINER, SERVERLESS, KUBERNETES_CLUSTER
 
-# Filter by status (JSON array)
-# Values: ACTIVE, INACTIVE
-status = ["ACTIVE"]
+# Filter by status. Leave empty for all.
+# status = ACTIVE
+
+# =============================================================================
+# Custom Query Configuration (--query)
+# =============================================================================
+
+[custom]
+# Page size passed as $first, when the custom query declares it
+first = 500
+
+# Value passed as $filterBy, when the custom query declares it. Raw JSON, sent through unchanged.
+# filter = {"status": ["OPEN"]}
 
 # =============================================================================
 # Advanced Configuration

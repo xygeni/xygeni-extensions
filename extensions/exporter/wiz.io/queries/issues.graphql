@@ -1,9 +1,16 @@
+# Wiz CNAPP issues — Toxic Combinations, Threats, Cloud Misconfigurations.
+#
+# sourceRule is a UNION. The three issue types we request are backed by three different rule
+# types, so all three fragments are required: selecting only `... on Control` returns an empty
+# rule object for THREAT_DETECTION and CLOUD_CONFIGURATION issues, losing the rule name,
+# description, remediation and framework mapping — precisely what an ASPM ingest needs.
+# Verified against three independent integrations (Cortex XSOAR, Port Ocean, Elastic).
+#
+# Each member's `description` is aliased so the union members cannot collide in the response.
 query ListIssuesV2($first: Int, $after: String, $filterBy: IssueFilters, $orderBy: IssueOrder) {
-  issues: issuesV2(first: $first, after: $after, filterBy: $filterBy, orderBy: $orderBy) {
-    pageInfo {
-      hasNextPage
-      endCursor
-    }
+  issuesV2(first: $first, after: $after, filterBy: $filterBy, orderBy: $orderBy) {
+    pageInfo { hasNextPage endCursor }
+    totalCount
     nodes {
       id
       type
@@ -12,6 +19,8 @@ query ListIssuesV2($first: Int, $after: String, $filterBy: IssueFilters, $orderB
       createdAt
       updatedAt
       resolvedAt
+      statusChangedAt
+      dueAt
       sourceRule {
         __typename
         ... on Control {
@@ -32,6 +41,20 @@ query ListIssuesV2($first: Int, $after: String, $filterBy: IssueFilters, $orderB
             }
           }
         }
+        ... on CloudEventRule {
+          id
+          name
+          cloudEventRuleDescription: description
+          sourceType
+          type
+        }
+        ... on CloudConfigurationRule {
+          id
+          name
+          cloudConfigurationRuleDescription: description
+          remediationInstructions
+          serviceType
+        }
       }
       entitySnapshot {
         id
@@ -41,8 +64,14 @@ query ListIssuesV2($first: Int, $after: String, $filterBy: IssueFilters, $orderB
         region
         providerId
         nativeType
-        tags
+        externalId
         status
+        cloudProviderURL
+        resourceGroupExternalId
+        subscriptionExternalId
+        subscriptionName
+        tags
+        subscriptionTags
         createdAt
       }
       projects {

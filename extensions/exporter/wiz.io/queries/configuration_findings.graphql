@@ -1,9 +1,15 @@
-query ListConfigurationFindings($first: Int, $after: String, $filter: ConfigurationFindingFilters) {
-  configurationFindings(first: $first, after: $after, filterBy: $filter) {
-    pageInfo {
-      hasNextPage
-      endCursor
-    }
+# Wiz CNAPP configuration findings (CSPM policy violations against cloud resources).
+#
+# Every field below is confirmed present in a real tenant response, so the previously conservative
+# selection has been restored. In particular `resolutionReason` and `note { text }` do exist (they
+# come back null while a finding is open), as do `analyzedAt` and `totalCount`.
+#
+# `targetExternalId` is selected deliberately and must not be dropped: it is the provider-assigned
+# identifier of the object the rule evaluated, it is present on every finding — including those
+# whose resource has no `providerId` — and it anchors the flaw's identity. See IacFlaw.targetId.
+query ListConfigurationFindings($first: Int, $after: String, $filterBy: ConfigurationFindingFilters, $orderBy: ConfigurationFindingOrder) {
+  configurationFindings(first: $first, after: $after, filterBy: $filterBy, orderBy: $orderBy) {
+    pageInfo { hasNextPage endCursor }
     totalCount
     nodes {
       id
@@ -12,10 +18,11 @@ query ListConfigurationFindings($first: Int, $after: String, $filter: Configurat
       status
       remediation
       analyzedAt
-      targetExternalId
-      targetObjectProviderUniqueId
+      updatedAt
       firstSeenAt
       resolutionReason
+      targetExternalId
+      targetObjectProviderUniqueId
       resource {
         id
         providerId

@@ -1,22 +1,26 @@
 # Custom GraphQL Query Template for Wiz CNAPP Export
 #
-# This template can be used as a starting point for creating custom queries.
-# Copy this file to the queries/ directory and modify as needed.
+# Copy this file and modify it to export something the four built-in exports do not cover.
 #
 # Usage:
-#   1. Copy this file: cp templates/custom_query.graphql.template queries/my_custom.graphql
-#   2. Modify the query to fit your needs
-#   3. Run: ./wiz_cnapp_exporter.sh -c wiz.config --query queries/my_custom.graphql
+#   1. cp templates/custom_query.graphql.template queries/my_custom.graphql
+#   2. Edit the query
+#   3. python wiz_cnapp_exporter.py -c wiz.config --query queries/my_custom.graphql
 #
-# Tips:
-#   - Use the Wiz API Console to explore available fields
-#   - Use pagination (first, after) for large result sets
-#   - Add filters to reduce the result set size
+# Notes:
+#   - Whole-line comments like these are stripped before the query is sent. Inline comments are
+#     preserved and safe: the query keeps its line breaks.
+#   - The exporter passes $first and $after itself, and $filterBy from [custom] filter in the
+#     config file. Declare only variables you want supplied — a required variable ($x: T!) with
+#     no value is refused rather than sent empty.
+#   - The results field is guessed from the query. If the guess is wrong, or the query starts
+#     with a fragment definition, pass --data-path <field> explicitly.
+#   - Use the Wiz API Explorer in the console to check field names before running.
 #
-# Example: Custom query for high-severity unresolved vulnerabilities in AWS
+# Example: high-severity open vulnerabilities
 
-query CustomVulnerabilities($first: Int, $after: String, $filter: VulnerabilityFindingFilters) {
-  vulnerabilityFindings(first: $first, after: $after, filterBy: $filter) {
+query CustomVulnerabilities($first: Int, $after: String, $filterBy: VulnerabilityFindingFilters) {
+  vulnerabilityFindings(first: $first, after: $after, filterBy: $filterBy) {
     pageInfo {
       hasNextPage
       endCursor
