@@ -1,5 +1,5 @@
 # The evidence of one Wiz toxic combination: runs the issue's `evidenceQuery` against the
-# security graph. Run by the exporter once per TOXIC_COMBINATION issue, after the issues export.
+# security graph. Run by the exporter once per TOXIC_COMBINATION issue, after the last page of issues.
 #
 # Same call as Palo Alto's XSOAR Wiz integration (`wiz-get-issue-evidence`): `quick` mode, a small
 # page, across all projects.

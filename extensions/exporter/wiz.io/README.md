@@ -201,17 +201,19 @@ both narrows to their overlap.
 
 A Wiz issue carries only its primary resource (`entitySnapshot`). The other resources of a toxic
 combination, and how they connect, are reached through the issue's `evidenceQuery`: a graph query
-that has to be run through `graphSearch`. After each page of issues, the exporter runs it once
-for every `TOXIC_COMBINATION` issue (`queries/issue_evidence.graphql`, the same call as Palo Alto's
+that has to be run through `graphSearch`. Once every page of issues is in, the exporter runs it
+once for every `TOXIC_COMBINATION` issue (`queries/issue_evidence.graphql`, the same call as Palo Alto's
 XSOAR Wiz integration) and writes the result rows as `evidence`, next to `evidenceQuery`.
 `report-upload` builds the finding's attack path from the two.
 
 - At most `evidence_max` calls per run (default 500; `0` turns evidence off). Toxic issues past
   the limit are exported without evidence.
-- A failed call is logged and the issue is exported without evidence. If the first 3 calls all
-  fail (typically a service account that may not run `graphSearch`), the rest are skipped.
+- A failed call is logged as a warning and the issue is exported without evidence. After 3
+  failures in a row (for example a service account that may not run `graphSearch`), the rest are
+  skipped.
 - `evidenceQuery` is dropped from the other issues and from toxic issues without evidence.
-- The run ends with a line such as `Toxic combination evidence: 27 fetched, 1 failed, 0 skipped`.
+- The issues export ends with a line such as
+  `Toxic combination evidence: 26 with evidence, 1 empty, 1 failed, 0 skipped, 0 without evidence query`.
 
 ### Environment Variables
 
