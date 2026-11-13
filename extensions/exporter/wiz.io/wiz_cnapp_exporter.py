@@ -25,7 +25,7 @@ import random
 import re
 import sys
 import time
-from typing import Any, Dict, List, Optional, Tuple
+from typing import Any, Callable, Dict, List, Optional, Tuple
 
 try:
     import requests
@@ -79,6 +79,16 @@ QUERY_FILES = {
     'cloud_resources': 'queries/cloud_resources.graphql',
 }
 
+# The evidence of a toxic combination: the issue's `evidenceQuery` run through `graphSearch`.
+EVIDENCE_QUERY_FILE = 'queries/issue_evidence.graphql'
+TOXIC_COMBINATION = 'TOXIC_COMBINATION'
+# graphSearch arguments, as in XSOAR's `wiz-get-issue-evidence`: a small page across all projects.
+EVIDENCE_ROWS = 5
+EVIDENCE_PROJECT_ID = '*'
+# When the first calls all fail, the token most likely cannot run graphSearch: stop asking.
+EVIDENCE_GIVE_UP_AFTER = 3
+DEFAULT_EVIDENCE_MAX = 500
+
 # Root field of each query's response, i.e. where the nodes live under `data`.
 DATA_PATHS = {
     'vulnerabilities': 'vulnerabilityFindings',
@@ -129,6 +139,7 @@ class WizExporter:
         self.access_token: Optional[str] = None
         self.token_expires_at: float = 0.0
         self.session = requests.Session()
+        self.last_failure = ''
 
         self.api_url = config['api_url']
         self.token_url = config['token_url']
@@ -198,12 +209,16 @@ class WizExporter:
 
     # ------------------------------------------------------------- transport
 
-    def _post_graphql(self, body: Dict[str, Any]) -> Optional[Dict[str, Any]]:
+    def _post_graphql(self, body: Dict[str, Any], quiet: bool = False) -> Optional[Dict[str, Any]]:
         """
         POST one GraphQL request, retrying transient failures and re-authenticating once on 401.
 
-        Returns the decoded response, or None when the request could not be completed.
+        Returns the decoded response object, or None when the request could not be completed; the
+        reason is then in `last_failure`. With `quiet`, a failure is left for the caller to report
+        instead of being logged as an error.
         """
+        self.last_failure = ''
+        reauthenticated = False
         for attempt in range(1, MAX_ATTEMPTS + 1):
             try:
                 response = self.session.post(
@@ -217,19 +232,25 @@ class WizExporter:
                 )
             except requests.exceptions.RequestException as e:
                 if attempt >= MAX_ATTEMPTS:
-                    log_error(f"GraphQL request failed after {attempt} attempts: {e}")
-                    return None
+                    return self._failed(f"request failed after {attempt} attempts: {e}", quiet)
                 self._sleep_backoff(attempt, None, f"request error: {e}")
                 continue
 
             if response.status_code == 200:
-                return response.json()
+                try:
+                    data = response.json()
+                except ValueError:
+                    return self._failed("response is not JSON", quiet)
+                if not isinstance(data, dict):
+                    return self._failed("response is not a JSON object", quiet)
+                return data
 
             # An expired token mid-export is ordinary on a long run: re-auth once and carry on.
-            if response.status_code == 401 and attempt < MAX_ATTEMPTS:
+            if response.status_code == 401 and not reauthenticated and attempt < MAX_ATTEMPTS:
                 log_warning("Access token rejected; re-authenticating")
                 if not self.authenticate(force=True):
-                    return None
+                    return self._failed("re-authentication failed", quiet)
+                reauthenticated = True
                 continue
 
             if response.status_code in RETRY_STATUSES and attempt < MAX_ATTEMPTS:
@@ -237,10 +258,15 @@ class WizExporter:
                                     f"HTTP {response.status_code}")
                 continue
 
-            log_error(f"GraphQL request failed: HTTP {response.status_code}")
             log_verbose(f"Response: {response.text}", self.verbose)
-            return None
+            return self._failed(f"HTTP {response.status_code}", quiet)
 
+        return None
+
+    def _failed(self, reason: str, quiet: bool) -> None:
+        self.last_failure = reason
+        if not quiet:
+            log_error(f"GraphQL request failed: {reason}")
         return None
 
     def _sleep_backoff(self, attempt: int, retry_after: Optional[str], reason: str) -> None:
@@ -251,6 +277,8 @@ class WizExporter:
                 delay = float(retry_after)
             except ValueError:
                 delay = None
+            if delay is not None and not 0 <= delay <= BACKOFF_MAX_SECONDS:
+                delay = BACKOFF_MAX_SECONDS if delay > BACKOFF_MAX_SECONDS else None
         if delay is None:
             delay = min(BACKOFF_BASE_SECONDS * (2 ** (attempt - 1)), BACKOFF_MAX_SECONDS)
             delay += random.uniform(0, delay * 0.1)
@@ -280,12 +308,15 @@ class WizExporter:
         return '\n'.join(lines)
 
     def _execute_query(self, query: str, variables: Dict[str, Any],
-                       data_path: str, output_file: str) -> bool:
+                       data_path: str, output_file: str,
+                       transform: Optional[Callable[[Dict[str, Any]], None]] = None) -> bool:
         """
         Execute a GraphQL query with pagination and save results.
 
         Pages are appended to a `.part` file as they arrive, so a run that dies on page 40 of 50
-        leaves those 40 pages on disk instead of discarding them.
+        leaves those 40 pages on disk instead of discarding them. `transform`, when given, may
+        change each node in place. It runs once every page is in, as the output file is
+        assembled, so per-node calls never hold a pagination cursor open.
         """
         if not self.access_token:
             log_error("Not authenticated. Call authenticate() first.")
@@ -350,7 +381,7 @@ class WizExporter:
                 time.sleep(request_delay)
                 page += 1
 
-        self._assemble(part_file, output_file, total)
+        self._assemble(part_file, output_file, total, transform)
 
         if latest_timestamp:
             log_info(f"Newest updatedAt in this export: {latest_timestamp} "
@@ -360,7 +391,8 @@ class WizExporter:
         return True
 
     @staticmethod
-    def _assemble(part_file: str, output_file: str, total: int) -> None:
+    def _assemble(part_file: str, output_file: str, total: int,
+                  transform: Optional[Callable[[Dict[str, Any]], None]] = None) -> None:
         """Turn the streamed NDJSON into the {nodes, pageInfo} envelope report-upload expects."""
         with open(part_file, 'r', encoding='utf-8') as partial, \
              open(output_file, 'w', encoding='utf-8') as out:
@@ -369,6 +401,10 @@ class WizExporter:
                 line = line.strip()
                 if not line:
                     continue
+                if transform:
+                    node = json.loads(line)
+                    transform(node)
+                    line = json.dumps(node)
                 out.write('    ' + line + (',\n' if i < total - 1 else '\n'))
             out.write('  ],\n  "pageInfo": {"hasNextPage": false, "endCursor": null},\n')
             out.write(f'  "totalCount": {total}\n}}\n')
@@ -427,10 +463,17 @@ class WizExporter:
             "first": int(self.config.get(f'{kind}_first', 500)),
             "filterBy": self._filters_for(kind),
         }
+        transform = None
+        evidence = None
         if kind == 'issues':
             variables["orderBy"] = {"field": "CREATED_AT", "direction": "DESC"}
+            evidence = EvidenceFetcher(self)
+            transform = evidence.add_to
 
-        return self._execute_query(query, variables, DATA_PATHS[kind], output_file)
+        ok = self._execute_query(query, variables, DATA_PATHS[kind], output_file, transform)
+        if evidence is not None and not self.dry_run:
+            evidence.log_summary()
+        return ok
 
     def export_custom_query(self, query_file: str, output_file: str,
                             data_path: Optional[str]) -> bool:
@@ -472,7 +515,106 @@ class WizExporter:
         return self._execute_query(query, variables, data_path, output_file)
 
 
+class EvidenceFetcher:
+    """
+    Adds its evidence to each TOXIC_COMBINATION issue: the rows `graphSearch` returns for the
+    issue's `evidenceQuery`, written as `evidence`. report-upload builds the attack path from the
+    two together, so `evidenceQuery` is kept on those issues and dropped from every other one.
+
+    It runs after the last page of issues, as the output file is assembled. One call per toxic
+    issue, at most `issues.evidence_max` per run (0 turns it off), and none after
+    EVIDENCE_GIVE_UP_AFTER consecutive failures. A failed call never fails the export: the issue
+    is written without evidence.
+    """
+
+    def __init__(self, exporter: 'WizExporter'):
+        self.exporter = exporter
+        self.max_calls = int(exporter.config.get('issues_evidence_max', DEFAULT_EVIDENCE_MAX))
+        self.request_delay = float(exporter.config.get('request_delay', 0.5))
+        self.query: Optional[str] = None
+        self.with_evidence = 0
+        self.empty = 0
+        self.failed = 0
+        self.failed_in_a_row = 0
+        self.skipped = 0
+        self.without_query = 0
+
+    @property
+    def calls(self) -> int:
+        return self.with_evidence + self.empty + self.failed
+
+    def add_to(self, issue: Dict[str, Any]) -> None:
+        evidence_query = issue.pop('evidenceQuery', None)
+        if self.max_calls == 0 or issue.get('type') != TOXIC_COMBINATION:
+            return
+        if not isinstance(evidence_query, dict) or not evidence_query:
+            self.without_query += 1
+            return
+        if self.calls >= self.max_calls or self.failed_in_a_row >= EVIDENCE_GIVE_UP_AFTER:
+            self.skipped += 1
+            return
+
+        rows = self._fetch(issue.get('id'), evidence_query)
+        if rows is None:
+            self.failed += 1
+            self.failed_in_a_row += 1
+            if self.failed_in_a_row == EVIDENCE_GIVE_UP_AFTER:
+                log_warning(f"{EVIDENCE_GIVE_UP_AFTER} evidence calls failed in a row; "
+                            f"the remaining toxic combinations are exported without evidence")
+            return
+        self.failed_in_a_row = 0
+        if not rows:
+            self.empty += 1
+            return
+        self.with_evidence += 1
+        issue['evidenceQuery'] = evidence_query
+        issue['evidence'] = rows
+
+    def log_summary(self) -> None:
+        if self.calls or self.skipped or self.without_query:
+            log_info(f"Toxic combination evidence: {self.with_evidence} with evidence, "
+                     f"{self.empty} empty, {self.failed} failed, {self.skipped} skipped, "
+                     f"{self.without_query} without evidence query")
+
+    def _fetch(self, issue_id: Any, evidence_query: Dict[str, Any]) -> Optional[List[Any]]:
+        """The graphSearch rows for one issue, or None when the call failed."""
+        if self.query is None:
+            self.query = self.exporter.load_query(os.path.join(SCRIPT_DIR, EVIDENCE_QUERY_FILE)) or ''
+        if not self.query:
+            return None
+
+        if self.calls:
+            time.sleep(self.request_delay)
+        variables = {"query": evidence_query, "projectId": EVIDENCE_PROJECT_ID, "first": EVIDENCE_ROWS}
+        data = self.exporter._post_graphql({"query": self.query, "variables": variables}, quiet=True)
+        if data is None:
+            return self._failed(issue_id, self.exporter.last_failure)
+
+        errors = data.get('errors')
+        if errors:
+            first = errors[0] if isinstance(errors, list) and errors else errors
+            message = first.get('message') if isinstance(first, dict) else first
+            return self._failed(issue_id, str(message or 'GraphQL error'))
+
+        result = data.get('data')
+        search = result.get('graphSearch') if isinstance(result, dict) else None
+        nodes = search.get('nodes') if isinstance(search, dict) else None
+        return [n for n in nodes if isinstance(n, dict)] if isinstance(nodes, list) else []
+
+    @staticmethod
+    def _failed(issue_id: Any, reason: str) -> None:
+        log_warning(f"Evidence of issue {_printable(issue_id)} not fetched ({_printable(reason)}); "
+                    f"it is exported without it")
+        return None
+
+
 # ------------------------------------------------------------------ helpers
+
+def _printable(value: Any, limit: int = 300) -> str:
+    """A value from the API made safe for one log line: control characters out, length capped."""
+    text = ''.join(c if c.isprintable() else ' ' for c in str(value))
+    return text if len(text) <= limit else text[:limit] + '...'
+
 
 def _later(current: Optional[str], candidate: Optional[str]) -> Optional[str]:
     """Highest ISO8601 timestamp seen; lexicographic order is correct for UTC ISO8601."""
@@ -556,6 +698,16 @@ def _parse_list(value: Any, key: str) -> List[str]:
     return [part.strip() for part in text.split(',') if part.strip()]
 
 
+def _parse_count(value: Any, key: str) -> int:
+    try:
+        count = int(str(value).strip())
+    except ValueError:
+        raise ConfigError(f"{key}: expected a whole number, got '{value}'") from None
+    if count < 0:
+        raise ConfigError(f"{key}: must be 0 or more, got {count}")
+    return count
+
+
 def _validate_enum(values: List[str], key: str, allowed_key: str) -> List[str]:
     """Reject unknown enum members before the request, naming the config key that produced them."""
     allowed = VALID_ENUMS[allowed_key]
@@ -616,6 +768,7 @@ def load_config(config_file: Optional[str]) -> Dict[str, Any]:
         'issues_first': get('issues', 'first', '500'),
         'issues_status': get('issues', 'status', 'OPEN, IN_PROGRESS'),
         'issues_types': get('issues', 'types', 'TOXIC_COMBINATION, THREAT_DETECTION, CLOUD_CONFIGURATION'),
+        'issues_evidence_max': get('issues', 'evidence_max', str(DEFAULT_EVIDENCE_MAX)),
 
         'config_findings_first': get('config_findings', 'first', '500'),
         'config_result': get('config_findings', 'result', 'FAIL, ERROR'),
@@ -659,6 +812,7 @@ def load_config(config_file: Optional[str]) -> Dict[str, Any]:
                                                  'issues.status', 'issues_status')
         result['issues_types'] = _validate_enum(_parse_list(result['issues_types'], 'issues.types'),
                                                 'issues.types', 'issues_types')
+        result['issues_evidence_max'] = _parse_count(result['issues_evidence_max'], 'issues.evidence_max')
         result['config_result'] = _parse_list(result['config_result'], 'config_findings.result')
         result['config_severity'] = _validate_enum(_parse_list(result['config_severity'], 'config_findings.severity'),
                                                    'config_findings.severity', 'severity')

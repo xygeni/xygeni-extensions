@@ -1,0 +1,25 @@
+# The evidence of one Wiz toxic combination: runs the issue's `evidenceQuery` against the
+# security graph. Run by the exporter once per TOXIC_COMBINATION issue, after the last page of issues.
+#
+# Same call as Palo Alto's XSOAR Wiz integration (`wiz-get-issue-evidence`): `quick` mode, a small
+# page, across all projects.
+#
+# Variables:
+#   query      The issue's evidenceQuery (GraphEntityQueryInput), passed through as returned
+#   projectId  "*" (all projects)
+#   first      Rows to return (5)
+#
+# Each row lists one entity per node of the query marked `select`, in depth-first order of the
+# query tree. report-upload places them back on that tree to draw the attack path's edges, so
+# `evidenceQuery` is kept in the export next to the rows.
+query IssueEvidence($query: GraphEntityQueryInput, $projectId: String!, $first: Int) {
+  graphSearch(query: $query, projectId: $projectId, first: $first, quick: true) {
+    nodes {
+      entities {
+        id
+        name
+        type
+      }
+    }
+  }
+}
