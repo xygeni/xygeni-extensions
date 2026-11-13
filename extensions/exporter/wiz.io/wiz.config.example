@@ -93,6 +93,11 @@ status = OPEN, IN_PROGRESS
 # empty for that type rather than an error.
 types = TOXIC_COMBINATION, THREAT_DETECTION, CLOUD_CONFIGURATION
 
+# Toxic combination evidence: for each TOXIC_COMBINATION issue, run its evidenceQuery through
+# graphSearch and add the rows as `evidence`, so report-upload can show the attack path.
+# One extra request per toxic issue, at most this many per run. 0 turns it off.
+evidence_max = 500
+
 # =============================================================================
 # Configuration Findings Configuration
 # =============================================================================

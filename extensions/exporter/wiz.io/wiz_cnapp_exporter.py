@@ -25,7 +25,7 @@ import random
 import re
 import sys
 import time
-from typing import Any, Dict, List, Optional, Tuple
+from typing import Any, Callable, Dict, List, Optional, Tuple
 
 try:
     import requests
@@ -78,6 +78,16 @@ QUERY_FILES = {
     'config_findings': 'queries/configuration_findings.graphql',
     'cloud_resources': 'queries/cloud_resources.graphql',
 }
+
+# The evidence of a toxic combination: the issue's `evidenceQuery` run through `graphSearch`.
+EVIDENCE_QUERY_FILE = 'queries/issue_evidence.graphql'
+TOXIC_COMBINATION = 'TOXIC_COMBINATION'
+# graphSearch arguments, as in XSOAR's `wiz-get-issue-evidence`: a small page across all projects.
+EVIDENCE_ROWS = 5
+EVIDENCE_PROJECT_ID = '*'
+# When the first calls all fail, the token most likely cannot run graphSearch: stop asking.
+EVIDENCE_GIVE_UP_AFTER = 3
+DEFAULT_EVIDENCE_MAX = 500
 
 # Root field of each query's response, i.e. where the nodes live under `data`.
 DATA_PATHS = {
@@ -280,12 +290,14 @@ class WizExporter:
         return '\n'.join(lines)
 
     def _execute_query(self, query: str, variables: Dict[str, Any],
-                       data_path: str, output_file: str) -> bool:
+                       data_path: str, output_file: str,
+                       transform: Optional[Callable[[Dict[str, Any]], None]] = None) -> bool:
         """
         Execute a GraphQL query with pagination and save results.
 
         Pages are appended to a `.part` file as they arrive, so a run that dies on page 40 of 50
-        leaves those 40 pages on disk instead of discarding them.
+        leaves those 40 pages on disk instead of discarding them. `transform`, when given, may
+        change each node in place before it is written.
         """
         if not self.access_token:
             log_error("Not authenticated. Call authenticate() first.")
@@ -330,6 +342,8 @@ class WizExporter:
                 page_info = result.get('pageInfo', {})
 
                 for node in nodes:
+                    if transform:
+                        transform(node)
                     partial.write(json.dumps(node) + '\n')
                     latest_timestamp = _later(latest_timestamp, node.get('updatedAt'))
                 partial.flush()
@@ -427,10 +441,17 @@ class WizExporter:
             "first": int(self.config.get(f'{kind}_first', 500)),
             "filterBy": self._filters_for(kind),
         }
+        transform = None
+        evidence = None
         if kind == 'issues':
             variables["orderBy"] = {"field": "CREATED_AT", "direction": "DESC"}
+            evidence = EvidenceFetcher(self)
+            transform = evidence.add_to
 
-        return self._execute_query(query, variables, DATA_PATHS[kind], output_file)
+        ok = self._execute_query(query, variables, DATA_PATHS[kind], output_file, transform)
+        if evidence is not None and not self.dry_run:
+            evidence.log_summary()
+        return ok
 
     def export_custom_query(self, query_file: str, output_file: str,
                             data_path: Optional[str]) -> bool:
@@ -470,6 +491,76 @@ class WizExporter:
             return False
 
         return self._execute_query(query, variables, data_path, output_file)
+
+
+class EvidenceFetcher:
+    """
+    Adds its evidence to each TOXIC_COMBINATION issue: the rows `graphSearch` returns for the
+    issue's `evidenceQuery`, written as `evidence`. report-upload builds the attack path from the
+    two together, so `evidenceQuery` is kept on those issues and dropped from every other one.
+
+    One call per toxic issue, at most `issues.evidence_max` per run (0 turns it off), and none
+    after the first EVIDENCE_GIVE_UP_AFTER all fail. A failed call never fails the export: the
+    issue is written without evidence.
+    """
+
+    def __init__(self, exporter: 'WizExporter'):
+        self.exporter = exporter
+        self.max_calls = int(exporter.config.get('issues_evidence_max', DEFAULT_EVIDENCE_MAX))
+        self.request_delay = float(exporter.config.get('request_delay', 0.5))
+        self.query: Optional[str] = None
+        self.fetched = 0
+        self.failed = 0
+        self.skipped = 0
+
+    def add_to(self, issue: Dict[str, Any]) -> None:
+        evidence_query = issue.pop('evidenceQuery', None)
+        if self.max_calls == 0 or issue.get('type') != TOXIC_COMBINATION or not isinstance(evidence_query, dict):
+            return
+        if not self._may_call():
+            self.skipped += 1
+            return
+
+        rows = self._fetch(issue.get('id'), evidence_query)
+        if rows is None:
+            self.failed += 1
+            return
+        self.fetched += 1
+        if rows:
+            issue['evidenceQuery'] = evidence_query
+            issue['evidence'] = rows
+
+    def log_summary(self) -> None:
+        if self.fetched or self.failed or self.skipped:
+            log_info(f"Toxic combination evidence: {self.fetched} fetched, "
+                     f"{self.failed} failed, {self.skipped} skipped")
+
+    def _may_call(self) -> bool:
+        if self.fetched + self.failed >= self.max_calls:
+            return False
+        return not (self.fetched == 0 and self.failed >= EVIDENCE_GIVE_UP_AFTER)
+
+    def _fetch(self, issue_id: Any, evidence_query: Dict[str, Any]) -> Optional[List[Any]]:
+        """The graphSearch rows for one issue, or None when the call failed."""
+        if self.query is None:
+            self.query = self.exporter.load_query(os.path.join(SCRIPT_DIR, EVIDENCE_QUERY_FILE)) or ''
+        if not self.query:
+            return None
+
+        if self.fetched or self.failed:
+            time.sleep(self.request_delay)
+        variables = {"query": evidence_query, "projectId": EVIDENCE_PROJECT_ID, "first": EVIDENCE_ROWS}
+        data = self.exporter._post_graphql({"query": self.query, "variables": variables})
+        if data is None:
+            log_warning(f"Evidence of issue {issue_id} not fetched; it is exported without it")
+            return None
+        if data.get('errors'):
+            message = data['errors'][0].get('message', 'Unknown error')
+            log_warning(f"Evidence of issue {issue_id} not fetched ({message}); it is exported without it")
+            return None
+
+        nodes = ((data.get('data') or {}).get('graphSearch') or {}).get('nodes')
+        return nodes if isinstance(nodes, list) else []
 
 
 # ------------------------------------------------------------------ helpers
@@ -556,6 +647,16 @@ def _parse_list(value: Any, key: str) -> List[str]:
     return [part.strip() for part in text.split(',') if part.strip()]
 
 
+def _parse_count(value: Any, key: str) -> int:
+    try:
+        count = int(str(value).strip())
+    except ValueError:
+        raise ConfigError(f"{key}: expected a whole number, got '{value}'")
+    if count < 0:
+        raise ConfigError(f"{key}: must be 0 or more, got {count}")
+    return count
+
+
 def _validate_enum(values: List[str], key: str, allowed_key: str) -> List[str]:
     """Reject unknown enum members before the request, naming the config key that produced them."""
     allowed = VALID_ENUMS[allowed_key]
@@ -616,6 +717,7 @@ def load_config(config_file: Optional[str]) -> Dict[str, Any]:
         'issues_first': get('issues', 'first', '500'),
         'issues_status': get('issues', 'status', 'OPEN, IN_PROGRESS'),
         'issues_types': get('issues', 'types', 'TOXIC_COMBINATION, THREAT_DETECTION, CLOUD_CONFIGURATION'),
+        'issues_evidence_max': get('issues', 'evidence_max', str(DEFAULT_EVIDENCE_MAX)),
 
         'config_findings_first': get('config_findings', 'first', '500'),
         'config_result': get('config_findings', 'result', 'FAIL, ERROR'),
@@ -659,6 +761,7 @@ def load_config(config_file: Optional[str]) -> Dict[str, Any]:
                                                  'issues.status', 'issues_status')
         result['issues_types'] = _validate_enum(_parse_list(result['issues_types'], 'issues.types'),
                                                 'issues.types', 'issues_types')
+        result['issues_evidence_max'] = _parse_count(result['issues_evidence_max'], 'issues.evidence_max')
         result['config_result'] = _parse_list(result['config_result'], 'config_findings.result')
         result['config_severity'] = _validate_enum(_parse_list(result['config_severity'], 'config_findings.severity'),
                                                    'config_findings.severity', 'severity')

@@ -14,6 +14,11 @@
 # fragments are needed: without them the rule name, description, remediation and framework
 # mapping come back empty for THREAT_DETECTION and CLOUD_CONFIGURATION issues.
 # Each member's `description` is aliased so the union members cannot collide in the response.
+#
+# `evidenceQuery` is the graph query behind an issue's evidence; the issue itself only carries its
+# primary entity (`entitySnapshot`). For TOXIC_COMBINATION issues the exporter runs it through
+# `graphSearch` (issue_evidence.graphql) and writes the rows as `evidence`, from which
+# report-upload builds the attack path. It is dropped from the other issues.
 query ListIssuesV2($first: Int, $after: String, $filterBy: IssueFilters, $orderBy: IssueOrder) {
   issuesV2(first: $first, after: $after, filterBy: $filterBy, orderBy: $orderBy) {
     pageInfo { hasNextPage endCursor }
@@ -21,6 +26,7 @@ query ListIssuesV2($first: Int, $after: String, $filterBy: IssueFilters, $orderB
     nodes {
       id
       type
+      evidenceQuery
       status
       severity
       createdAt

@@ -149,6 +149,7 @@ severity = CRITICAL, HIGH
 first = 500
 status = OPEN, IN_PROGRESS
 types = TOXIC_COMBINATION, THREAT_DETECTION, CLOUD_CONFIGURATION
+evidence_max = 500
 
 [config_findings]
 first = 500
@@ -196,6 +197,22 @@ Each run prints the newest `updatedAt` it saw, to use as the next run's value. V
 also accept `--detected-after`, which filters on `lastDetectedAt` — a separate axis, so setting
 both narrows to their overlap.
 
+### Toxic combination evidence (attack path)
+
+A Wiz issue carries only its primary resource (`entitySnapshot`). The other resources of a toxic
+combination, and how they connect, are reached through the issue's `evidenceQuery`: a graph query
+that has to be run through `graphSearch`. After each page of issues, the exporter runs it once
+for every `TOXIC_COMBINATION` issue (`queries/issue_evidence.graphql`, the same call as Palo Alto's
+XSOAR Wiz integration) and writes the result rows as `evidence`, next to `evidenceQuery`.
+`report-upload` builds the finding's attack path from the two.
+
+- At most `evidence_max` calls per run (default 500; `0` turns evidence off). Toxic issues past
+  the limit are exported without evidence.
+- A failed call is logged and the issue is exported without evidence. If the first 3 calls all
+  fail (typically a service account that may not run `graphSearch`), the rest are skipped.
+- `evidenceQuery` is dropped from the other issues and from toxic issues without evidence.
+- The run ends with a line such as `Toxic combination evidence: 27 fetched, 1 failed, 0 skipped`.
+
 ### Environment Variables
 
 Credentials can also be provided via environment variables:
@@ -236,6 +253,7 @@ wiz.io/
 ├── queries/
 │   ├── vulnerability_findings.graphql  # Vulnerability findings query
 │   ├── issues.graphql                   # Issues V2 query
+│   ├── issue_evidence.graphql          # Evidence of one toxic combination (graphSearch)
 │   ├── configuration_findings.graphql  # Cloud configuration findings query
 │   └── cloud_resources.graphql         # Cloud resources inventory query
 ├── templates/
@@ -282,6 +300,7 @@ wiz.io/
 
 - Transient failures (429 and 5xx) are retried with exponential backoff, honouring `Retry-After`.
 - An access token that expires mid-export triggers one re-authentication and the run continues.
+- A failed evidence call for a toxic combination never fails the issues export (see above).
 - Pages are appended to a `.part` file as they arrive. A run that fails on page 40 of 50 leaves
   those 40 pages on disk (as NDJSON) instead of discarding them, and says where.
 
